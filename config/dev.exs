@@ -56,3 +56,12 @@ config :aquir, Aquir.Repo,
   database: "aquir_dev",
   hostname: "localhost",
   pool_size: 10
+
+# Configure the event store database
+config :eventstore, EventStore.Storage,
+  serializer: Commanded.Serialization.JsonSerializer,
+  username: "postgres",
+  password: "postgres",
+  database: "aquir_eventstore_dev",
+  hostname: "localhost",
+  pool_size: 10
