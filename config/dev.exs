@@ -53,7 +53,7 @@ config :aquir, Aquir.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
-  database: "aquir_dev",
+  database: "aquir_statestore_dev",
   hostname: "localhost",
   pool_size: 10
 
