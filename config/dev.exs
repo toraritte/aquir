@@ -48,7 +48,8 @@ config :logger, :console, format: "[$level] $message\n"
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
-# Configure your database
+# Configure the state_store (i.e., states of the streams,
+# "read store" with Ben's terminology)
 config :aquir, Aquir.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",

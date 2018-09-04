@@ -23,7 +23,7 @@ defmodule Aquir.Mixfile do
       extra_applications: [
         :logger,
         :runtime_tools,
-        :eventstore
+        :eventstore,
       ]
     ]
   end
@@ -48,6 +48,8 @@ defmodule Aquir.Mixfile do
       {:commanded, "~> 0.15"},
       # The adapter includes commanded/eventstore
       {:commanded_eventstore_adapter, "~> 0.3"},
+      {:comeonin, "~> 4.1"},
+      {:pbkdf2_elixir, "~> 0.12"},
     ]
   end
 
