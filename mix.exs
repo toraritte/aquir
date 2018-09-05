@@ -56,7 +56,7 @@ defmodule Aquir.Mixfile do
       {:commanded_eventstore_adapter, "~> 0.3"},
       {:comeonin, "~> 4.1"},
       {:pbkdf2_elixir, "~> 0.12"},
-      {:commanded_ecto_projections, "~> 0.6"},
+      {:commanded_ecto_projections, "~> 0.7"},
     ]
   end
 
