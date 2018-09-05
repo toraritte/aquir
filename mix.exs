@@ -47,9 +47,16 @@ defmodule Aquir.Mixfile do
       {:cowboy, "~> 1.0"},
       {:commanded, "~> 0.15"},
       # The adapter includes commanded/eventstore
+      #
+      #   DON'T FORGET to initialize the Event Store
+      #   after configuring it!
+      #   ```
+      #   >  mix do event_store.create, event_store.init
+      #   ```
       {:commanded_eventstore_adapter, "~> 0.3"},
       {:comeonin, "~> 4.1"},
       {:pbkdf2_elixir, "~> 0.12"},
+      {:commanded_ecto_projections, "~> 0.6"},
     ]
   end
 
