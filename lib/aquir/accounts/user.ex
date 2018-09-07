@@ -4,10 +4,8 @@ defmodule Aquir.Accounts.User do
 
 
   schema "accounts_users" do
-    field :bio, :string
     field :email, :string
     field :hashed_password, :string
-    field :image, :string
     field :username, :string
 
     timestamps()
@@ -16,7 +14,7 @@ defmodule Aquir.Accounts.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :email, :hashed_password, :bio, :image])
-    |> validate_required([:username, :email, :hashed_password, :bio, :image])
+    |> cast(attrs, [:username, :email, :hashed_password])
+    |> validate_required([:username, :email, :hashed_password])
   end
 end
