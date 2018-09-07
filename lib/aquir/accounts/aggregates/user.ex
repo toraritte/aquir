@@ -9,6 +9,10 @@ defmodule Aquir.Accounts.Aggregates.User do
 
   alias __MODULE__
 
+  alias Aquir.Accounts.Commands.RegisterUser
+
+  alias Aquir.Accounts.Events.UserRegistered
+
   @doc """
   Register a new user.
   """
