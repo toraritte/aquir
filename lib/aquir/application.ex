@@ -8,10 +8,16 @@ defmodule Aquir.Application do
 
     # Define workers and child supervisors to be supervised
     children = [
+
       # Start the Ecto repository
       supervisor(Aquir.Repo, []),
+
       # Start the endpoint when the application starts
       supervisor(AquirWeb.Endpoint, []),
+
+      # Accounts supervisor
+      supervisor(Aquir.Accounts.Supervisor, []),
+
       # Start your own worker by calling: Aquir.Worker.start_link(arg1, arg2, arg3)
       # worker(Aquir.Worker, [arg1, arg2, arg3]),
     ]

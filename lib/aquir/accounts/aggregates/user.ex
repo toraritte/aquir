@@ -8,9 +8,7 @@ defmodule Aquir.Accounts.Aggregates.User do
   ]
 
   alias __MODULE__
-
   alias Aquir.Accounts.Commands.RegisterUser
-
   alias Aquir.Accounts.Events.UserRegistered
 
   @doc """
@@ -18,7 +16,7 @@ defmodule Aquir.Accounts.Aggregates.User do
   """
   def execute(%User{uuid: nil}, %RegisterUser{} = r) do
     %UserRegistered{
-      uuid:     r.uuid,
+      user_uuid:     r.user_uuid,
       username: r.username,
       email:    r.email,
       hashed_password: r.hashed_password
@@ -27,7 +25,7 @@ defmodule Aquir.Accounts.Aggregates.User do
 
   def apply(%User{} = user, %UserRegistered{} = r) do
     %User{ user |
-      uuid:     r.uuid,
+      uuid:     r.user_uuid,
       username: r.username,
       email:    r.email,
       hashed_password: r.hashed_password
