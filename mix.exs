@@ -24,7 +24,6 @@ defmodule Aquir.Mixfile do
         :logger,
         :runtime_tools,
         :eventstore,
-        :exconstructor,
       ]
     ]
   end
@@ -58,7 +57,6 @@ defmodule Aquir.Mixfile do
       {:comeonin, "~> 4.1"},
       {:pbkdf2_elixir, "~> 0.12"},
       {:commanded_ecto_projections, "~> 0.7"},
-      {:exconstructor, "~> 1.1.0"},
     ]
   end
 

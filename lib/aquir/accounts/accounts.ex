@@ -3,22 +3,53 @@ defmodule Aquir.Accounts do
   The Accounts context.
   """
 
-  alias Aquir.Accounts.Commands.RegisterUser
-  alias Aquir.Accounts.Projections.User
-  alias Aquir.Repo
-  alias Aquir.Router
+  alias Aquir.{Repo, Router}
+  alias Aquir.Accounts.{Commands, Projections}
 
   def register_user(attrs \\ %{}) do
 
+    # RegisterUser command validation is done here instead
+    # of   Aquir.Router  using   Commanded.Middleware  (as
+    # described in Building Conduit), because RegisterUser
+    # will only be called from the Accounts context. After
+    # all,  its  whole  point  is  to  be  an  abstraction
+    # boundary for dealing with user management).
+    #
+    # If the command would need  to be called from another
+    # context,  then the  middleware  approach would  make
+    # more  sense.  But  then  again,  shouldn't  contexts
+    # only interact  with each other through  their public
+    # functions?  We'll see  whether I  am oversimplifying
+    # things.
+
+    # Used  Ecto.Changeset  instead  of  Vex,  which  also
+    # resulted   in    omitting   ExConstructor,   because
+    # generating a changeset from  the incoming raw params
+    # will result  in "clean" maps (i.e.,  the string keys
+    # become  atoms)  thus  Kernel.struct/2  can  be  used
+    # to  instantiate  the  RegisterUser struct  with  the
+    # changes.
+    #
+    # See https://stackoverflow.com/questions/30927635/in-elixir-how-do-you-initialize-a-struct-with-a-map-variable
+    #
+    # CAVEAT:  Using the  changeset  approach requires  to
+    # check  the  results   BEFORE  dispatching  the  CQRS
+    # command! Otherwise the process will crash after many
+    # retries of a faulty event.
+
     uuid = Ecto.UUID.generate()
 
-    command =
+    changeset =
       attrs
-      |> assign(:user_uuid, uuid)
-      |> RegisterUser.new()
+      |> assign("user_uuid", uuid)
+      |> Commands.RegisterUser.changeset()
 
-    with :ok <- Router.dispatch(command, consistency: :strong) do
-      get(User, uuid)
+    with(
+      [] <- changeset.errors,
+      command = struct(Commands.RegisterUser, changeset.changes),
+      :ok <- Router.dispatch(command, consistency: :strong)
+    ) do
+      get(Projections.User, uuid)
     else
       err -> err
     end

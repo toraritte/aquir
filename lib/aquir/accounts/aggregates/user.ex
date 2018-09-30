@@ -16,9 +16,9 @@ defmodule Aquir.Accounts.Aggregates.User do
   """
   def execute(%User{uuid: nil}, %RegisterUser{} = r) do
     %UserRegistered{
-      user_uuid:     r.user_uuid,
-      username: r.username,
-      email:    r.email,
+      user_uuid: r.user_uuid,
+      username:  r.username,
+      email:     r.email,
       hashed_password: r.hashed_password
     }
   end
