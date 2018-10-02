@@ -6,6 +6,8 @@ defmodule Aquir.Accounts do
   alias Aquir.{Repo, Router}
   alias Aquir.Accounts.{Commands, Projections}
 
+  import Ecto.Query, warn: false
+
   def register_user(attrs \\ %{}) do
 
     # RegisterUser command validation is done here instead
@@ -39,20 +41,31 @@ defmodule Aquir.Accounts do
 
     uuid = Ecto.UUID.generate()
 
-    changeset =
+    command_changeset =
       attrs
       |> assign("user_uuid", uuid)
       |> Commands.RegisterUser.changeset()
 
     with(
-      [] <- changeset.errors,
-      command = struct(Commands.RegisterUser, changeset.changes),
+      {:ok, _} <- check_username(attrs["username"]),
+      [] <- command_changeset.errors,
+      command = struct(Commands.RegisterUser, command_changeset.changes),
       :ok <- Router.dispatch(command, consistency: :strong)
     ) do
       get(Projections.User, uuid)
     else
       err -> err
     end
+  end
+
+  defp check_username(username) do
+
+    from(u in Projections.User, where: u.username == ^username)
+    |> Repo.one()
+    |> case do
+         nil -> {:ok, "username is not registered yet"}
+         _   -> {:error, "username #{username} already taken"}
+       end
   end
 
   defp get(projection_schema, uuid) do
