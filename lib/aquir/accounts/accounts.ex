@@ -4,40 +4,45 @@ defmodule Aquir.Accounts do
   """
 
   alias Aquir.{Repo, Router}
-  alias Aquir.Accounts.{Commands, Projections}
+  alias Aquir.Accounts.{
+    Commands,
+    Projections,
+    Support,
+  }
 
   import Ecto.Query, warn: false
 
+  @doc """
+    RegisterUser command validation is done here instead
+    of   Aquir.Router  using   Commanded.Middleware  (as
+    described in Building Conduit), because RegisterUser
+    will only be called from the Accounts context. After
+    all,  its  whole  point  is  to  be  an  abstraction
+    boundary for dealing with user management).
+
+    If the command would need  to be called from another
+    context,  then the  middleware  approach would  make
+    more  sense.  But  then  again,  shouldn't  contexts
+    only interact  with each other through  their public
+    functions?  We'll see  whether I  am oversimplifying
+    things.
+
+    Used  Ecto.Changeset  instead  of  Vex,  which  also
+    resulted   in    omitting   ExConstructor,   because
+    generating a changeset from  the incoming raw params
+    will result  in "clean" maps (i.e.,  the string keys
+    become  atoms)  thus  Kernel.struct/2  can  be  used
+    to  instantiate  the  RegisterUser struct  with  the
+    changes.
+
+    See https://stackoverflow.com/questions/30927635/in-elixir-how-do-you-initialize-a-struct-with-a-map-variable
+
+    CAVEAT:  Using the  changeset  approach requires  to
+    check  the  results   BEFORE  dispatching  the  CQRS
+    command! Otherwise the process will crash after many
+    retries of a faulty event.
+  """
   def register_user(attrs \\ %{}) do
-
-    # RegisterUser command validation is done here instead
-    # of   Aquir.Router  using   Commanded.Middleware  (as
-    # described in Building Conduit), because RegisterUser
-    # will only be called from the Accounts context. After
-    # all,  its  whole  point  is  to  be  an  abstraction
-    # boundary for dealing with user management).
-    #
-    # If the command would need  to be called from another
-    # context,  then the  middleware  approach would  make
-    # more  sense.  But  then  again,  shouldn't  contexts
-    # only interact  with each other through  their public
-    # functions?  We'll see  whether I  am oversimplifying
-    # things.
-
-    # Used  Ecto.Changeset  instead  of  Vex,  which  also
-    # resulted   in    omitting   ExConstructor,   because
-    # generating a changeset from  the incoming raw params
-    # will result  in "clean" maps (i.e.,  the string keys
-    # become  atoms)  thus  Kernel.struct/2  can  be  used
-    # to  instantiate  the  RegisterUser struct  with  the
-    # changes.
-    #
-    # See https://stackoverflow.com/questions/30927635/in-elixir-how-do-you-initialize-a-struct-with-a-map-variable
-    #
-    # CAVEAT:  Using the  changeset  approach requires  to
-    # check  the  results   BEFORE  dispatching  the  CQRS
-    # command! Otherwise the process will crash after many
-    # retries of a faulty event.
 
     uuid = Ecto.UUID.generate()
 
@@ -47,9 +52,14 @@ defmodule Aquir.Accounts do
       |> Commands.RegisterUser.changeset()
 
     with(
-      {:ok, _} <- check_username(attrs["username"]),
       [] <- command_changeset.errors,
       command = struct(Commands.RegisterUser, command_changeset.changes),
+      # `changeset` needs to come first because if the UniqueUsername agent
+      # saves the username first, but changeset returns any error, then
+      # subsequent tries will fail as the name check will come back as
+      # already taken.
+      {:ok, _} <- Support.UniqueUsername.claim(attrs["username"]),
+      {:ok, _} <- check_username(attrs["username"]),
       :ok <- Router.dispatch(command, consistency: :strong)
     ) do
       get(Projections.User, uuid)
@@ -59,13 +69,12 @@ defmodule Aquir.Accounts do
   end
 
   defp check_username(username) do
-
     from(u in Projections.User, where: u.username == ^username)
     |> Repo.one()
     |> case do
-         nil -> {:ok, "username is not registered yet"}
-         _   -> {:error, "username #{username} already taken"}
-       end
+        nil -> {:ok, "username is free"}
+        _   -> {:error, :username_already_in_database}
+      end
   end
 
   defp get(projection_schema, uuid) do
