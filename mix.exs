@@ -37,15 +37,15 @@ defmodule Aquir.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.3.3"},
-      {:phoenix_pubsub, "~> 1.0"},
-      {:phoenix_ecto, "~> 3.2"},
-      {:postgrex, ">= 0.0.0"},
-      {:phoenix_html, "~> 2.10"},
+      {:phoenix,             "~> 1.3.3"},
+      {:phoenix_pubsub,      "~> 1.0"},
+      {:phoenix_ecto,        "~> 3.2"},
+      {:postgrex,            ">= 0.0.0"},
+      {:phoenix_html,        "~> 2.10"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
-      {:gettext, "~> 0.11"},
-      {:cowboy, "~> 1.0"},
-      {:commanded, "~> 0.15"},
+      {:gettext,             "~> 0.11"},
+      {:cowboy,              "~> 1.0"},
+      {:commanded,           "~> 0.15"},
       # The adapter includes commanded/eventstore
       #
       #   DON'T FORGET to initialize the Event Store
@@ -54,9 +54,10 @@ defmodule Aquir.Mixfile do
       #   >  mix do event_store.create, event_store.init
       #   ```
       {:commanded_eventstore_adapter, "~> 0.3"},
-      {:comeonin, "~> 4.1"},
-      {:pbkdf2_elixir, "~> 0.12"},
-      {:commanded_ecto_projections, "~> 0.7"},
+      {:comeonin,                     "~> 4.1"},
+      # https://security.stackexchange.com/questions/4781/
+      {:bcrypt_elixir,                "~> 1.1"},
+      {:commanded_ecto_projections,   "~> 0.7"},
     ]
   end
 
