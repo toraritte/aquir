@@ -1,4 +1,4 @@
-defmodule Aquir.Repo.Migrations.CreateAccountsUsers do
+defmodule Aquir.Repo.Migrations.CreateAccountsUsersProjection do
   use Ecto.Migration
 
   def change do
