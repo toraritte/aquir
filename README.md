@@ -2,9 +2,9 @@
 
 ## 0. Documenting different uses of `@primary_key`
 
-Projections: (i.e., migrations and corresponding Ecto.Schema)
+### 0.1 Projections: (i.e., migrations and corresponding Ecto.Schema)
 
-### 0.1 Migrations
+#### 0.1.1 Migrations
 
 ```elixir
     # (1) Do not generate primary key on table creation
@@ -17,13 +17,42 @@ Projections: (i.e., migrations and corresponding Ecto.Schema)
 
 **Note to self**: make migrations easier to distinguish by adding "projection" if it is related to one.
 
-### 0.2 Schemas
+#### 0.1.2 Schemas
 
 ```elixir
   @primary_key {:uuid, :binary_id, autogenerate: false}
 ```
 
 The argument is the same as for migrations above. See [Ecto.Schema docs](https://hexdocs.pm/ecto/Ecto.Schema.html)' ["Primary Keys" section](https://hexdocs.pm/ecto/Ecto.Schema.html#module-primary-keys).
+
+### 0.2 CQRS commands
+
+```elixir
+  @primary_key {:command_key, Ecto.UUID, autogenerate: false}
+  #                   |           |                      |
+  #                   V           |                      |
+  #   e.g., for RegisterUser it   |                      |
+  #         is :user_uuid         V                      |
+  #                           Using Ecto.UUID.generate() to make
+  #                           UUIDs, but for other use cases the
+  #                           docs recommended :binary_id would
+  #                           probably be more suitable. |
+  #                                                      |
+  #                                                      V
+```
+
+According to the [Ecto.Schema docs](https://hexdocs.pm/ecto/Ecto.Schema.html) "_by default, a schema will automatically generate a primary key which is named id and of type :integer_", but Ecto.Schema is only used here for validation purposes, hence the `false` at the end. Use the [`__schema__`](https://hexdocs.pm/ecto/Ecto.Schema.html#module-reflection) function to introspect the fields at runtime.
+
+```
+iex(2)> alias Aquir.Accounts.Commands.RegisterUser
+Aquir.Accounts.Commands.RegisterUser
+
+iex(3)> RegisterUser.__schema__(:primary_key)
+[:user_uuid]
+
+iex(4)> RegisterUser.__schema__(:fields)     
+[:user_uuid, :username, :email, :password, :hashed_password]
+```
 
 ## Start project
 

@@ -44,49 +44,30 @@ defmodule Aquir.Accounts do
   """
   def register_user(attrs \\ %{}) do
 
-    uuid = Ecto.UUID.generate()
 
     command_changeset =
       attrs
-      |> assign("user_uuid", uuid)
       |> Commands.RegisterUser.changeset()
 
     with(
-      [] <- command_changeset.errors,
-      command = struct(Commands.RegisterUser, command_changeset.changes),
-      # `changeset` needs to come first because if the UniqueUsername agent
-      # saves the username first, but changeset returns any error, then
-      # subsequent tries will fail as the name check will come back as
+      # `changeset`  needs  to  come first  because  if  the
+      # UniqueUsername agent  saves the username  first, but
+      # changeset returns  any error, then  subsequent tries
+      # will  fail  as the  name  check  will come  back  as
       # already taken.
+      []       <- command_changeset.errors,
       {:ok, _} <- Support.UniqueUsername.claim(attrs["username"]),
-      {:ok, _} <- check_username(attrs["username"]),
+      {:ok, _} <- Projections.User.check_username(attrs["username"]),
+
+      command = struct(Commands.RegisterUser, command_changeset.changes),
       :ok <- Router.dispatch(command, consistency: :strong)
     ) do
-      get(Projections.User, uuid)
+      Projections.User.get(attrs["user_uuid"])
     else
       err -> err
     end
   end
 
-  defp check_username(username) do
-    from(u in Projections.User, where: u.username == ^username)
-    |> Repo.one()
-    |> case do
-        nil -> {:ok, "username is free"}
-        _   -> {:error, :username_already_in_database}
-      end
-  end
-
-  defp get(projection_schema, uuid) do
-    case Repo.get(projection_schema, uuid) do
-      nil -> {:error, :not_found}
-      projection -> {:ok, projection}
-    end
-  end
-
-  defp assign(attrs, key, value) do
-    Map.put(attrs, key, value)
-  end
 #   import Ecto.Query, warn: false
 #   alias Aquir.Repo
 
