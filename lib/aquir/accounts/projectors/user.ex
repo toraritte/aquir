@@ -9,7 +9,6 @@ defmodule Aquir.Accounts.Projectors.User do
   project %UserRegistered{} = u do
     Ecto.Multi.insert(multi, :user, %User{
       uuid: u.user_uuid,
-      username: u.username,
       email: u.email,
       hashed_password: u.hashed_password
     })

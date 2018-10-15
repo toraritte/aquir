@@ -1,6 +1,8 @@
 # Aquir
 
-## 0. Documenting different uses of `@primary_key`
+## 0. Notes on using `Ecto.Schema` in this project
+
+`Ecto.Schema` is used for validating commands and for projections. [This Stack Overflow question](https://stackoverflow.com/questions/52799805) documents the difference between `schema/2` and `embedded_schema/1`, but as soon as Ecto 3 is out, it will be in the main documentation as well.
 
 ### 0.1 Projections: (i.e., migrations and corresponding Ecto.Schema)
 
@@ -25,7 +27,7 @@
 
 The argument is the same as for migrations above. See [Ecto.Schema docs](https://hexdocs.pm/ecto/Ecto.Schema.html)' ["Primary Keys" section](https://hexdocs.pm/ecto/Ecto.Schema.html#module-primary-keys).
 
-### 0.2 CQRS commands
+### 0.2 CQRS command schemas
 
 ```elixir
   @primary_key {:command_key, Ecto.UUID, autogenerate: false}
@@ -53,6 +55,8 @@ iex(3)> RegisterUser.__schema__(:primary_key)
 iex(4)> RegisterUser.__schema__(:fields)     
 [:user_uuid, :username, :email, :password, :hashed_password]
 ```
+
+If a field is tagged with `virtual: true`, it means that it won't be persisted in any projection. Because command schemas use `embedded_schema/1`, its only purpose is to document this fact.
 
 ## Start project
 

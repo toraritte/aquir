@@ -1,8 +1,6 @@
 defmodule Aquir.Accounts.Commands.RegisterUser do
   use Ecto.Schema
 
-  @primary_key {:user_uuid, Ecto.UUID, autogenerate: false}
-
   # NOTE:  Seen  several  places  that  it  is
   # recommended  to  treat  credentials  as  a  separate
   # module (context  even, if  it is justified)  so that
@@ -18,10 +16,17 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
 
   # Why the use of `embedded_schema/1`:
   # https://stackoverflow.com/questions/52799805
+
+  # See main README on `@primary_key` usage in this project.
+  @primary_key {:user_uuid, Ecto.UUID, autogenerate: false}
+
+  # Adding the `virtual` option to the `:password` field
+  # has  no  significance;  it only  documents  that  it
+  # would not  be persisted  in the projection.  See the
+  # `Projections.User` schema, it isn't even listed.
   embedded_schema do
-    field :username,        :string
     field :email,           :string
-    field :password,        :string
+    field :password,        :string, virtual: true
     field :hashed_password, :string, default: ""
   end
 
@@ -51,18 +56,10 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
 
     # TODO: tests!
 
-    # TODO: validations for "email" and "username"
-
-    # types = %{
-    #   user_uuid: Ecto.UUID,
-    #   username:  :string,
-    #   email:     :string,
-    #   password:  :string,
-    # }
+    # TODO: validations for "email"
 
     # TODO: separate credentials and user info
     required_fields = [
-      :username,
       :email,
       :password,
     ]

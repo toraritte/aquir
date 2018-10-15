@@ -2,7 +2,6 @@ defmodule Aquir.Accounts.Aggregates.User do
 
   defstruct [
     :uuid,
-    :username,
     :email,
     :hashed_password
   ]
@@ -17,7 +16,6 @@ defmodule Aquir.Accounts.Aggregates.User do
   def execute(%User{uuid: nil}, %RegisterUser{} = r) do
     %UserRegistered{
       user_uuid: r.user_uuid,
-      username:  r.username,
       email:     r.email,
       hashed_password: r.hashed_password
     }
@@ -26,7 +24,6 @@ defmodule Aquir.Accounts.Aggregates.User do
   def apply(%User{} = user, %UserRegistered{} = r) do
     %User{ user |
       uuid:     r.user_uuid,
-      username: r.username,
       email:    r.email,
       hashed_password: r.hashed_password
     }

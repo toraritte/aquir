@@ -10,8 +10,6 @@ defmodule Aquir.Accounts do
     Support,
   }
 
-  import Ecto.Query, warn: false
-
   @doc """
     RegisterUser command validation is done here instead
     of   Aquir.Router  using   Commanded.Middleware  (as
@@ -46,23 +44,23 @@ defmodule Aquir.Accounts do
 
 
     command_changeset =
-      attrs
-      |> Commands.RegisterUser.changeset()
+      %Commands.RegisterUser{}
+      |> Commands.RegisterUser.changeset(attrs)
 
     with(
       # `changeset`  needs  to  come first  because  if  the
-      # UniqueUsername agent  saves the username  first, but
+      # UniqueEmail agent  saves the email  first, but
       # changeset returns  any error, then  subsequent tries
       # will  fail  as the  name  check  will come  back  as
       # already taken.
       []       <- command_changeset.errors,
-      {:ok, _} <- Support.UniqueUsername.claim(attrs["username"]),
-      {:ok, _} <- Projections.User.check_username(attrs["username"]),
+      {:ok, _} <- Support.UniqueEmail.claim(attrs["email"]),
+      {:ok, _} <- Projections.User.check_email(attrs["email"]),
 
       command = struct(Commands.RegisterUser, command_changeset.changes),
       :ok <- Router.dispatch(command, consistency: :strong)
     ) do
-      Projections.User.get(attrs["user_uuid"])
+      Projections.User.get(command_changeset.changes.user_uuid)
     else
       err -> err
     end

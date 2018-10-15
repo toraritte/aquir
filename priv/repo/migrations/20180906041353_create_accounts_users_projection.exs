@@ -7,14 +7,12 @@ defmodule Aquir.Repo.Migrations.CreateAccountsUsersProjection do
 
     create table(:accounts_users, primary_key: false) do
       add :uuid, :uuid, primary_key: true
-      add :username, :citext
       add :email,    :citext
       add :hashed_password, :string
 
       timestamps()
     end
 
-    create unique_index(:accounts_users, [:username])
     create unique_index(:accounts_users, [:email])
   end
 end
