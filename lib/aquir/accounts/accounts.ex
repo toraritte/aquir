@@ -11,41 +11,37 @@ defmodule Aquir.Accounts do
   }
 
   @doc """
-    RegisterUser command validation is done here instead
-    of   Aquir.Router  using   Commanded.Middleware  (as
-    described in Building Conduit), because RegisterUser
-    will only be called from the Accounts context. After
-    all,  its  whole  point  is  to  be  an  abstraction
-    boundary for dealing with user management).
+  NOTE 2018-10-11_2312
+  RegisterUser command validation is done here instead
+  of   Aquir.Router  using   Commanded.Middleware  (as
+  described in Building Conduit), because RegisterUser
+  will only be called from the Accounts context. After
+  all,  its  whole  point  is  to  be  an  abstraction
+  boundary for dealing with user management).
 
-    If the command would need  to be called from another
-    context,  then the  middleware  approach would  make
-    more  sense.  But  then  again,  shouldn't  contexts
-    only interact  with each other through  their public
-    functions?  We'll see  whether I  am oversimplifying
-    things.
+  If the command would need  to be called from another
+  context,  then the  middleware  approach would  make
+  more  sense.  But  then  again,  shouldn't  contexts
+  only interact  with each other through  their public
+  functions?  We'll see  whether I  am oversimplifying
+  things.
 
-    Used  Ecto.Changeset  instead  of  Vex,  which  also
-    resulted   in    omitting   ExConstructor,   because
-    generating a changeset from  the incoming raw params
-    will result  in "clean" maps (i.e.,  the string keys
-    become  atoms)  thus  Kernel.struct/2  can  be  used
-    to  instantiate  the  RegisterUser struct  with  the
-    changes.
+  Used  Ecto.Changeset  instead  of  Vex,  which  also
+  resulted   in    omitting   ExConstructor,   because
+  generating a changeset from  the incoming raw params
+  will result  in "clean" maps (i.e.,  the string keys
+  become  atoms)  thus  Kernel.struct/2  can  be  used
+  to  instantiate  the  RegisterUser struct  with  the
+  changes.
 
-    See https://stackoverflow.com/questions/30927635/in-elixir-how-do-you-initialize-a-struct-with-a-map-variable
+  See https://stackoverflow.com/questions/30927635/in-elixir-how-do-you-initialize-a-struct-with-a-map-variable
 
-    CAVEAT:  Using the  changeset  approach requires  to
-    check  the  results   BEFORE  dispatching  the  CQRS
-    command! Otherwise the process will crash after many
-    retries of a faulty event.
+  CAVEAT:  Using the  changeset  approach requires  to
+  check  the  results   BEFORE  dispatching  the  CQRS
+  command! Otherwise the process will crash after many
+  retries of a faulty event.
   """
   def register_user(attrs \\ %{}) do
-
-
-    command_changeset =
-      %Commands.RegisterUser{}
-      |> Commands.RegisterUser.changeset(attrs)
 
     with(
       # `changeset`  needs  to  come first  because  if  the
@@ -53,16 +49,28 @@ defmodule Aquir.Accounts do
       # changeset returns  any error, then  subsequent tries
       # will  fail  as the  name  check  will come  back  as
       # already taken.
-      []       <- command_changeset.errors,
-      {:ok, _} <- Support.UniqueEmail.claim(attrs["email"]),
-      {:ok, _} <- Projections.User.check_email(attrs["email"]),
+      {:ok, command} <-
+        %Commands.RegisterUser{}
+        |> Commands.Support.imbue_command(attrs),
 
-      command = struct(Commands.RegisterUser, command_changeset.changes),
+      :ok <- Support.UniqueEmail.claim(attrs["email"]),
+      :ok <- Projections.User.check_email(attrs["email"]),
       :ok <- Router.dispatch(command, consistency: :strong)
     ) do
-      Projections.User.get(command_changeset.changes.user_uuid)
+      Projections.User.get(command.user_uuid)
     else
       err -> err
+    end
+  end
+
+  def reset_password(attrs \\ %{}) do
+
+    case Commands.Support.imbue_command(%Commands.ResetPassword{}, attrs) do
+      {:ok, command} ->
+        Router.dispatch(command, consistency: :strong)
+        # TODO: what to return?
+      errors ->
+        errors
     end
   end
 

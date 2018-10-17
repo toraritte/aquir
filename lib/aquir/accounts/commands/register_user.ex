@@ -27,20 +27,10 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
   embedded_schema do
     field :email,           :string
     field :password,        :string, virtual: true
-    field :hashed_password, :string, default: ""
+    field :password_hash,   :string, default: ""
   end
 
   import Ecto.Changeset
-
-  def hash_password(changeset) do
-    case changeset do
-      %Ecto.Changeset{valid?: true, changes: %{password: pw}} ->
-        hash = Comeonin.Bcrypt.hashpwsalt(pw)
-        put_change(changeset, :hashed_password, hash)
-      _ ->
-        changeset
-    end
-  end
 
   def assign_uuid(changeset) do
     case changeset.valid? do
@@ -54,21 +44,19 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
 
   def changeset(command, params \\ %{}) do
 
-    # TODO: tests!
-
-    # TODO: validations for "email"
-
-    # TODO: separate credentials and user info
+    # TODO:
+    # + add tests and email, password constraints
+    #   (these could be in Support)
+    # + separate credentials and user info
     required_fields = [
       :email,
       :password,
     ]
 
-    # { command, types }
     command
     |> cast(params, required_fields)
     |> validate_required(required_fields)
     |> assign_uuid()
-    |> hash_password()
+    |> Aquir.Accounts.Commands.Support.secure_password()
   end
 end

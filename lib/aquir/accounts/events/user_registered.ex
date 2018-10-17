@@ -5,6 +5,6 @@ defmodule Aquir.Accounts.Events.UserRegistered do
   defstruct [
     :user_uuid,
     :email,
-    :hashed_password
+    :password_hash
   ]
 end

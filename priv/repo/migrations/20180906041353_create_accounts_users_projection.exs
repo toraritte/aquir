@@ -8,7 +8,7 @@ defmodule Aquir.Repo.Migrations.CreateAccountsUsersProjection do
     create table(:accounts_users, primary_key: false) do
       add :uuid, :uuid, primary_key: true
       add :email,    :citext
-      add :hashed_password, :string
+      add :password_hash, :string
 
       timestamps()
     end

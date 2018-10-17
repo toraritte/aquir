@@ -8,7 +8,7 @@ defmodule Aquir.Accounts.Projections.User do
 
   schema "accounts_users" do
     field :email, :string, unique: true
-    field :hashed_password, :string
+    field :password_hash, :string
 
     timestamps()
   end
@@ -18,7 +18,7 @@ defmodule Aquir.Accounts.Projections.User do
     from(u in __MODULE__, where: u.email == ^email)
     |> Repo.one()
     |> case do
-        nil -> {:ok, "email is free"}
+        nil -> :ok
         _   -> {:error, :email_already_in_database}
       end
   end

@@ -16,7 +16,7 @@ defmodule Aquir.Accounts.Support.UniqueEmail do
         # email  is  saved. For  a  larger  service a  more
         # robust key-value store would be a better option.
         Agent.update(__MODULE__, &MapSet.put(&1, name))
-        {:ok, :email_claimed}
+        :ok
       true  ->
         {:error, :email_already_taken}
     end

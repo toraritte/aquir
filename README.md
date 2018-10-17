@@ -53,7 +53,7 @@ iex(3)> RegisterUser.__schema__(:primary_key)
 [:user_uuid]
 
 iex(4)> RegisterUser.__schema__(:fields)     
-[:user_uuid, :username, :email, :password, :hashed_password]
+[:user_uuid, :username, :email, :password, :password_hash]
 ```
 
 If a field is tagged with `virtual: true`, it means that it won't be persisted in any projection. Because command schemas use `embedded_schema/1`, its only purpose is to document this fact.
