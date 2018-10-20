@@ -40,6 +40,11 @@ defmodule Aquir.Accounts do
   check  the  results   BEFORE  dispatching  the  CQRS
   command! Otherwise the process will crash after many
   retries of a faulty event.
+
+  NOTE 2018-10-18_00:04
+  Keeping command validation here as  I am not fond of
+  the  Commanded.Middleware  implementation. See  note
+  "2018-10-17_2246" in Aquir.Router.
   """
   def register_user(attrs \\ %{}) do
 
@@ -57,7 +62,7 @@ defmodule Aquir.Accounts do
       :ok <- Projections.User.check_email(attrs["email"]),
       :ok <- Router.dispatch(command, consistency: :strong)
     ) do
-      Projections.User.get(command.user_uuid)
+      Projections.User.get_user(command.user_id)
     else
       err -> err
     end

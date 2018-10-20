@@ -4,7 +4,7 @@ defmodule Aquir.Accounts.Commands.ResetPassword do
   # TODO This is probably oversimplified again. It would
   # be prudent to match the prevoius password to be more
   # secure and :password should be :new_password.
-  @primary_key {:user_uuid, Ecto.UUID, autogenerate: false}
+  @primary_key {:user_id, Ecto.UUID, autogenerate: false}
 
   embedded_schema do
     field :password,      :string, virtual: true
@@ -18,7 +18,7 @@ defmodule Aquir.Accounts.Commands.ResetPassword do
     # TODO: add tests and add password constraints
 
     required_fields = [
-      :user_uuid,
+      :user_id,
       :password
     ]
 

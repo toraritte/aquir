@@ -3,7 +3,7 @@ defmodule Aquir.Accounts.Events.PasswordReset do
   @derive [Poison.Encoder]
 
   defstruct [
-    :user_uuid,
+    :user_id,
     :password_hash,
   ]
 end

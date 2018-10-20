@@ -4,7 +4,7 @@ defmodule Aquir.Accounts.Projections.User do
   alias Aquir.Repo
   import Ecto.Query
 
-  @primary_key {:uuid, :binary_id, autogenerate: false}
+  @primary_key {:user_id, :binary_id, autogenerate: false}
 
   schema "accounts_users" do
     field :email, :string, unique: true
@@ -23,10 +23,7 @@ defmodule Aquir.Accounts.Projections.User do
       end
   end
 
-  def get(uuid) do
-    case Repo.get(__MODULE__, uuid) do
-      nil        -> {:error, :not_found}
-      projection -> {:ok, projection}
-    end
+  def get_user(user_id) do
+    Repo.get(__MODULE__, user_id)
   end
 end

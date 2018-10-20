@@ -23,7 +23,7 @@ defmodule Aquir.Accounts.Aggregates.User do
   """
 
   defstruct [
-    :uuid,
+    :user_id,
     :email,
     :password_hash
   ]
@@ -60,8 +60,25 @@ defmodule Aquir.Accounts.Aggregates.User do
   the  time the  command  gets here,  it already  went
   through validation  via changesets in  context (such
   as `accounts.ex`).
+
+  NOTE 2018-10-17_2208
+  What if  new authentication  methods would  be added
+  later? I think that the advantage of CQRS/ES in this
+  case  is  that  commands  are the  only  input,  and
+  their execution's results  are simple events. Adding
+  new commands  to the  User aggregate  that register,
+  remove, configure etc.  authentication methods for a
+  specific User  (e.g., AddAuthenticationMethod) would
+  suffice. To decouple it from User, there would be an
+  Auth  module with  submodules implementing  the auth
+  methods. For example,  Auth.EmailPassword would hold
+  all  the  methods  that a  simple  username/password
+  login  would  require.  The  auth  method  would  be
+  submitted  in   RegisterUser  via  an   atom  (e.g.,
+  auth_method: :email_password).
+  TODO This is pretty vague, work it out.
   """
-  def execute(%User{uuid: nil}, %RegisterUser{} = command) do
+  def execute(%User{user_id: nil}, %RegisterUser{} = command) do
     Support.convert_similar_structs(command, UserRegistered)
   end
 

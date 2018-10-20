@@ -18,7 +18,7 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
   # https://stackoverflow.com/questions/52799805
 
   # See main README on `@primary_key` usage in this project.
-  @primary_key {:user_uuid, Ecto.UUID, autogenerate: false}
+  @primary_key {:user_id, Ecto.UUID, autogenerate: false}
 
   # Adding the `virtual` option to the `:password` field
   # has  no  significance;  it only  documents  that  it
@@ -32,11 +32,11 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
 
   import Ecto.Changeset
 
-  def assign_uuid(changeset) do
+  def assign_user_id(changeset) do
     case changeset.valid? do
       true ->
         uuid = Ecto.UUID.generate()
-        put_change(changeset, :user_uuid, uuid)
+        put_change(changeset, :user_id, uuid)
       false ->
         changeset
     end
@@ -56,7 +56,7 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
     command
     |> cast(params, required_fields)
     |> validate_required(required_fields)
-    |> assign_uuid()
+    |> assign_user_id()
     |> Aquir.Accounts.Commands.Support.secure_password()
   end
 end

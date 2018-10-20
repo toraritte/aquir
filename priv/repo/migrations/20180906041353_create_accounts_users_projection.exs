@@ -6,8 +6,8 @@ defmodule Aquir.Repo.Migrations.CreateAccountsUsersProjection do
     execute "CREATE EXTENSION IF NOT EXISTS citext"
 
     create table(:accounts_users, primary_key: false) do
-      add :uuid, :uuid, primary_key: true
-      add :email,    :citext
+      add :user_id,       :uuid, primary_key: true
+      add :email,         :citext
       add :password_hash, :string
 
       timestamps()
