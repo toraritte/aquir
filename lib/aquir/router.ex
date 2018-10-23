@@ -8,7 +8,7 @@ defmodule Aquir.Router do
   }
 
   @doc """
-  NOTE 2018-10-17_2246
+  NOTE 2018-10-19_2246
   Commanded.Middleware is  currently implemented  as a
   behaviour with before  and after dispatch callbacks,
   and every middleware in a  router is called for each
@@ -25,5 +25,5 @@ defmodule Aquir.Router do
   """
 
     dispatch [RegisterUser],  to: User, identity: :user_id
-    dispatch [ResetPassword], to: User, identity: :user_id
+    dispatch [ResetPassword], to: User, identity: :email
 end

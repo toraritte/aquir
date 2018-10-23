@@ -27,7 +27,7 @@ defmodule Aquir.Accounts.Projectors.User do
   end
 
   @doc """
-  NOTE 2018-10-17_2344
+  NOTE 2018-10-19_2344
   The state of the User  aggregate is fetched from the
   User  projection in  the  database,  but that  state
   should  also be  available  in  the stream  process.

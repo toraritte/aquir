@@ -44,7 +44,7 @@ defmodule Aquir.Accounts do
   NOTE 2018-10-18_00:04
   Keeping command validation here as  I am not fond of
   the  Commanded.Middleware  implementation. See  note
-  "2018-10-17_2246" in Aquir.Router.
+  "2018-10-19_2246" in Aquir.Router.
   """
   def register_user(attrs \\ %{}) do
 
@@ -58,6 +58,7 @@ defmodule Aquir.Accounts do
         %Commands.RegisterUser{}
         |> Commands.Support.imbue_command(attrs),
 
+      # TODO Clean up. See NOTE 2018-10-23_0914
       :ok <- Support.UniqueEmail.claim(attrs["email"]),
       :ok <- Projections.User.check_email(attrs["email"]),
       :ok <- Router.dispatch(command, consistency: :strong)
