@@ -1,7 +1,14 @@
 defmodule Aquir.Accounts.Projectors.User do
   use Commanded.Projections.Ecto,
     name: "Accounts.Projections.User",
+    repo: Aquir.Repo,
     consistency: :strong
+
+  @doc """
+  NOTE 2018-10-23_2154
+  Where is `:consistency` above defined? Commanded.Projections.Ecto
+  has  one file basically (ecto.ex) and it's not in there.
+  """
 
   alias Aquir.Accounts.Events.{
     UserRegistered,
@@ -50,15 +57,15 @@ defmodule Aquir.Accounts.Projectors.User do
   """
   project %PasswordReset{} = u do
 
-    case User.get_user(u.user_id) do
+    case User.get_user_by_email(u.email) do
+      nil ->
+        multi
       user ->
         user
         |> Ecto.Changeset.change(password_hash: u.password_hash)
         |> (&Ecto.Multi.update(multi, :reset_password, &1)).()
-      nil ->
-        multi
     end
   end
 end
 # Aquir.Accounts.register_user(%{"email" => "alvaro@miez.com", "password" => "balabab"})
-# Aquir.Accounts.reset_password(%{"user_id" => "a045a1d0-2461-45ee-8085-261f6fdbb294", "password" => "mas"})
+# Aquir.Accounts.reset_password(%{"email" => "alvaro@miez.com", "password" => "mas"})

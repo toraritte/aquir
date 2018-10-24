@@ -63,7 +63,7 @@ defmodule Aquir.Accounts do
       :ok <- Projections.User.check_email(attrs["email"]),
       :ok <- Router.dispatch(command, consistency: :strong)
     ) do
-      Projections.User.get_user(command.user_id)
+      Projections.User.get_user_by_id(command.user_id)
     else
       err -> err
     end

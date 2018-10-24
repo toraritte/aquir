@@ -38,13 +38,16 @@ defmodule Aquir.Accounts.Aggregates.User do
   Commanded.Aggregates.Supervisor. After  restart, its
   list of streams is empty, but issuing a command on a
   specific  stream will  get  it  re-spawned with  the
-  correct  state. The  mechanism is  still fuzzy,  but
+  correct state. (*) The mechanism is still fuzzy, but
   added  a  user, stopped  the  server,  and issued  a
   ResetPassword  command after  restart with  success,
   see `:sys.get_state/1` outputs.  Thus this shouldn't
   be a barrier. This way projections can be just dummy
   operations because whatever came in before should be
   clean.
+
+  (*) The state is correct because  it is taken from the
+      projection itself and NOT from the aggregate...
 
   `consistency:  :strong` also  wouldn't be  needed as
   the User state is being  read back from a projection
@@ -54,41 +57,46 @@ defmodule Aquir.Accounts.Aggregates.User do
   do  I know,  only created  a couple  commands/events
   yet.)
 
-    iex(4)> Aquir.Accounts.register_user(%{"email" => "alvaro@miez.com", "password" => "balabab"})
+    iex(1)> Aquir.Accounts.register_user(%{"email" => "alvaro@miez.com", "password" => "balabab"})
+      #> (...)
       #> %Aquir.Accounts.Projections.User{
       #>   __meta__: #Ecto.Schema.Metadata<:loaded, "accounts_users">,
       #>   email: "alvaro@miez.com",
-      #>   inserted_at: ~N[2018-10-18 23:52:50.651913],
-      #>   password_hash: "$2b$12$EKQm/UHsu4GyXycEkzCet.mrLay7GnayD5Ikhc.zNoe8CWlCyNDSG",
-      #>   updated_at: ~N[2018-10-18 23:52:50.651925],
-      #>   user_id: "a045a1d0-2461-45ee-8085-261f6fdbb294"
+      #>   inserted_at: ~N[2018-10-24 05:36:17.848485],
+      #>   password_hash: "$2b$12$rh/cpbZkpytOZ8iIuNUs7uvPPI.sZsB338Q8ujzssAc97n4ii16ie",
+      #>   updated_at: ~N[2018-10-24 05:36:17.848501],
+      #>   user_id: "aef3a738-af21-4165-94ef-dfb18abb00bd"
       #> }
-    iex(5)>
+
+    iex(2)> Supervisor.which_children(Commanded.Aggregates.Supervisor)
+      #> [{:undefined, #PID<0.486.0>, :worker, [Commanded.Aggregates.Aggregate]}]
+
+    iex(3)>
     BREAK: (a)bort (c)ontinue (p)roc info (i)nfo (l)oaded
           (v)ersion (k)ill (D)b-tables (d)istribution
-
     $ iex -S mix phx.server
     Erlang/OTP 21 [erts-10.0] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [hipe]
 
-    iex(3)> :sys.get_state(Commanded.Aggregates.Supervisor)
-      #> {:state, {:local, Commanded.Aggregates.Supervisor}, :simple_one_for_one,
-      #>  {[Commanded.Aggregates.Aggregate],
-      #>   %{
-      #>     Commanded.Aggregates.Aggregate => {:child, :undefined,
-      #>      Commanded.Aggregates.Aggregate,
-      #>      {Commanded.Aggregates.Aggregate, :start_link, []}, :temporary, 5000,
-      #>      :worker, [Commanded.Aggregates.Aggregate]}
-      #>   }},
-      #>  {:sets,
-      #>   {:set, 0, 16, 16, 8, 80, 48,
-      #>    {[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []},
-      #>    {{[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []}}}}, 3, 5,
-      #>  [], 0, Commanded.Aggregates.Supervisor, []}
+    iex(1)> Supervisor.which_children(Commanded.Aggregates.Supervisor)
+      #> []
 
-    iex(5)> Aquir.Accounts.reset_password(%{"user_id" => "a045a1d0-2461-45ee-8085-261f6fdbb294", "password" => "lofa"})
+    iex(2)> Aquir.Accounts.reset_password(%{"email" => "alvaro@miez.com", "password" => "mas"})
       #> :ok
 
-    iex(6)> :sys.get_state(Commanded.Aggregates.Supervisor)
+    iex(3)> Aquir.Accounts.Projections.User.get_user_by_email("alvaro@miez.com")
+      #> %Aquir.Accounts.Projections.User{
+      #>   __meta__: #Ecto.Schema.Metadata<:loaded, "accounts_users">,
+      #>   email: "alvaro@miez.com",
+      #>   inserted_at: ~N[2018-10-24 05:36:17.848485],
+      #>   password_hash: "$2b$12$IUUhwJ2hiQhZruNA3gTUa.Bvsst/sZyDl54OAt65jx9XF2aOdI5wC",
+      #>   updated_at: ~N[2018-10-24 05:36:47.000317],
+      #>   user_id: "aef3a738-af21-4165-94ef-dfb18abb00bd"
+      #> }
+
+    iex(4)> Supervisor.which_children(Commanded.Aggregates.Supervisor)
+    [{:undefined, #PID<0.475.0>, :worker, [Commanded.Aggregates.Aggregate]}]
+
+    iex(5)> :sys.get_state(Commanded.Aggregates.Supervisor)
       #> {:state, {:local, Commanded.Aggregates.Supervisor}, :simple_one_for_one,
       #>  {[Commanded.Aggregates.Aggregate],
       #>   %{
@@ -100,20 +108,8 @@ defmodule Aquir.Accounts.Aggregates.User do
       #>  {:sets,
       #>   {:set, 1, 16, 16, 8, 80, 48,
       #>    {[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []},
-      #>    {{[], [], [], [], [#PID<0.491.0>], [], [], [], [], [], [], [], [], [], [],
+      #>    {{[], [], [], [], [#PID<0.475.0>], [], [], [], [], [], [], [], [], [], [],
       #>      []}}}}, 3, 5, [], 0, Commanded.Aggregates.Supervisor, []}
-
-    iex(10)> Aquir.Repo.get_by(Aquir.Accounts.Projections.User, email: "alvaro@miez.com")
-      #> [debug] QUERY OK source="accounts_users" db=298.2ms decode=0.1ms queue=0.1ms
-      #> SELECT a0."user_id", a0."email", a0."password_hash", a0."inserted_at", a0."updated_at" FROM "accounts_users" AS a0 WHERE (a0."email" = $1) ["alvaro@miez.com"]
-      #> %Aquir.Accounts.Projections.User{
-      #>   __meta__: #Ecto.Schema.Metadata<:loaded, "accounts_users">,
-      #>   email: "alvaro@miez.com",
-      #>   inserted_at: ~N[2018-10-18 23:52:50.651913],
-      #>   password_hash: "$2b$12$dQTXBE4i6RvuGMr9CjBkiuKpQYtAojRAtyi6RWBBAPoU1rM6Sgvwu",
-      #>   updated_at: ~N[2018-10-18 23:57:27.187553],
-      #>   user_id: "a045a1d0-2461-45ee-8085-261f6fdbb294"
-      #> }
   """
 
   defstruct [

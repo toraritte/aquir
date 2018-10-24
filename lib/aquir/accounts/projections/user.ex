@@ -1,7 +1,6 @@
 defmodule Aquir.Accounts.Projections.User do
   use Ecto.Schema
 
-  alias Aquir.Repo
   import Ecto.Query
 
   @primary_key {:user_id, :binary_id, autogenerate: false}
@@ -33,7 +32,7 @@ defmodule Aquir.Accounts.Projections.User do
   """
   def check_email(email) do
     from(u in __MODULE__, where: u.email == ^email)
-    |> Repo.one()
+    |> Aquir.Repo.one()
     |> case do
         nil -> :ok
         _   -> {:error, :email_already_in_database}
@@ -41,10 +40,10 @@ defmodule Aquir.Accounts.Projections.User do
   end
 
   def get_user_by_id(user_id) do
-    Repo.get(__MODULE__, user_id)
+    Aquir.Repo.get(__MODULE__, user_id)
   end
 
   def get_user_by_email(email) do
-    Repo.get(__MODULE__, email)
+    Aquir.Repo.get_by(__MODULE__, email: email)
   end
 end
