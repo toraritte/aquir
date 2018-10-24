@@ -17,7 +17,7 @@
 
 (1) and (2) are both needed because the events (e.g., %UserRegistered{}) already contain the UUID (usually taken care of in the command modules, such as RegisterUser). See the [Ecto.Migration](https://hexdocs.pm/ecto/Ecto.Migration.html).{[table/2](https://hexdocs.pm/ecto/Ecto.Migration.html#table/2) and [add/3](https://hexdocs.pm/ecto/Ecto.Migration.html#add/3)} docs.
 
-**Note to self**: make migrations easier to distinguish by adding "projection" if it is related to one.
+**Note to self**: make migrations easier to distinguish by adding "projection" at the end of their names if it is related to one.
 
 #### 0.1.2 Schemas
 
@@ -57,6 +57,18 @@ iex(4)> RegisterUser.__schema__(:fields)
 ```
 
 If a field is tagged with `virtual: true`, it means that it won't be persisted in any projection. Because command schemas use `embedded_schema/1`, its only purpose is to document this fact.
+
+
+## Miscellaneous
+
+### Resetting both the Ecto projections, and the EventStore
+
+```
+$ mix do ecto.drop, ecto.create, ecto.migrate
+$ mix do event_store.drop, event_store.create, event_store.init
+```
+
+(It did work all of these tasks on one line and then it didn't, then again it did, etc. This way seemed to be the most robust so far.)
 
 ## Start project
 
