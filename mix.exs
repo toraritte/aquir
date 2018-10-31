@@ -45,18 +45,31 @@ defmodule Aquir.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext,             "~> 0.11"},
       {:cowboy,              "~> 1.0"},
-      # {:commanded,           "~> 0.15"},
-      {:commanded, github: "toraritte/commanded", branch: "master"},
-      # The adapter includes commanded/eventstore
-      #
-      #   DON'T FORGET to initialize the Event Store
-      #   after configuring it!
-      #   ```
-      #   >  mix do event_store.create, event_store.init
-      #   ```
-      {:comeonin,                     "~> 4.1"},
+      {:plug_cowboy,         "~> 1.0"},
+      {:comeonin,            "~> 4.1"},
       # https://security.stackexchange.com/questions/4781/
-      {:bcrypt_elixir,                "~> 1.1"},
+      {:bcrypt_elixir,       "~> 1.1"},
+
+      # {:commanded, "~> 0.15"},
+      # {:commanded, github: "toraritte/commanded", branch: "master"},
+      # {:commanded, path: "../commanded", override: true},
+      {:commanded,
+        github:   "toraritte/commanded",
+        branch:   "make-application-more-idiomatic-2",
+      },
+
+      # The official lib includes `commanded/eventstore`!
+      # {:commanded_eventstore_adapter, "~> 0.3"},
+      {:commanded_eventstore_adapter,
+        github: "toraritte/commanded-eventstore-adapter",
+        branch: "remove-child-spec-0",
+      },
+
+      # {:commanded_ecto_projections,   "~> 0.7"},
+      {:commanded_ecto_projections,
+        github: "toraritte/commanded-ecto-projections",
+        branch: "master",
+      },
     ]
   end
 
