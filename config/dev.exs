@@ -51,7 +51,9 @@ config :phoenix, :stacktrace_depth, 20
 # Configure the state_store (i.e., states of the streams,
 # "read store" with Ben's terminology)
 config :aquir, Aquir.Repo,
-  adapter: Ecto.Adapters.Postgres,
+  # Since Ecto 3, configuring  the adapter in the config
+  # file will throw warning. See Ecto.Repo docs.
+  # adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
   database: "aquir_statestore_dev",

@@ -1,5 +1,7 @@
 defmodule Aquir.Repo do
-  use Ecto.Repo, otp_app: :aquir
+  use Ecto.Repo,
+    otp_app: :aquir,
+    adapter: Ecto.Adapters.Postgres
 
   @doc """
   Dynamically loads the repository url from the
