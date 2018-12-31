@@ -1,8 +1,8 @@
 defmodule Aquir.Accounts.Aggregates.User do
   require Logger
 
-  @moduledoc """
-  NOTE 2018-10-14_2339
+  # NOTE 2018-10-14_2339
+  @doc """
   Instill these slides: https://www.slideshare.net/andrewhao/building-beautiful-systems-with-phoenix-contexts-and-domaindriven-design
 
   So  if credentials  would need  to be  added at  one
@@ -20,8 +20,10 @@ defmodule Aquir.Accounts.Aggregates.User do
   It's still fuzzy how the schemas would look like, but
   the  domain is  complex  enough that  there will  be
   plenty of opportunity to figure it out.
+  """
 
-  NOTE 2018-10-23_0914 (Dunning-Krueger alert)
+  # NOTE 2018-10-23_0914 (Dunning-Krueger alert)
+  @doc """
   Unique (and  other) constraints  should live  in the
   aggregates and not in arbitrary places. For example,
   the user  email is  checked twice  in `accounts.ex`,
@@ -118,40 +120,35 @@ defmodule Aquir.Accounts.Aggregates.User do
     :password_hash
   ]
 
-  alias Aquir.Accounts
-
-  alias Accounts.Aggregates.{
-    User,
-    Support,
+  alias Aquir.Accounts.{
+    Aggregates,
+    Commands,
+    Events,
   }
 
-  alias Accounts.Commands.{
-    RegisterUser,
-    ResetPassword,
-  }
+  ###########
+  # EXECUTE #
+  ###########
 
-  alias Accounts.Events.{
-    UserRegistered,
-    PasswordReset,
-  }
-
+  # NOTE 2018-10-14_2348
   @doc """
-  Register a new user.
-
-  NOTE 2018-10-14_2348
   An  aggregate   instance  (i.e.,  a  stream)   is  a
   gen_server,  and the  first argument  to `execute/2`
   and `apply/2`  are the state  of the process.  It is
   still unclear  how these  functions get  called, but
   this makes the most sense at the moment.
+  """
 
-  NOTE 2018-10-15_2316
+  # NOTE 2018-10-15_2316
+  @doc """
   The  `execute/2`  clauses  are  simple,  because  by
   the  time the  command  gets here,  it already  went
   through validation  via changesets in  context (such
   as `accounts.ex`).
+  """
 
-  NOTE 2018-10-19_2208
+  # NOTE 2018-10-19_2208
+  @doc """
   What if  new authentication  methods would  be added
   later? I think that the advantage of CQRS/ES in this
   case  is  that  commands  are the  only  input,  and
@@ -168,32 +165,42 @@ defmodule Aquir.Accounts.Aggregates.User do
   auth_method: :email_password).
   TODO This is pretty vague, work it out.
   """
-  def execute(%User{user_id: nil}, %RegisterUser{} = command) do
-    Support.convert_similar_structs(command, UserRegistered)
+
+  @doc """
+  Register a new user.
+  """
+  def execute(
+    %Aggregates.User{user_id: nil},
+    %Commands.RegisterUser{} = command
+  ) do
+    Aggregates.Support.convert_struct(command, Events.UserRegistered)
   end
 
-  ###########
-  # EXECUTE #
-  ###########
-  def execute(%User{password_hash: ""}, %ResetPassword{}) do
+  @doc """
+  Reset user password.
+  """
+  def execute(
+    %Aggregates.User{password_hash: ""},
+    %Commands.ResetPassword{}
+  ) do
     Logger.error "An existing user should have a password hash"
     raise "An existing user should have a password hash"
   end
 
-  def execute(_user, %ResetPassword{} = command) do
-    Support.convert_similar_structs(command, PasswordReset)
+  def execute(_user, %Commands.ResetPassword{} = command) do
+    Aggregates.Support.convert_struct(command, Events.PasswordReset)
   end
 
   #########
   # APPLY #
   #########
-  def apply(%User{} = user, %UserRegistered{} = event) do
+  def apply(%Aggregates.User{} = user, %Events.UserRegistered{} = event) do
     # Simply converting the event to %User{} because there
     # is no state before registering.
-    Support.convert_similar_structs(event, User)
+    Aggregates.Support.convert_struct(event, Aggregates.User)
   end
 
-  def apply(user, %PasswordReset{password_hash: new_pwhash}) do
-    %User{ user | password_hash: new_pwhash }
+  def apply(user, %Events.PasswordReset{password_hash: new_pwhash}) do
+    %Aggregates.User{ user | password_hash: new_pwhash }
   end
 end

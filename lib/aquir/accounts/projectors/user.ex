@@ -4,18 +4,17 @@ defmodule Aquir.Accounts.Projectors.User do
     repo: Aquir.Repo,
     consistency: :strong
 
+  # NOTE 2018-10-23_2154
   @doc """
-  NOTE 2018-10-23_2154
   Where is `:consistency` above defined? Commanded.Projections.Ecto
   has  one file basically (ecto.ex) and it's not in there.
   """
 
-  alias Aquir.Accounts.Events.{
-    UserRegistered,
-    PasswordReset,
+  alias Aquir.Accounts.{
+    Events,
+    Projections,
+    Aggregates,
   }
-  alias Aquir.Accounts.Projections.User
-  alias Aquir.Accounts.Aggregates.Support
 
   @doc """
   The  UserRegistered event  and the  Projections.User
@@ -25,16 +24,16 @@ defmodule Aquir.Accounts.Projectors.User do
   is  generated from  the  a command  that is  already
   validated using changesets.)
   """
-  project %UserRegistered{} = u do
+  project %Events.UserRegistered{} = u do
     Ecto.Multi.insert(
       multi,
       :add_user,
-      Support.convert_similar_structs(u, User)
+      Aggregates.Support.convert_struct(u, Projections.User)
     )
   end
 
+  # NOTE 2018-10-19_2344
   @doc """
-  NOTE 2018-10-19_2344
   The state of the User  aggregate is fetched from the
   User  projection in  the  database,  but that  state
   should  also be  available  in  the stream  process.
@@ -55,9 +54,9 @@ defmodule Aquir.Accounts.Projectors.User do
     such  respawn or  do I  need  to bring  back to  a
     consistent state manually re-applying the events?
   """
-  project %PasswordReset{} = u do
+  project %Events.PasswordReset{} = u do
 
-    case User.get_user_by_email(u.email) do
+    case Projections.User.get_user_by_email(u.email) do
       nil ->
         multi
       user ->

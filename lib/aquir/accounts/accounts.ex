@@ -10,8 +10,8 @@ defmodule Aquir.Accounts do
     Support,
   }
 
+  # NOTE 2018-10-11_2312
   @doc """
-  NOTE 2018-10-11_2312
   RegisterUser command validation is done here instead
   of   Aquir.Router  using   Commanded.Middleware  (as
   described in Building Conduit), because RegisterUser
@@ -40,12 +40,15 @@ defmodule Aquir.Accounts do
   check  the  results   BEFORE  dispatching  the  CQRS
   command! Otherwise the process will crash after many
   retries of a faulty event.
+  """
 
-  NOTE 2018-10-18_00:04
+  # NOTE 2018-10-18_0004
+  @doc """
   Keeping command validation here as  I am not fond of
   the  Commanded.Middleware  implementation. See  note
   "2018-10-19_2246" in Aquir.Router.
   """
+
   def register_user(attrs \\ %{}) do
 
     with(
