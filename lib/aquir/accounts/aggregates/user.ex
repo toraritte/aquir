@@ -179,6 +179,8 @@ defmodule Aquir.Accounts.Aggregates.User do
   @doc """
   Reset user password.
   """
+  # TODO: If the password_hash does not exist then the app shouldn't
+  #       even compile. Make it a test?
   def execute(
     %Aggregates.User{password_hash: ""},
     %Commands.ResetPassword{}
