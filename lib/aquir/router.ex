@@ -1,4 +1,4 @@
-defmodule Aquir.Router do
+defmodule Aquir.CommandedRouter do
   use Commanded.Commands.Router
 
   alias Aquir.Accounts.Aggregates.User

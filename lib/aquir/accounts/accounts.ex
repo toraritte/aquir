@@ -3,7 +3,7 @@ defmodule Aquir.Accounts do
   The Accounts context.
   """
 
-  alias Aquir.{Repo, Router}
+  alias Aquir.{Repo, CommandedRouter}
   alias Aquir.Accounts.{
     Commands,
     Projections,
@@ -12,12 +12,7 @@ defmodule Aquir.Accounts do
 
   # NOTE 2018-10-11_2312
   @doc """
-  RegisterUser command validation is done here instead
-  of   Aquir.Router  using   Commanded.Middleware  (as
-  described in Building Conduit), because RegisterUser
-  will only be called from the Accounts context. After
-  all,  its  whole  point  is  to  be  an  abstraction
-  boundary for dealing with user management).
+RegisterUser command validation is done here instead of Aquir.CommandedRouter using Commanded.Middleware (as described in Building Conduit), because RegisterUser will only be called from the Accounts context. After all, its whole point is to be an abstraction boundary for dealing with user management).
 
   If the command would need  to be called from another
   context,  then the  middleware  approach would  make
@@ -46,7 +41,7 @@ defmodule Aquir.Accounts do
   @doc """
   Keeping command validation here as  I am not fond of
   the  Commanded.Middleware  implementation. See  note
-  "2018-10-19_2246" in Aquir.Router.
+  "2018-10-19_2246" in Aquir.CommandedRouter.
   """
 
   def register_user(attrs \\ %{}) do
@@ -64,7 +59,7 @@ defmodule Aquir.Accounts do
       # TODO Clean up. See NOTE 2018-10-23_0914
       :ok <- Support.UniqueEmail.claim(attrs["email"]),
       :ok <- Projections.User.check_email(attrs["email"]),
-      :ok <- Router.dispatch(command, consistency: :strong)
+      :ok <- CommandedRouter.dispatch(command, consistency: :strong)
     ) do
       Projections.User.get_user_by_id(command.user_id)
     else
@@ -76,7 +71,7 @@ defmodule Aquir.Accounts do
 
     case Commands.Support.imbue_command(%Commands.ResetPassword{}, attrs) do
       {:ok, command} ->
-        Router.dispatch(command, consistency: :strong)
+        CommandedRouter.dispatch(command, consistency: :strong)
         # TODO: what to return?
       errors ->
         errors
