@@ -28,7 +28,7 @@ defmodule Aquir.Accounts.Projectors.User do
     Ecto.Multi.insert(
       multi,
       :add_user,
-      Aggregates.Support.convert_struct(u, Projections.User)
+      Aquir.CommandedSupport.convert_struct(u, Projections.User)
     )
   end
 

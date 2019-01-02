@@ -3,11 +3,15 @@ defmodule Aquir.Accounts do
   The Accounts context.
   """
 
-  alias Aquir.{Repo, CommandedRouter}
+  alias Aquir.{
+    Repo,
+    CommandedRouter,
+    CommandedSupport
+  }
+
   alias Aquir.Accounts.{
     Commands,
     Projections,
-    Support,
   }
 
   # NOTE 2018-10-11_2312
@@ -60,7 +64,7 @@ defmodule Aquir.Accounts do
       # already taken.
       {:ok, command} <-
         %Commands.RegisterUser{}
-        |> Commands.Support.imbue_command(attrs),
+        |> Aquir.CommandedSupport.imbue_command(attrs),
 
       # TODO Clean up. See NOTE 2018-10-23_0914
       :ok <- Support.UniqueEmail.claim(attrs["email"]),
@@ -75,7 +79,7 @@ defmodule Aquir.Accounts do
 
   def reset_password(attrs \\ %{}) do
 
-    case Commands.Support.imbue_command(%Commands.ResetPassword{}, attrs) do
+    case Aquir.CommandedSupport.imbue_command(%Commands.ResetPassword{}, attrs) do
       {:ok, command} ->
         CommandedRouter.dispatch(command, consistency: :strong)
         # TODO: what to return?
