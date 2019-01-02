@@ -3,11 +3,11 @@ defmodule Aquir.Accounts.Commands.ResetPassword do
 
   # TODO This is probably oversimplified again. It would
   # be prudent to match the prevoius password to be more
-  # secure and :password should be :new_password.
+  # secure.
   @primary_key {:email, :string, autogenerate: false}
 
   embedded_schema do
-    field :password,      :string, virtual: true
+    field :new_password,  :string, virtual: true
     field :password_hash, :string, default: ""
   end
 
@@ -19,12 +19,12 @@ defmodule Aquir.Accounts.Commands.ResetPassword do
 
     required_fields = [
       :email,
-      :password
+      :new_password
     ]
 
     command
     |> cast(params, required_fields)
     |> validate_required(required_fields)
-    |> Aquir.Accounts.Commands.Support.secure_password()
+    |> Aquir.Accounts.Auth.secure_password(:new_password)
   end
 end

@@ -12,7 +12,13 @@ defmodule Aquir.Accounts do
 
   # NOTE 2018-10-11_2312
   @doc """
-RegisterUser command validation is done here instead of Aquir.CommandedRouter using Commanded.Middleware (as described in Building Conduit), because RegisterUser will only be called from the Accounts context. After all, its whole point is to be an abstraction boundary for dealing with user management).
+  RegisterUser command validation is done here instead
+  of Aquir.CommandedRouter  using Commanded.Middleware
+  (as   described   in  Building   Conduit),   because
+  RegisterUser will  only be called from  the Accounts
+  context.  After  all,  its  whole  point  is  to  be
+  an  abstraction  boundary   for  dealing  with  user
+  management).
 
   If the command would need  to be called from another
   context,  then the  middleware  approach would  make
@@ -62,8 +68,8 @@ RegisterUser command validation is done here instead of Aquir.CommandedRouter us
       :ok <- CommandedRouter.dispatch(command, consistency: :strong)
     ) do
       Projections.User.get_user_by_id(command.user_id)
-    else
-      err -> err
+    # else
+    #   err -> err
     end
   end
 

@@ -76,6 +76,6 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
     |> cast(params, required_fields)
     |> validate_required(required_fields)
     |> assign_user_id()
-    |> Aquir.Accounts.Commands.Support.secure_password()
+    |> Aquir.Accounts.Auth.secure_password(:password)
   end
 end
