@@ -125,6 +125,7 @@ defmodule Aquir.Accounts.Aggregates.User do
     Commands,
     Events,
   }
+  alias Aquir.Commanded
 
   ###########
   # EXECUTE #
@@ -173,7 +174,7 @@ defmodule Aquir.Accounts.Aggregates.User do
     %Aggregates.User{user_id: nil},
     %Commands.RegisterUser{} = command
   ) do
-    Aquir.CommandedSupport.convert_struct(command, Events.UserRegistered)
+    Commanded.Support.convert_struct(command, Events.UserRegistered)
   end
 
   @doc """
@@ -190,7 +191,7 @@ defmodule Aquir.Accounts.Aggregates.User do
   end
 
   def execute(_user, %Commands.ResetPassword{} = command) do
-    Aquir.CommandedSupport.convert_struct(command, Events.PasswordReset)
+    Commanded.Support.convert_struct(command, Events.PasswordReset)
   end
 
   #########
@@ -199,7 +200,7 @@ defmodule Aquir.Accounts.Aggregates.User do
   def apply(%Aggregates.User{} = user, %Events.UserRegistered{} = event) do
     # Simply converting the event to %User{} because there
     # is no state before registering.
-    Aquir.CommandedSupport.convert_struct(event, Aggregates.User)
+    Commanded.Support.convert_struct(event, Aggregates.User)
   end
 
   def apply(user, %Events.PasswordReset{password_hash: new_pwhash}) do

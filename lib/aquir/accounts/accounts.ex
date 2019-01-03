@@ -5,8 +5,7 @@ defmodule Aquir.Accounts do
 
   alias Aquir.{
     Repo,
-    CommandedRouter,
-    CommandedSupport
+    Commanded,
   }
 
   alias Aquir.Accounts.{
@@ -17,7 +16,7 @@ defmodule Aquir.Accounts do
   # NOTE 2018-10-11_2312
   @doc """
   RegisterUser command validation is done here instead
-  of Aquir.CommandedRouter  using Commanded.Middleware
+  of Aquir.Commanded.Router  using Commanded.Middleware,
   (as   described   in  Building   Conduit),   because
   RegisterUser will  only be called from  the Accounts
   context.  After  all,  its  whole  point  is  to  be
@@ -51,7 +50,7 @@ defmodule Aquir.Accounts do
   @doc """
   Keeping command validation here as  I am not fond of
   the  Commanded.Middleware  implementation. See  note
-  "2018-10-19_2246" in Aquir.CommandedRouter.
+  "2018-10-19_2246" in Aquir.Commanded.Router.
   """
 
   def register_user(attrs \\ %{}) do
@@ -64,12 +63,12 @@ defmodule Aquir.Accounts do
       # already taken.
       {:ok, command} <-
         %Commands.RegisterUser{}
-        |> Aquir.CommandedSupport.imbue_command(attrs),
+        |> Commanded.Support.imbue_command(attrs),
 
       # TODO Clean up. See NOTE 2018-10-23_0914
-      :ok <- Support.UniqueEmail.claim(attrs["email"]),
+      :ok <- Aquir.Accounts.Support.UniqueEmail.claim(attrs["email"]),
       :ok <- Projections.User.check_email(attrs["email"]),
-      :ok <- CommandedRouter.dispatch(command, consistency: :strong)
+      :ok <- Commanded.Router.dispatch(command, consistency: :strong)
     ) do
       Projections.User.get_user_by_id(command.user_id)
     # else
@@ -79,9 +78,9 @@ defmodule Aquir.Accounts do
 
   def reset_password(attrs \\ %{}) do
 
-    case Aquir.CommandedSupport.imbue_command(%Commands.ResetPassword{}, attrs) do
+    case Commanded.Support.imbue_command(%Commands.ResetPassword{}, attrs) do
       {:ok, command} ->
-        CommandedRouter.dispatch(command, consistency: :strong)
+        Commanded.Router.dispatch(command, consistency: :strong)
         # TODO: what to return?
       errors ->
         errors

@@ -1,4 +1,4 @@
-defmodule Aquir.CommandedSupport do
+defmodule Aquir.Commanded.Support do
 
   # TODO(?): inject this with  a macro to every command
   # as it  is universal when using  `Ecto.Changeset` for

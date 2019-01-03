@@ -15,6 +15,7 @@ defmodule Aquir.Accounts.Projectors.User do
     Projections,
     Aggregates,
   }
+  alias Aquir.Commanded
 
   @doc """
   The  UserRegistered event  and the  Projections.User
@@ -28,7 +29,7 @@ defmodule Aquir.Accounts.Projectors.User do
     Ecto.Multi.insert(
       multi,
       :add_user,
-      Aquir.CommandedSupport.convert_struct(u, Projections.User)
+      Commanded.Support.convert_struct(u, Projections.User)
     )
   end
 
