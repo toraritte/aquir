@@ -3,6 +3,17 @@ defmodule Aquir.Commanded.Support do
   # TODO(?): inject this with  a macro to every command
   # as it  is universal when using  `Ecto.Changeset` for
   # validation.
+
+  # TODO 2019-01-03_1117
+  @doc """
+  specify   typespec    for   `imbue_command`.   Won't
+  be   straightforward  as   `Ecto.Schema`  does   not
+  automatically  generate   a  type  when   used.  See
+  discussions on Elixir Forum  or in TypedStruct issue
+  #5:
+  https://github.com/ejpcmac/typed_struct/issues/5
+  """
+
   @doc """
   First,   `imbue_command/2`   validates   a   command
   changeset against arbitrary input (`attrs`). Second,
@@ -23,8 +34,7 @@ defmodule Aquir.Commanded.Support do
     end
   end
 
-  # NOTE 2018-12-31_1019
-  # TODO(?)
+  # TODO(?) 2018-12-31_1019
   @doc """
   There is a simmetry between commands and events, and
   duplicated  code with  that it  seems. The  commands
