@@ -4,9 +4,10 @@ defmodule Aquir.Accounts.Commands.ResetPassword do
   # TODO This is probably oversimplified again. It would
   # be prudent to match the prevoius password to be more
   # secure.
-  @primary_key {:email, :string, autogenerate: false}
 
+  @primary_key false
   embedded_schema do
+    field :email,         :string
     field :new_password,  :string, virtual: true
     field :password_hash, :string, default: ""
   end
