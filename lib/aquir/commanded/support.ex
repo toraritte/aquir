@@ -50,12 +50,33 @@ defmodule Aquir.Commanded.Support do
 
   But of course, I just realized that a projection can
   combine many more command fields.
+
+  UPDATE 2019-01-14_0724
+  ======================
+  + Aquir.Accounts.Aggregates.User
+  + Aquir.Accounts.Commands.RegisterUser
+  + Aquir.Accounts.Events.UserRegistered
+
+  These structs are (almost) identical and they define
+  the same  structure multiple  times; the  only thing
+  that differs is the  struct's (i.e., module's) name.
+  In Haskell(-like)  languages a record would  just be
+  tagged and  re-packed whenever needed.  For example,
+  data  validation is  done  on `RegisterUser`  before
+  conversion  to `UserRegistered`,  but that  could be
+  part of the re-packing process.
+
+  Take  a  look  at   Witchcraft  and  Algae.  (Purerl
+  would probably  be a  much bigger leap,  leaving the
+  entire Elixir  ecosystem behind.  Or maybe  not? The
+  underlying system is Erlang for both anyway.
+  """
+
+  @doc """
+  Convert from one type of struct to another.
   """
   def convert_struct(from, to) do
-    struct(
-      to,
-      Map.from_struct(from)
-    )
+    struct(to, Map.from_struct(from))
     # Leaving this for posterity that piping is nice
     # but it can be overdone.
     #

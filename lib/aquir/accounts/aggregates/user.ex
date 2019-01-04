@@ -121,7 +121,6 @@ defmodule Aquir.Accounts.Aggregates.User do
   ]
 
   alias Aquir.Accounts.{
-    Aggregates,
     Commands,
     Events,
   }
@@ -171,7 +170,7 @@ defmodule Aquir.Accounts.Aggregates.User do
   Register a new user.
   """
   def execute(
-    %Aggregates.User{user_id: nil},
+    %__MODULE__{user_id: nil},
     %Commands.RegisterUser{} = command
   ) do
     Commanded.Support.convert_struct(command, Events.UserRegistered)
@@ -183,7 +182,7 @@ defmodule Aquir.Accounts.Aggregates.User do
   # TODO: If the password_hash does not exist then the app shouldn't
   #       even compile. Make it a test?
   def execute(
-    %Aggregates.User{password_hash: ""},
+    %__MODULE__{password_hash: ""},
     %Commands.ResetPassword{}
   ) do
     Logger.error "An existing user should have a password hash"
@@ -197,13 +196,13 @@ defmodule Aquir.Accounts.Aggregates.User do
   #########
   # APPLY #
   #########
-  def apply(%Aggregates.User{} = user, %Events.UserRegistered{} = event) do
+  def apply(%__MODULE__{} = user, %Events.UserRegistered{} = event) do
     # Simply converting the event to %User{} because there
     # is no state before registering.
-    Commanded.Support.convert_struct(event, Aggregates.User)
+    Commanded.Support.convert_struct(event, __MODULE__)
   end
 
   def apply(user, %Events.PasswordReset{password_hash: new_pwhash}) do
-    %Aggregates.User{ user | password_hash: new_pwhash }
+    %__MODULE__{ user | password_hash: new_pwhash }
   end
 end
