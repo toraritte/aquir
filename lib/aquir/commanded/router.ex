@@ -24,6 +24,7 @@ defmodule Aquir.Commanded.Router do
   in Commanded.Commands.Router.
   """
 
-    dispatch [RegisterUser],  to: User, identity: :user_id
-    dispatch [ResetPassword], to: User, identity: :email
+  # Accounts
+  dispatch [RegisterUser],  to: User, identity: :user_id
+  dispatch [ResetPassword], to: User, identity: :email
 end

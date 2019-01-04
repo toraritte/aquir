@@ -52,8 +52,15 @@ defmodule Aquir.Commanded.Support do
   combine many more command fields.
   """
   def convert_struct(from, to) do
-    from
-    |> Map.from_struct()
-    |> (&struct(to, &1)).()
+    struct(
+      to,
+      Map.from_struct(from)
+    )
+    # Leaving this for posterity that piping is nice
+    # but it can be overdone.
+    #
+    # from
+    # |> Map.from_struct()
+    # |> (&struct(to, &1)).()
   end
 end
