@@ -1,0 +1,65 @@
+  197  2018/07/21-09:57	nix-env -qa | ag postgres
+  198  2018/07/21-09:58	nix-env -i postgresql-10.3
+  201  2018/07/21-10:03	which postgres 
+  203  2018/07/21-10:04	sudo -u postgres
+  208  2018/07/21-10:11	sudo groupadd postgres
+  209  2018/07/21-10:13	useradd postgres -q postgres
+  210  2018/07/21-10:13	useradd postgres -g postgres
+  211  2018/07/21-10:13	sudo useradd postgres -g postgres
+  219  2018/07/21-10:14	sudo -u postgres
+  226  2018/07/21-10:16	sudo addgroup postgres
+  228  2018/07/21-10:16	sudo postgres
+  230  2018/07/21-10:16	sudo -u postgres
+  231  2018/07/21-10:16	su - postgres
+  232  2018/07/21-10:17	sudo passwd postgres
+  233  2018/07/21-10:18	sudo -u postgres 
+  235  2018/07/21-10:18	su - postgres 
+  236  2018/07/21-10:19	sudo -u postgres ls
+  238  2018/07/21-10:20	chown postgres:postgres /usr/local/pqsql/
+  239  2018/07/21-10:20	sudo chown postgres:postgres /usr/local/pqsql/
+  295  2018/07/21-11:51	sudo - postgres "initdb -D /usr/local/pgsql/data"
+  296  2018/07/21-11:51	sudo -u postgres "initdb -D /usr/local/pgsql/data"
+  297  2018/07/21-11:52	su - postgres
+  300  2018/07/21-11:55	sudo -u postgres $(which initdb)
+  301  2018/07/21-11:55	sudo -u postgres "$(which initdb)"
+  302  2018/07/21-11:55	sudo -u postgres "$(which initdb) -D /usr/local/pgsql/data"
+  303  2018/07/21-11:56	sudo -u postgres "$(which initdb) --help"
+  304  2018/07/21-11:56	sudo -u postgres $(which initdb) -D /usr/local/pgsql/data
+  310  2018/07/21-11:57	sudo -u postgres mkdir /usr/local/pqsql/data
+  311  2018/07/21-11:58	sudo -u postgres $(which initdb) -D /usr/local/pgsql/data
+  312  2018/07/21-11:59	sudo -u postgres rm  /usr/local/pqsql/data
+  313  2018/07/21-11:59	sudo -u postgres rm -r  /usr/local/pqsql/data
+  316  2018/07/21-12:00	sudo -u postgres mkdir /usr/local/pqsql/
+  317  2018/07/21-12:00	sudo -u postgres ll
+  318  2018/07/21-12:00	sudo -u postgres ls -l /usr/local
+  319  2018/07/21-12:01	sudo -u postgres mv /usr/local/{pqsql,pgsql}
+  321  2018/07/21-12:01	sudo -u postgres ls -l /usr/local
+  322  2018/07/21-12:01	sudo -u postgres $(which initdb) -D /usr/local/pgsql/data
+  323  2018/07/21-12:02	sudo -u postgres $(which pg_ctl) -D /usr/local/pgsql/data -l logfile start 
+  324  2018/07/21-12:02	sudo -u postgres $(which pg_ctl) -D /usr/local/pgsql/data -l /usr/local/pgsql/logfile start 
+  327  2018/07/21-12:03	sudo -u postgres psql
+  328  2018/07/21-12:03	sudo -u postgres $(which psql)
+  340  2018/07/21-13:04	sudo -u postgres $(which pg_ctl) -D /usr/local/pgsql/data -l /usr/local/pgsql/logfile start 
+  875  2018/08/22-22:12	sudo -u postgres $(which pg_ctl) -D /usr/local/pgsql/data -l /usr/local/pgsql/logfile start 
+ 1033  2018/09/02-21:48	ag 'adapters.postgres' deps/eventstore/
+ 1061  2018/09/03-21:34	sudo -u postgres psql
+ 1064  2018/09/03-21:34	sudo -u postgres $(which psql)
+ 1120  2018/09/04-22:53	sudo -u postgres $(which psql)
+ 1214  2018/09/24-22:24	sudo -u postgres $(which pg_ctl) -D /usr/local/pgsql/data -l /usr/local/pgsql/logfile start 
+ 1231  2018/09/26-22:23	sudo -u postgres $(which psql)
+ 1362  2018/09/27-22:03	sudo -u postgres $(which psql)
+ 1399  2018/09/30-21:59	sudo -u postgres $(which psql)
+ 1472  2018/10/06-23:00	sudo -u postgres $(which psql)
+ 1492  2018/10/11-05:11	sudo -u postgres $(which pg_ctl) -D /usr/local/pgsql/data -l /usr/local/pgsql/logfile start 
+ 1593  2018/10/11-05:12	sudo -u postgres $(which psql)
+ 1639  2018/10/14-22:08	sudo -u postgres $(which psql)
+ 1653  2018/10/17-01:24	sudo -u postgres $(which psql)
+ 1656  2018/10/17-23:41	sudo -u postgres $(which psql)
+ 1666  2018/10/18-00:26	sudo -u postgres $(which psql)
+ 5354  2018/12/27-09:22	sudo -u postgres $(which pg_ctl) -D /usr/local/pgsql/data -l /usr/local/pgsql/logfile start 
+ 5523  2018/12/28-12:50	sudo -u postgres $(which pg_ctl) -D /usr/local/pgsql/data -l /usr/local/pgsql/logfile start 
+ 5664  2019/01/05-13:04	postgres --version
+ 5665  2019/01/05-13:46	history | postgres
+ 5666  2019/01/05-13:46	history | ag postgres
+ 5667  2019/01/05-13:47	history | ag postgres | less
+ 5670  2019/01/05-14:00	history | ag postgres > ./doc/postgresql_commands_dump.txt
