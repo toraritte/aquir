@@ -114,6 +114,136 @@ defmodule Aquir.Accounts.Aggregates.User do
       #>      []}}}}, 3, 5, [], 0, Commanded.Aggregates.Supervisor, []}
   """
 
+  # NOTE TODO(?) 2019-01-04_1148
+  @doc """
+  A new Credential aggregate would be in many-to-one association to the User aggregate, so trying to find ways to make that happen.
+
+  ?! - This may be more useful for projections.
+
+  ```elixir
+  defmodule NewOrderCommand do
+    use Ecto.Schema
+    import Ecto.Changeset
+
+    embedded_schema do
+      field :user_id, Ecto.UUID
+
+      embeds_one :address, Address do
+        field :street, :string
+        field :country, :string
+      end
+
+      embeds_many :items, Item do
+        field :item_id, Ecto.UUID
+        field :quantity, :integer
+      end
+    end
+
+    def changeset(struct, params) do
+      struct
+      |> cast(params, [:user_id])
+      |> cast_embed(:address, with: &address_changeset/2)
+      |> cast_embed(:items, with: &item_changeset/2)
+      |> validate_required([:user_id, :address, :items])
+    end
+
+    defp address_changeset(struct, params) do
+      struct
+      |> cast(params, [:street, :city])
+      |> validate_required([:street, :city])
+      # |> validate_existing_city
+      # |> find_location
+    end
+
+    defp item_changeset(struct, params) do
+        struct
+        |> cast(params, [:item_id, :quantity])
+        |> validate_required([:item_id, :quantity])
+        |> validate_number(:quantity, min: 0)
+    end
+  end
+  ```
+
+  IEx output:
+  ```text
+  {:module, NewOrderCommand,
+  <<70, 79, 82, 49, 0, 0, 17, 56, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 2, 105,
+    0, 0, 0, 58, 22, 69, 108, 105, 120, 105, 114, 46, 78, 101, 119, 79, 114, 100,
+    101, 114, 67, 111, 109, 109, 97, 110, 100, ...>>, {:item_changeset, 2}}
+
+  iex(12)> NewOrderCommand.changeset(%NewOrderCommand{}, %{})
+  #Ecto.Changeset<
+    action: nil,
+    changes: %{},
+    errors: [
+      user_id: {"can't be blank", [validation: :required]},
+      address: {"can't be blank", [validation: :required]}
+    ],
+    data: #NewOrderCommand<>,
+    valid?: false
+  >
+  ```
+
+  Also works when the embeds are defined separately:
+  ```elixir
+  defmodule Address do
+    use Ecto.Schema
+
+    embedded_schema do
+      field :street, :string
+      field :country, :string
+    end
+  end
+
+  defmodule Item do
+    use Ecto.Schema
+
+    embedded_schema do
+      field :item_id, Ecto.UUID
+      field :quantity, :integer
+    end
+  end
+
+  defmodule NewOrderCommand do
+    use Ecto.Schema
+    import Ecto.Changeset
+
+    embedded_schema do
+      field :user_id, Ecto.UUID
+
+      embeds_one :address, Address
+
+      embeds_many :items, Item
+    end
+
+    def changeset(struct, params) do
+      struct
+      |> cast(params, [:user_id])
+      |> cast_embed(:address, with: &address_changeset/2)
+      |> cast_embed(:items, with: &item_changeset/2)
+      |> validate_required([:user_id, :address, :items])
+    end
+
+    defp address_changeset(struct, params) do
+      struct
+      |> cast(params, [:street, :city])
+      |> validate_required([:street, :city])
+      # |> validate_existing_city
+      # |> find_location
+    end
+
+    defp item_changeset(struct, params) do
+        struct
+        |> cast(params, [:item_id, :quantity])
+        |> validate_required([:item_id, :quantity])
+        |> validate_number(:quantity, min: 0)
+    end
+  end
+  ```
+
+  IEx output will be the same as for the first version.
+  """
+
   defstruct [
     :user_id,
     :email,

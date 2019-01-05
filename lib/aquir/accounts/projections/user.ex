@@ -34,9 +34,9 @@ defmodule Aquir.Accounts.Projections.User do
     from(u in __MODULE__, where: u.email == ^email)
     |> Aquir.Repo.one()
     |> case do
-        nil -> :ok
-        _   -> {:error, :email_already_in_database}
-      end
+         nil -> :ok
+         _   -> {:error, :email_already_in_database}
+       end
   end
 
   def get_user_by_id(user_id) do

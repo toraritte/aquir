@@ -76,6 +76,68 @@ defmodule Aquir.Accounts do
     end
   end
 
+  # NOTE TODO(?) 2019-01-04_1148
+  @doc """
+  
+  iex(11)>   defmodule NewOrderCommand do
+  ...(11)>     use Ecto.Schema
+  ...(11)>     import Ecto.Changeset
+  ...(11)> 
+  ...(11)>     embedded_schema do
+  ...(11)>       field :user_id, Ecto.UUID
+  ...(11)> 
+  ...(11)>       embeds_one :address, Address do
+  ...(11)>         field :street, :string
+  ...(11)>         field :country, :string
+  ...(11)>       end
+  ...(11)> 
+  ...(11)>       embeds_many :items, Item do
+  ...(11)>         field :item_id, Ecto.UUID
+  ...(11)>         field :quantity, :integer
+  ...(11)>       end
+  ...(11)>     end
+  ...(11)> 
+  ...(11)>     def changeset(struct, params) do
+  ...(11)>       struct
+  ...(11)>       |> cast(params, [:user_id])
+  ...(11)>       |> cast_embed(:address, with: &address_changeset/2)
+  ...(11)>       |> cast_embed(:items, with: &item_changeset/2)
+  ...(11)>       |> validate_required([:user_id, :address, :items])
+  ...(11)>     end
+  ...(11)> 
+  ...(11)>     defp address_changeset(struct, params) do
+  ...(11)>       struct
+  ...(11)>       |> cast(params, [:street, :city])
+  ...(11)>       |> validate_required([:street, :city])
+  ...(11)>       # |> validate_existing_city
+  ...(11)>       # |> find_location
+  ...(11)>     end
+  ...(11)> 
+  ...(11)>     defp item_changeset(struct, params) do
+  ...(11)>         struct
+  ...(11)>         |> cast(params, [:item_id, :quantity])
+  ...(11)>         |> validate_required([:item_id, :quantity])
+  ...(11)>         |> validate_number(:quantity, min: 0)
+  ...(11)>     end
+  ...(11)>   end
+
+  {:module, NewOrderCommand,
+  <<70, 79, 82, 49, 0, 0, 17, 56, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 2, 105,
+    0, 0, 0, 58, 22, 69, 108, 105, 120, 105, 114, 46, 78, 101, 119, 79, 114, 100,
+    101, 114, 67, 111, 109, 109, 97, 110, 100, ...>>, {:item_changeset, 2}}
+
+  iex(12)> NewOrderCommand.changeset(%NewOrderCommand{}, %{})
+  #Ecto.Changeset<
+    action: nil,
+    changes: %{},
+    errors: [
+      user_id: {"can't be blank", [validation: :required]},
+      address: {"can't be blank", [validation: :required]}
+    ],
+    data: #NewOrderCommand<>,
+    valid?: false
+  """
+
   def reset_password(attrs \\ %{}) do
 
     case Commanded.Support.imbue_command(%Commands.ResetPassword{}, attrs) do
