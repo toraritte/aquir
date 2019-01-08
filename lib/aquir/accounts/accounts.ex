@@ -13,46 +13,6 @@ defmodule Aquir.Accounts do
     Projections,
   }
 
-  # NOTE 2018-10-11_2312
-  @doc """
-  RegisterUser command validation is done here instead
-  of Aquir.Commanded.Router  using Commanded.Middleware,
-  (as   described   in  Building   Conduit),   because
-  RegisterUser will  only be called from  the Accounts
-  context.  After  all,  its  whole  point  is  to  be
-  an  abstraction  boundary   for  dealing  with  user
-  management).
-
-  If the command would need  to be called from another
-  context,  then the  middleware  approach would  make
-  more  sense.  But  then  again,  shouldn't  contexts
-  only interact  with each other through  their public
-  functions?  We'll see  whether I  am oversimplifying
-  things.
-
-  Used  Ecto.Changeset  instead  of  Vex,  which  also
-  resulted   in    omitting   ExConstructor,   because
-  generating a changeset from  the incoming raw params
-  will result  in "clean" maps (i.e.,  the string keys
-  become  atoms)  thus  Kernel.struct/2  can  be  used
-  to  instantiate  the  RegisterUser struct  with  the
-  changes.
-
-  See https://stackoverflow.com/questions/30927635/in-elixir-how-do-you-initialize-a-struct-with-a-map-variable
-
-  CAVEAT:  Using the  changeset  approach requires  to
-  check  the  results   BEFORE  dispatching  the  CQRS
-  command! Otherwise the process will crash after many
-  retries of a faulty event.
-  """
-
-  # NOTE 2018-10-18_0004
-  @doc """
-  Keeping command validation here as  I am not fond of
-  the  Commanded.Middleware  implementation. See  note
-  "2018-10-19_2246" in Aquir.Commanded.Router.
-  """
-
   def register_user(attrs \\ %{}) do
 
     with(
@@ -75,68 +35,6 @@ defmodule Aquir.Accounts do
     #   err -> err
     end
   end
-
-  # NOTE TODO(?) 2019-01-04_1148
-  @doc """
-  
-  iex(11)>   defmodule NewOrderCommand do
-  ...(11)>     use Ecto.Schema
-  ...(11)>     import Ecto.Changeset
-  ...(11)> 
-  ...(11)>     embedded_schema do
-  ...(11)>       field :user_id, Ecto.UUID
-  ...(11)> 
-  ...(11)>       embeds_one :address, Address do
-  ...(11)>         field :street, :string
-  ...(11)>         field :country, :string
-  ...(11)>       end
-  ...(11)> 
-  ...(11)>       embeds_many :items, Item do
-  ...(11)>         field :item_id, Ecto.UUID
-  ...(11)>         field :quantity, :integer
-  ...(11)>       end
-  ...(11)>     end
-  ...(11)> 
-  ...(11)>     def changeset(struct, params) do
-  ...(11)>       struct
-  ...(11)>       |> cast(params, [:user_id])
-  ...(11)>       |> cast_embed(:address, with: &address_changeset/2)
-  ...(11)>       |> cast_embed(:items, with: &item_changeset/2)
-  ...(11)>       |> validate_required([:user_id, :address, :items])
-  ...(11)>     end
-  ...(11)> 
-  ...(11)>     defp address_changeset(struct, params) do
-  ...(11)>       struct
-  ...(11)>       |> cast(params, [:street, :city])
-  ...(11)>       |> validate_required([:street, :city])
-  ...(11)>       # |> validate_existing_city
-  ...(11)>       # |> find_location
-  ...(11)>     end
-  ...(11)> 
-  ...(11)>     defp item_changeset(struct, params) do
-  ...(11)>         struct
-  ...(11)>         |> cast(params, [:item_id, :quantity])
-  ...(11)>         |> validate_required([:item_id, :quantity])
-  ...(11)>         |> validate_number(:quantity, min: 0)
-  ...(11)>     end
-  ...(11)>   end
-
-  {:module, NewOrderCommand,
-  <<70, 79, 82, 49, 0, 0, 17, 56, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 2, 105,
-    0, 0, 0, 58, 22, 69, 108, 105, 120, 105, 114, 46, 78, 101, 119, 79, 114, 100,
-    101, 114, 67, 111, 109, 109, 97, 110, 100, ...>>, {:item_changeset, 2}}
-
-  iex(12)> NewOrderCommand.changeset(%NewOrderCommand{}, %{})
-  #Ecto.Changeset<
-    action: nil,
-    changes: %{},
-    errors: [
-      user_id: {"can't be blank", [validation: :required]},
-      address: {"can't be blank", [validation: :required]}
-    ],
-    data: #NewOrderCommand<>,
-    valid?: false
-  """
 
   def reset_password(attrs \\ %{}) do
 
