@@ -22,41 +22,14 @@ defmodule Aquir.Accounts.Aggregates.User do
   # EXECUTE #
   ###########
 
-  # TODO 2019-01-07_2123 QUESTION
-  # Follow along  with  IEx.pry when  `execute/2`
-  # and  `apply/2` functions  are invoked.  I don't  get
-  # the  necessity  of  the  `user_id:  nil`  match  for
-  # example  or  whether  in  the  `apply`  below  where
-  # the  `UserRegistered` event  is handled,  should the
-  # `:user_id` be matched  that is not `nil`  (or with a
-  # guard for UUID), etc.
-  #
-  # See "Building Conduit", page 28 before and after the
-  # example again.
-  #
-  # HOW DOES AN AGGREGATE KNOW THE RIGHT STREAM ID?
-  # (That is, `stream_uuid`.)
-  #
-  # One  possible answer:  the first  key in  each event
-  # struct... At least, the  2 events corroborates this:
-  # UserRegistered  starts with  :user_id, PasswordReset
-  # with :email.
-  #
-  # ANSWER 2019-01-09_0643
-  # OR, the  idiot I am,  one should just look  into the
-  # router  (`Aquir.Commanded.Router`) and  look at  the
-  # dispatches: each one  ends with `identity:` followed
-  # by the preferred key.
-  #
-  # aquir_eventstore_dev=# SELECT stream_id, stream_events.event_id, event_type, causation_id, correlation_id, convert_from(data,'UTF8'), convert_from(metadata,'UTF8'), created_at FROM events, stream_events WHERE events.event_id = stream_events.event_id and stream_id =
-
+  # Why checking for `user_id: nil`? See 2019-01-07_2123
   def execute(
-    %__MODULE__{user_id: nil} = user,
+    %__MODULE__{user_id: nil},
     %Commands.RegisterUser{} = command
   ) do
-    IO.puts("\n\n")
-    IO.inspect(user)
-    IO.puts("\n\n")
+    # IO.puts("\n\n")
+    # IO.inspect(user)
+    # IO.puts("\n\n")
     Commanded.Support.convert_struct(command, Events.UserRegistered)
   end
 
@@ -64,6 +37,8 @@ defmodule Aquir.Accounts.Aggregates.User do
   # APPLY #
   #########
 
+  # `User` aggregate state:
+  # %Aquir.Accounts.Aggregates.User{email: nil, name: nil, user_id: nil}
   def apply(%__MODULE__{} = user, %Events.UserRegistered{} = event) do
     IO.puts("\n\n")
     IO.inspect(user)

@@ -918,3 +918,66 @@ def assign_id(command_changeset, struct_field) do
   end
 end
 ```
+
+  # 2019-01-07_2123 QUESTION
+  # Follow along  with  IEx.pry when  `execute/2`
+  # and  `apply/2` functions  are invoked.  I don't  get
+  # the  necessity  of  the  `user_id:  nil`  match  for
+  # example  or  whether  in  the  `apply`  below  where
+  # the  `UserRegistered` event  is handled,  should the
+  # `:user_id` be matched  that is not `nil`  (or with a
+  # guard for UUID), etc.
+  #
+  # See "Building Conduit", page 28 before and after the
+  # example again.
+  #
+  # ANSWER
+  #
+  # When   dispatching   the   `RegisterUser`   command,
+  # Commanded  will   try  to  find   the  corresponding
+  # aggregate   using   the    `:user_id`   (i.e.,   the
+  # `:identity`  set   by  the  `dispatch/2`   macro  in
+  # `Aquir.Commanded.Router`).
+  #
+  # Commanded has great debug  output, so when trying to
+  # register a user (right now at commit 53c9a5f):
+  #
+  # ```text
+  # iex(1)> Aquir.Accounts.register_user(%{"name" => "d", "email" => "@d"})
+  # [debug] Locating aggregate process for `Aquir.Accounts.Aggregates.User` with UUID "c4c84fa8-5daa-4300-b63c-51d567560fe8"
+  # ```
+  #
+  # Not in the debug output, but I know that there isn't
+  # any `User`  stream with that  ID, so the  state will
+  # be:
+  #
+  # ```elixir
+  # %Aquir.Accounts.Aggregates.User{email: nil, name: nil, user_id: nil}
+  # ```
+  #
+  # Hence  the check  for  `user_id: nil`,  but at  this
+  # point one could simply  just omit this argument with
+  # `_`, but it is always prudent to check.
+  #
+  # TODO
+  # Commanded debug messages are  indeed good, but there
+  # doesn't seem to be any defined for `apply/2`.
+
+
+  # 2019-01-09_0643 QUESTION
+  # HOW DOES AN AGGREGATE KNOW THE RIGHT STREAM ID?
+  # (That is, `stream_uuid`.)
+  #
+  # One  possible answer:  the first  key in  each event
+  # struct... At least, the  2 events corroborates this:
+  # UserRegistered  starts with  :user_id, PasswordReset
+  # with :email.
+  #
+  # ANSWER
+  # OR, the  idiot I am,  one should just look  into the
+  # router  (`Aquir.Commanded.Router`) and  look at  the
+  # dispatches: each one  ends with `identity:` followed
+  # by the preferred key.
+  #
+  # aquir_eventstore_dev=# SELECT stream_id, stream_events.event_id, event_type, causation_id, correlation_id, convert_from(data,'UTF8'), convert_from(metadata,'UTF8'), created_at FROM events, stream_events WHERE events.event_id = stream_events.event_id and stream_id =
+

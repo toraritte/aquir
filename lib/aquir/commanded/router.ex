@@ -4,7 +4,7 @@ defmodule Aquir.Commanded.Router do
   alias Aquir.Accounts.Aggregates.User
   alias Aquir.Accounts.Commands, as: C
 
-  # # Accounts
+  # Accounts.User
   dispatch [C.RegisterUser],  to: User, identity: :user_id
   # dispatch [C.ResetPassword], to: User, identity: :user_id
 end
