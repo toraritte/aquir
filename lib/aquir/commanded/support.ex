@@ -46,7 +46,10 @@ defmodule Aquir.Commanded.Support do
     Map.put(struct, field, Ecto.UUID.generate())
   end
 
-  def recstruct(struct) do
+  @doc """
+  Recursive version of `Map.from_struct/1`
+  """
+  def from(struct) do
     map = Map.delete(struct, :__struct__)
     map_keys = Map.keys(map)
     Enum.reduce(
@@ -56,7 +59,7 @@ defmodule Aquir.Commanded.Support do
         s = Map.get(map, key)
         value =
           case is_map(s) && Map.has_key?(s, :__struct__) do
-            true  -> recstruct(s)
+            true  -> from(s)
             false -> s
           end
         Map.put(acc, key, value)

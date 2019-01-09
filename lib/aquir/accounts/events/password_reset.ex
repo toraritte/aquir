@@ -1,8 +1,8 @@
-defmodule Aquir.Accounts.Aggregates.Credential.Events.PasswordReset do
+defmodule Aquir.Accounts.Events.PasswordReset do
 
   @derive [Poison.Encoder]
   defstruct [
-    :user_id
+    :user_id,
     :username,
     :password_hash,
   ]

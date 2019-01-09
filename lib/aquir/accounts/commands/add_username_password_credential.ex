@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Aggregates.Credential.Commands.AddUsernamePasswordCredential do
+defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
   use Ecto.Schema
 
   @primary_key false
@@ -9,7 +9,7 @@ defmodule Aquir.Accounts.Aggregates.Credential.Commands.AddUsernamePasswordCrede
 
     # Even embeds add a `:id` primary key automatically.
     # See docs for `Ecto.Schema.embeds_*/3`.
-    embeds_one :credential, Credential, primary_key: false do
+    embeds_one :credentials, Credentials, primary_key: false do
       field :username,      :string
       field :password,      :string, virtual: true
       field :password_hash, :string
@@ -23,15 +23,15 @@ defmodule Aquir.Accounts.Aggregates.Credential.Commands.AddUsernamePasswordCrede
     command
     |> Aquir.Commanded.Support.assign_id(:credential_id)
     |> cast(params, [:for_user_id])
-    |> cast_embed(:credential, with: &credential_changeset/2)
-    |> validate_required([:credential_id, :for_user_id, :credential])
+    |> cast_embed(:credentials, with: &credentials_changeset/2)
+    |> validate_required([:credential_id, :for_user_id, :credentials])
   end
 
-  defp credential_changeset(credential, params) do
+  defp credentials_changeset(credentials, params) do
 
     required_fields = [:username, :password]
 
-    credential
+    credentials
     |> cast(params, required_fields)
     |> validate_required(required_fields)
     |> Aquir.Accounts.Auth.secure_password(:password)

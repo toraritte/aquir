@@ -33,7 +33,7 @@ defmodule Aquir.Accounts.Projectors.User do
     )
   end
 
-  # NOTE QUESTION 2018-10-19_2344
+  # TODO QUESTION 2018-10-19_2344
   @doc """
   The state of the User  aggregate is fetched from the
   User  projection in  the  database,  but that  state

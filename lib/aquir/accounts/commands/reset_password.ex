@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Aggregates.Credential.Commands.ResetPassword do
+defmodule Aquir.Accounts.Commands.ResetPassword do
   use Ecto.Schema
 
   # TODO This is probably oversimplified again. It would
