@@ -45,8 +45,11 @@ defmodule Aquir.Accounts.Aggregates.Credential do
   ## APPLY #
   ##########
 
-  def apply(user, %Events.UsernamePasswordCredentialAdded{} = event) do
-    ACS.convert_struct(__MODULE__, Events.UsernamePasswordCredentialAdded)
+  def apply(
+    %__MODULE__{credential_id: nil},
+    %Events.UsernamePasswordCredentialAdded{} = event
+  ) do
+    ACS.convert_struct(event, __MODULE__)
   end
 
   #def apply(user, %Events.PasswordReset{password_hash: new_pwhash}) do

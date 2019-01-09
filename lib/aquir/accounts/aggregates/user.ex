@@ -39,10 +39,10 @@ defmodule Aquir.Accounts.Aggregates.User do
 
   # `User` aggregate state:
   # %Aquir.Accounts.Aggregates.User{email: nil, name: nil, user_id: nil}
-  def apply(%__MODULE__{} = user, %Events.UserRegistered{} = event) do
-    IO.puts("\n\n")
-    IO.inspect(user)
-    IO.puts("\n\n")
+  def apply(%__MODULE__{user_id: nil}, %Events.UserRegistered{} = event) do
+    # IO.puts("\n\n")
+    # IO.inspect(user)
+    # IO.puts("\n\n")
     # Simply converting the event to %User{} because there
     # is no state before registering.
     Commanded.Support.convert_struct(event, __MODULE__)
