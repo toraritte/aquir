@@ -42,12 +42,21 @@ defmodule Aquir.Accounts.Aggregates.User do
   # UserRegistered  starts with  :user_id, PasswordReset
   # with :email.
   #
+  # ANSWER 2019-01-09_0643
+  # OR, the  idiot I am,  one should just look  into the
+  # router  (`Aquir.Commanded.Router`) and  look at  the
+  # dispatches: each one  ends with `identity:` followed
+  # by the preferred key.
+  #
   # aquir_eventstore_dev=# SELECT stream_id, stream_events.event_id, event_type, causation_id, correlation_id, convert_from(data,'UTF8'), convert_from(metadata,'UTF8'), created_at FROM events, stream_events WHERE events.event_id = stream_events.event_id and stream_id =
 
   def execute(
-    %__MODULE__{user_id: nil},
+    %__MODULE__{user_id: nil} = user,
     %Commands.RegisterUser{} = command
   ) do
+    IO.puts("\n\n")
+    IO.inspect(user)
+    IO.puts("\n\n")
     Commanded.Support.convert_struct(command, Events.UserRegistered)
   end
 
@@ -55,7 +64,10 @@ defmodule Aquir.Accounts.Aggregates.User do
   # APPLY #
   #########
 
-  def apply(%__MODULE__{}, %Events.UserRegistered{} = event) do
+  def apply(%__MODULE__{} = user, %Events.UserRegistered{} = event) do
+    IO.puts("\n\n")
+    IO.inspect(user)
+    IO.puts("\n\n")
     # Simply converting the event to %User{} because there
     # is no state before registering.
     Commanded.Support.convert_struct(event, __MODULE__)

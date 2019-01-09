@@ -4,7 +4,7 @@ defmodule Aquir.Accounts.Aggregates.Credential do
   # TODO How to query the state of an aggregate?
 
   alias Aquir.Accounts.{Commands, Events}
-  alias Aquir.Commanded
+  alias Aquir.Commanded.Support, as: ACS
 
   @primary_key false
   embedded_schema do
@@ -24,18 +24,18 @@ defmodule Aquir.Accounts.Aggregates.Credential do
     %__MODULE__{credential_id: nil},
     %Commands.AddUsernamePasswordCredential{} = command
   ) do
-    # Commanded.Support.convert_struct(command,
+    ACS.convert_struct(command, Events.UsernamePasswordCredentialAdded)
   end
 
-  ## TODO: If the password_hash does not exist then the app shouldn't
-  ##       even compile. Make it a test?
-  #def execute(
-  #  %__MODULE__{password_hash: ""},
-  #  %Commands.ResetPassword{}
-  #) do
-  #  Logger.error "An existing user should have a password hash"
-  #  raise "An existing user should have a password hash"
-  #end
+  # TODO: If the password_hash does not exist then the app shouldn't
+  #       even compile. Make it a test?
+  # def execute(
+  #   %__MODULE__{password_hash: ""},
+  #   %Commands.ResetPassword{}
+  # ) do
+  #   Logger.error "An existing user should have a password hash"
+  #   raise "An existing user should have a password hash"
+  # end
 
   #def execute(_user, %Commands.ResetPassword{} = command) do
   #  Commanded.Support.convert_struct(command, Events.PasswordReset)
@@ -44,6 +44,10 @@ defmodule Aquir.Accounts.Aggregates.Credential do
   ##########
   ## APPLY #
   ##########
+
+  def apply(user, %Events.UsernamePasswordCredentialAdded{} = event) do
+    ACS.convert_struct(__MODULE__, Events.UsernamePasswordCredentialAdded)
+  end
 
   #def apply(user, %Events.PasswordReset{password_hash: new_pwhash}) do
   #  %__MODULE__{ user | password_hash: new_pwhash }

@@ -67,6 +67,9 @@ defmodule Aquir.Commanded.Support do
     )
   end
 
+  defmacro build_schema do
+  end
+
   defmacro __using__(opts) do
     quote do
       @derive Poison.Encoder
