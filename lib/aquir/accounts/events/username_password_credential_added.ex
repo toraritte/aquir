@@ -5,6 +5,6 @@ defmodule Aquir.Accounts.Events.UsernamePasswordCredentialAdded do
     :credential_id,
     :for_user_id,
     :type,
-    :data,
+    :payload,
   ]
 end

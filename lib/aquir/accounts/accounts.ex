@@ -38,7 +38,7 @@ defmodule Aquir.Accounts do
           %C.AddUsernamePasswordCredential{},
           %{
             for_user_id: reg_user_command.user_id,
-            data: %{
+            payload: %{
               username: username,
               password: password,
             }
@@ -55,7 +55,7 @@ defmodule Aquir.Accounts do
     #   err -> err
     end
   end
-  # char_to_put = "d"
+  # char_to_put = "g"
   # Aquir.Accounts.register_user(%{"name" => "#{char_to_put}", "email" => "@#{char_to_put}", "username" => "#{char_to_put}#{char_to_put}", "password" => "#{char_to_put}#{char_to_put}#{char_to_put}"})
 
   # def reset_password(attrs \\ %{}) do
