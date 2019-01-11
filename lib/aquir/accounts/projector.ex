@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Projectors.User do
+defmodule Aquir.Accounts.Projector do
   use Commanded.Projections.Ecto,
     name: "Accounts.Projections.User",
     repo: Aquir.Repo,
