@@ -55,17 +55,17 @@ defmodule Aquir.Accounts.Projectors.User do
     such  respawn or  do I  need  to bring  back to  a
     consistent state manually re-applying the events?
   """
-  project %Events.PasswordReset{} = u do
+  # project %Events.PasswordReset{} = u do
 
-    case Projections.User.get_user_by_email(u.email) do
-      nil ->
-        multi
-      user ->
-        user
-        |> Ecto.Changeset.change(password_hash: u.password_hash)
-        |> (&Ecto.Multi.update(multi, :reset_password, &1)).()
-    end
-  end
+  #   case Projections.User.get_user_by_email(u.email) do
+  #     nil ->
+  #       multi
+  #     user ->
+  #       user
+  #       |> Ecto.Changeset.change(password_hash: u.password_hash)
+  #       |> (&Ecto.Multi.update(multi, :reset_password, &1)).()
+  #   end
+  # end
 end
 # Aquir.Accounts.register_user(%{"email" => "alvaro@miez.com", "password" => "balabab"})
 # Aquir.Accounts.reset_password(%{"email" => "alvaro@miez.com", "password" => "mas"})

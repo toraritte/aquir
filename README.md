@@ -87,11 +87,19 @@ Legend: `->` - simple conversion
 
 #### 0.2.3 Use of `:virtual` fields
 
-Adding the `virtual` option to the `:password` field has no significance; it only serves as a reminder to myself that it would not be persisted in the projection. The changeset will simply swap it out with a hashed version (`:password_hash`). See also the `Projections.User` schema, it isn't even listed.
+Adding the `virtual` option to the `:password` field
+has no significance; it only serves as a reminder to
+myself  that  it  would  not  be  persisted  in  the
+projection. The  changeset will  simply swap  it out
+with a  hashed version (`:password_hash`).  See also
+the `Projections.User` schema, it isn't even listed.
 
 #### 0.2.4 `:binary_id` vs `Ecto.UUID`
 
-`:binary_id` vs `Ecto.UUID` can be used interchangeably in **schemas** but using the former as it more general. The `user_id` is generated via `Ecto.UUID` anyway.
+`:binary_id`    vs   `Ecto.UUID`    can   be    used
+interchangeably in **schemas**  but using the former
+as it  more general. The `user_id`  is generated via
+`Ecto.UUID` anyway.
 
 https://hexdocs.pm/ecto/Ecto.Schema.html#module-primary-keys
 
@@ -102,7 +110,9 @@ $ mix do ecto.drop, ecto.create, ecto.migrate
 $ mix do event_store.drop, event_store.create, event_store.init
 ```
 
-(It did work all of these tasks on one line and then it didn't, then again it did, etc. This way seemed to be the most robust so far.)
+(It did  work when  all of these  tasks were  on one
+line and  then it  didn't, then  again it  did, etc.
+This way seemed to be the most robust so far.)
 
 ## 1 How to start this project on your machine (WIP)
 
@@ -426,6 +436,12 @@ in Commanded.Commands.Router.
 
 ### 2018-10-23_0914 NOTE TODO(?)
 
+  Related notes:
+  + 2019-01-04_1152
+  + 2019-01-09_1200
+  + 2018-12-31_1019
+  + 2018-10-23_0914
+
 Unique (and  other) constraints  should live  in the
 aggregates and not in arbitrary places. For example,
 the user  email is  checked twice  in `accounts.ex`,
@@ -518,6 +534,12 @@ iex(5)> :sys.get_state(Commanded.Aggregates.Supervisor)
 ```
 
 ### 2018-12-31_1019 TODO(?) (duplicate?)
+
+  Related notes:
+  + 2019-01-04_1152
+  + 2019-01-09_1200
+  + 2018-12-31_1019
+  + 2018-10-23_0914
 
 There is a simmetry between commands and events, and
 duplicated  code with  that it  seems. The  commands
@@ -692,6 +714,12 @@ end
 IEx output will be the same as for the first version.
 
 ### 2019-01-04_1152 NOTE TODO(?) (Aggregate associations/relationships)
+
+  Related notes:
+  + 2019-01-04_1152
+  + 2019-01-09_1200
+  + 2018-12-31_1019
+  + 2018-10-23_0914
 
 The notion is that the
 

@@ -67,6 +67,40 @@ defmodule Aquir.Commanded.Support do
     )
   end
 
+  # 2019-01-11_0526 TODO
+  @doc """
+  Take a look at the `__using__/1` example at
+  https://hexdocs.pm/ecto/Ecto.Schema.html#module-schema-attributes
+
+  It  is   a  good   convention  to  use,   and  would
+  be  the  perfect  place  to  put  additional  schema
+  functionality. For example, only events would derive
+  `Poison.Encoder` or  the functions/macros  to "copy"
+  fields from the aggregate schema.
+
+  IDEA: (include copying fields in `use` examples)
+  Use `__using__/1` options to mark what the schema is
+  used:
+
+  ```elixir
+  defmodule Bla.Events.ThisHappened
+    use Aquir.Schema, for: :event
+  ```
+  or
+  ```elixir
+  defmodule Bla.Projections.ThisHappened
+    use Aquir.Schema, for: :projection
+  ```
+  It wouldn't probably be hard to recognize the module
+  names and invoke the right  macro clause, but I like
+  explicit stuff.
+
+  Related notes:
+  + 2019-01-04_1152
+  + 2019-01-09_1200
+  + 2018-12-31_1019
+  + 2018-10-23_0914
+  """
   defmacro build_schema do
   end
 

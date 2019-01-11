@@ -11,7 +11,7 @@ defmodule Aquir.Accounts do
 
   def register_user(
     %{
-      "name" => name,
+      "name" =>  name,
       "email" => email,
       # "for_user_id" => , not needed because it is the user_id
       "username" => username,
@@ -29,7 +29,7 @@ defmodule Aquir.Accounts do
         ACS.imbue_command(
           %C.RegisterUser{},
           %{
-            name: name,
+            name:  name,
             email: email
            }),
 

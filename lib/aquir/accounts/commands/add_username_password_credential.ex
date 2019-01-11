@@ -1,8 +1,14 @@
 defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
   use Ecto.Schema
 
-  # 2019-01-09 TODO
+  # 2019-01-09_1200 TODO
   @doc """
+  Related notes:
+  + 2019-01-04_1152
+  + 2019-01-09_1200
+  + 2018-12-31_1019
+  + 2018-10-23_0914
+
   Another take on making a `build_schema` macro:
 
   + allows  copying fields into  the events/commands
@@ -19,7 +25,7 @@ defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
     field :for_user_id,   :binary_id
     field :type,          :string, default: "username_password"
 
-    # Even embeds add a `:id` primary key automatically.
+    # Even embeds add an `:id` primary key automatically.
     # See docs for `Ecto.Schema.embeds_*/3`.
     embeds_one :payload, Payload, primary_key: false do
       field :username,      :string
