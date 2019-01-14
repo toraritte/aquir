@@ -1,4 +1,4 @@
-defmodule Aquir.Repo.Migrations.CreateAccountsUsersProjection do
+defmodule Aquir.Repo.Migrations.CreateUsers do
   use Ecto.Migration
 
   # 2019-01-10_0725 NOTE Migration name change TODO
@@ -44,8 +44,8 @@ defmodule Aquir.Repo.Migrations.CreateAccountsUsersProjection do
 
     create table(:users, primary_key: false) do
       add :user_id, :uuid, primary_key: true
-      add :name,    :citext
-      add :email,   :string
+      add :name,    :citext, null: false
+      add :email,   :string, null: false
 
       timestamps()
     end
