@@ -1,6 +1,19 @@
 defmodule Aquir.Accounts do
+
   @moduledoc """
-  The Accounts context.
+  The  Accounts context  that  deals with  information
+  related to users.
+
+  Aggregates in this context:
+  + `Aquir.Accounts.Aggregates.User`
+  + `Aquir.Accounts.Aggregates.Credential`
+
+  Aggregates have their own unique IDs that will be denoted by the `aid` ending. Sometimes that will be used to uniquely identify an entity (e.g., users), but in some cases it only serves to identify the right aggregate instance process to replay the events.
+
+  Authentication workflow
+  =======================
+
+  Users can choose from multiple authentication methods: social logins, username & password, etc. After one is chosen, the credentials are submitted to server along with the type of authentication method. For example, for username & password the way to identify the user will be the username and the string "username_password".
   """
 
   alias Aquir.Commanded.Support, as: ACS
