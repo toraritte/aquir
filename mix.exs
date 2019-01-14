@@ -67,8 +67,8 @@ defmodule Aquir.Mixfile do
       },
 
       # {:commanded_ecto_projections,   "~> 0.7"},
-      {:commanded_ecto_projections,
-        github: "toraritte/commanded-ecto-projections",
+      {:commanded_postgres_read_model_projector,
+        github: "toraritte/commanded-postgres-read-model-projector",
         branch: "master",
       },
     ]
