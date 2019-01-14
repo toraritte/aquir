@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Auth do
+defmodule Aquir.Accounts.Support.Auth do
 
   import Ecto.Changeset
 

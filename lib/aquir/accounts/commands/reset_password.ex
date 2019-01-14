@@ -27,6 +27,6 @@ defmodule Aquir.Accounts.Commands.ResetPassword do
     command
     |> cast(params, required_fields)
     |> validate_required(required_fields)
-    |> Aquir.Accounts.Auth.secure_password(:new_password)
+    |> Aquir.Accounts.Support.Auth.secure_password(:new_password)
   end
 end
