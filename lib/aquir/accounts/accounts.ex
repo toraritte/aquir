@@ -20,7 +20,7 @@ defmodule Aquir.Accounts do
   alias Aquir.Commanded.Router,  as: ACR
 
   alias Aquir.Accounts.Commands, as: C
-  alias Aquir.Accounts.Projections
+  alias Aquir.Accounts.Read.Schemas, as: RS
 
   def register_user(
     %{
@@ -59,11 +59,11 @@ defmodule Aquir.Accounts do
 
       # TODO Clean up. See NOTE 2018-10-23_0914
       :ok <- Aquir.Accounts.Support.UniqueEmail.claim(email),
-      :ok <- Projections.User.check_email(email),
+      :ok <- RS.User.check_email(email),
       :ok <- ACR.dispatch(reg_user_command, consistency: :strong),
       :ok <- ACR.dispatch(add_cred_command, consistency: :strong)
     ) do
-      Projections.User.get_user_by_id(reg_user_command.user_id)
+      RS.User.get_user_by_id(reg_user_command.user_id)
     # else
     #   err -> err
     end

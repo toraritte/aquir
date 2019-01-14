@@ -4,7 +4,7 @@
 
 `Ecto.Schema` is used for validating commands and for projections. [This Stack Overflow question](https://stackoverflow.com/questions/52799805) documents the difference between `schema/2` and `embedded_schema/1`, but as soon as Ecto 3 is out, it will be in the main documentation as well.
 
-### 0.1 Projections: (i.e., migrations and corresponding Ecto.Schema)
+### 0.1 Read model projections (i.e., migrations and corresponding Ecto.Schema)
 
 #### 0.1.1 Migrations
 
@@ -81,6 +81,10 @@ Projectors will cast events into their final form.
 The current flow:
 ```text
 Command schema -> Event struct -> Projector (Event struct -> Projection schema)
+                                      |
+                                      V
+                                  (as in read model
+                                   projector)
 
 Legend: `->` - simple conversion
 ```
@@ -92,7 +96,7 @@ has no significance; it only serves as a reminder to
 myself  that  it  would  not  be  persisted  in  the
 projection. The  changeset will  simply swap  it out
 with a  hashed version (`:password_hash`).  See also
-the `Projections.User` schema, it isn't even listed.
+the `Read.Schema.User` schema, it isn't even listed.
 
 #### 0.2.4 `:binary_id` vs `Ecto.UUID`
 

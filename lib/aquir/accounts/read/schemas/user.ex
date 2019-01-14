@@ -1,15 +1,16 @@
-defmodule Aquir.Accounts.Projections.User do
+defmodule Aquir.Accounts.Read.Schemas.User do
   use Ecto.Schema
 
   import Ecto.Query
-  alias Aquir.Accounts.Projections, as: P
+
+  alias Aquir.Accounts.Read.Schemas, as: S
 
   @primary_key {:user_id, :binary_id, autogenerate: false}
 
   schema "users" do
     field :name,  :string
     field :email, :string, unique: true
-    has_many :credentials, P.Credential
+    has_many :credentials, S.Credential
 
     timestamps()
   end

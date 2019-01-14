@@ -10,7 +10,7 @@ defmodule Aquir.Accounts.Supervisor do
   def init(_arg) do
 
     children = [
-      A.Projector,
+      A.Read.Projector,
       A.Support.UniqueEmail,
     ]
 
