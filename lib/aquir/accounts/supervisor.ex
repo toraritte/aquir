@@ -11,7 +11,7 @@ defmodule Aquir.Accounts.Supervisor do
 
     children = [
       A.Read.Projector,
-      A.Support.UniqueEmail,
+      A.Support.UniqueUsername,
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

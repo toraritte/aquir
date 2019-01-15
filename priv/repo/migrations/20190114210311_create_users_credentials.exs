@@ -16,6 +16,13 @@ defmodule Aquir.Repo.Migrations.CreateUsersCredentials do
   ignored.
 
   We'll see how this holds up in practice.
+  ----------------------------------------------------
+
+  UPDATE: It  should work.  Had  to  put a  `UNIQUE`
+          constraint  on  username, but  that  still
+          allows `null`  values. Also did  an insert
+          omitting  `username`  and  `password_hash`
+          and it went through.
   """
   def change do
     # https://hexdocs.pm/ecto/Ecto.Changeset.html#unique_constraint/3-case-sensitivity

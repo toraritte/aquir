@@ -20,7 +20,9 @@ defmodule Aquir.Accounts do
   alias Aquir.Commanded.Router,  as: ACR
 
   alias Aquir.Accounts.Commands, as: C
+  alias Aquir.Accounts.Read
   alias Aquir.Accounts.Read.Schemas, as: RS
+  # `alias Read.Schemas, as: RS` would have been enough but being pedantic
 
   def register_user(
     %{
@@ -34,7 +36,7 @@ defmodule Aquir.Accounts do
 
     with(
       # `changeset`  needs  to  come first  because  if  the
-      # UniqueEmail agent  saves the email  first, but
+      # UniqueUsername agent  saves the username  first, but
       # changeset returns  any error, then  subsequent tries
       # will  fail  as the  name  check  will come  back  as
       # already taken.
@@ -58,12 +60,15 @@ defmodule Aquir.Accounts do
            }),
 
       # TODO Clean up. See NOTE 2018-10-23_0914
-      :ok <- Aquir.Accounts.Support.UniqueEmail.claim(email),
-      :ok <- RS.User.check_email(email),
+      :ok <- Aquir.Accounts.Support.UniqueUsername.claim(username),
+      :ok <- Read.check_dup(RS.Credential, :username, username),
+
+      :ok <- Read.check_dup(RS.User, :email, email),
+
       :ok <- ACR.dispatch(reg_user_command, consistency: :strong),
       :ok <- ACR.dispatch(add_cred_command, consistency: :strong)
     ) do
-      RS.User.get_user_by_id(reg_user_command.user_id)
+      # Read.get_user_by_id(reg_user_command.user_id)
     # else
     #   err -> err
     end
