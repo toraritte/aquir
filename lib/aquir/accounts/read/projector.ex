@@ -100,13 +100,31 @@ defmodule Aquir.Accounts.Read.Projector do
   is  generated from  the  a command  that is  already
   validated using changesets.)
   """
-  project %Events.UserRegistered{} = u do
-    Ecto.Multi.insert(
-      multi,
-      :add_user,
-      Commanded.Support.convert_struct(u, RS.User)
-    )
-  end
+  project %Events.UserRegistered{} = event,
+    _metadata,
+    fn(multi) ->
+      Ecto.Multi.insert(
+        multi,
+        :add_user,
+        Commanded.Support.convert_struct(event, RS.User)
+      )
+    end
+
+  project %Events.UsernamePasswordCredentialAdded{} = event,
+    _metadata,
+    fn(multi) ->
+      Ecto.Multi.insert(
+        multi,
+        :add_user_credential,
+        %RS.Credential{
+          credential_id: event.credential_id,
+          for_user_id:   event.for_user_id,
+          type:          event.type,
+          username:      event.payload["username"],
+          password_hash: event.payload["password_hash"],
+        }
+      )
+    end
 
   # TODO QUESTION 2018-10-19_2344
   @doc """
