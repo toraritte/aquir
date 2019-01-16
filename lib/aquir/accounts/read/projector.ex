@@ -4,6 +4,29 @@ defmodule Aquir.Accounts.Read.Projector do
     repo: Aquir.Repo,
     consistency: :strong
 
+  # 2019-01-16_0506 TODO QUESTION (Get to the bottom of :consistency settings)
+  @doc """
+  Does  it  make  sense   to  talk  about  consistency
+  settings per event?
+
+  https://github.com/commanded/commanded/blob/master/guides/Commands.md#command-dispatch-consistency-guarantee
+
+  > Provide  an  explicit  list  of  event  handler  and
+  > process manager modules (or their configured names),
+  > containing  only   those  handlers  you'd   like  to
+  > wait  for. No  other  handlers will  be awaited  on,
+  > regardless  of  their   own  configured  consistency
+  > setting.
+
+  > ```elixir
+  > :ok = BankRouter.dispatch(command, consistency: [ExampleHandler, AnotherHandler])
+  > :ok = BankRouter.dispatch(command, consistency: ["ExampleHandler", "AnotherHandler"])
+  > ```
+  > Note you  cannot opt-in to strong  consistency for a
+  > handler  that  has  been  configured  as  eventually
+  > consistent.
+  """
+
   # 2018-10-23_2154 QUESTION
   @doc """
   Where is `:consistency` above defined? Commanded.Projections.Ecto

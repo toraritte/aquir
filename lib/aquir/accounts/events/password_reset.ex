@@ -13,6 +13,8 @@ defmodule Aquir.Accounts.Events.PasswordReset do
   QUESTION
   ========
   How to write to event metadata?
+
+  ANSWER: https://github.com/commanded/commanded/blob/7f7d5b7642aa94e2de2515f1606c4cafb9dbe325/guides/Events.md#metadata
   """
   @derive Poison.Encoder
   defstruct [
