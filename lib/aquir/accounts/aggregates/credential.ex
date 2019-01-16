@@ -150,9 +150,9 @@ defmodule Aquir.Accounts.Aggregates.Credential do
   #   raise "An existing user should have a password hash"
   # end
 
-  #def execute(_user, %Commands.ResetPassword{} = command) do
-  #  Commanded.Support.convert_struct(command, Events.PasswordReset)
-  #end
+  def execute(_user, %Commands.ResetPassword{} = command) do
+    ACS.convert_struct(command, Events.PasswordReset)
+  end
 
   ##########
   ## APPLY #
@@ -167,7 +167,19 @@ defmodule Aquir.Accounts.Aggregates.Credential do
     ACS.convert_struct(event, __MODULE__)
   end
 
-  #def apply(user, %Events.PasswordReset{password_hash: new_pwhash}) do
-  #  %__MODULE__{ user | password_hash: new_pwhash }
-  #end
+  def apply(
+    user,
+    %Events.PasswordReset{
+      username:      username,
+      password_hash: new_pwhash,
+    }
+  ) do
+
+    payload = %{
+      username:      username,
+      password_hash: new_pwhash,
+    }
+
+    %__MODULE__{ user | payload: payload }
+  end
 end

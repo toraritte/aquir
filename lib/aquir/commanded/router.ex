@@ -12,5 +12,8 @@ defmodule Aquir.Commanded.Router do
   dispatch [C.AddUsernamePasswordCredential],
     to: A.Credential,
     identity: :credential_id
-  # dispatch [C.ResetPassword], to: User, identity: :user_id
+
+  dispatch [C.ResetPassword],
+    to: A.Credential,
+    identity: :credential_id
 end

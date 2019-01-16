@@ -1,7 +1,7 @@
 defmodule Aquir.Accounts.Read do
   import Ecto.Query
 
-  alias __MODULE__.Schemas, as: RS
+  # alias __MODULE__.Schemas, as: RS
 
   @doc """
   It  may  seem  redundant  that  there  is  a  unique
@@ -21,17 +21,19 @@ defmodule Aquir.Accounts.Read do
   the event  store should  never be edited.  Hence the
   workaround in the account context (`account.ex`).
   """
-  def check_dup(schema, entity_key, entity) do
+  def get(schema, entity_key, entity) do
 
     query = from e in schema,
               where: field(e, ^entity_key) == ^entity
 
-    query
-    |> Aquir.Repo.one()
-    |> case do
-         nil -> :ok
-         _   -> {:error, [:already_in_database, entity]}
-       end
+    Aquir.Repo.one(query)
+  end
+
+  def check_dup(schema, entity_key, entity) do
+    case    get(schema, entity_key, entity) do
+      nil -> :ok
+      _   -> {:error, [:"#{entity_key}_already_in_database", entity]}
+    end
   end
 
   # def get_user_by_id(user_id) do

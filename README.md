@@ -1015,3 +1015,46 @@ end
 
 SELECT stream_id, stream_events.event_id, event_type, causation_id, correlation_id, convert_from(data,'UTF8'), convert_from(metadata,'UTF8'), created_at, stream_version FROM events, stream_events WHERE events.event_id = stream_events.event_id and stream_id = 6;
 
+### 2019-01-15_1223 NOTE (Why the `:credential_id`?)
+
+  COMMANDS
+  --------
+
+  Aggregate instances  are identified by  their unique
+  identifier. These  indentities are specified  in the
+  router (`Aquir.Commanded.Router`)  when commands are
+  dispatched:
+
+  ```elixir
+  dispatch [C.AddUsernamePasswordCredential],
+    to: A.Credential,
+    identity: :credential_id
+  ```
+
+  If this identity is not  part of all the commands in
+  the aggregate, the aggregate may  start a new one or
+  just  fails.  See  2019-01-15_0918 to  change  these
+  IDs  to `_aid`s  (as  in aggregate  IDs  to be  more
+  descriptive.
+
+  EVENTS
+  ------
+
+  In  the  case  of   `PasswordReset`  event,  the  ID
+  wouldn't be  strictly necessary, because  the record
+  could be  looked up  by the  username, but  it never
+  hurts to  hold this information. Maybe  in metadata?
+  See 2019-01-15_0918
+
+### 2019-01-15_1255 TODO (Why query the DB multiple times?)
+
+  Any operation that requires to update the read model
+  effectively results in two  or more queries. Once in
+  the context  (e.g., `Accounts`) and  once projecting
+  an update to the read model.
+
+  There is  only a couple events/commands  but keep an
+  eye on this trend.
+
+  SOLUTION: Query the aggregate instance process.
+            See 2019-01-10_0752

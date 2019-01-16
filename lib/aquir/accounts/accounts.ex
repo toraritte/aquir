@@ -19,19 +19,19 @@ defmodule Aquir.Accounts do
   alias Aquir.Commanded.Support, as: ACS
   alias Aquir.Commanded.Router,  as: ACR
 
-  alias Aquir.Accounts.Commands, as: C
-  alias Aquir.Accounts.Read
-  alias Aquir.Accounts.Read.Schemas, as: RS
+  alias __MODULE__.Commands, as: C
+  alias __MODULE__.Read
+  alias __MODULE__.Read.Schemas, as: RS
   # `alias Read.Schemas, as: RS` would have been enough but being pedantic
 
   def register_user(
     %{
-      "name" =>  name,
+      "name"  => name,
       "email" => email,
       # "for_user_id" => , not needed because it is the user_id
       "username" => username,
       "password" => password,
-     }
+    }
   ) do
 
     with(
@@ -40,7 +40,7 @@ defmodule Aquir.Accounts do
       # changeset returns  any error, then  subsequent tries
       # will  fail  as the  name  check  will come  back  as
       # already taken.
-      {:ok, reg_user_command} <-
+      {:ok, register_user} <-
         ACS.imbue_command(
           %C.RegisterUser{},
           %{
@@ -48,11 +48,11 @@ defmodule Aquir.Accounts do
             email: email
            }),
 
-      {:ok, add_cred_command} <-
+      {:ok, add_username_password_credential} <-
         ACS.imbue_command(
           %C.AddUsernamePasswordCredential{},
           %{
-            for_user_id: reg_user_command.user_id,
+            for_user_id: register_user.user_id,
             payload: %{
               username: username,
               password: password,
@@ -60,32 +60,43 @@ defmodule Aquir.Accounts do
            }),
 
       # TODO Clean up. See NOTE 2018-10-23_0914
-      :ok <- Aquir.Accounts.Support.UniqueUsername.claim(username),
+      :ok <- __MODULE__.Support.UniqueUsername.claim(username),
       :ok <- Read.check_dup(RS.Credential, :username, username),
 
-      :ok <- Read.check_dup(RS.User, :email, email),
-
-      :ok <- ACR.dispatch(reg_user_command, consistency: :strong),
-      :ok <- ACR.dispatch(add_cred_command, consistency: :strong)
+      :ok <- Read.check_dup(RS.User, :email, email)
     ) do
-      # Read.get_user_by_id(reg_user_command.user_id)
+      ACR.dispatch(register_user, consistency: :strong)
+      ACR.dispatch(add_username_password_credential, consistency: :strong)
+      # Read.get_user_by_id(register_user.user_id)
     # else
     #   err -> err
     end
   end
-  # char_to_put = "g"
-  # Aquir.Accounts.register_user(%{"name" => "#{char_to_put}", "email" => "@#{char_to_put}", "username" => "#{char_to_put}#{char_to_put}", "password" => "#{char_to_put}#{char_to_put}#{char_to_put}"})
+  # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
 
-  # def reset_password(attrs \\ %{}) do
+  # 2019-01-15_1123 NOTE
+  @doc """
+  Looking  up  the existing  `:credential_id`  because
+  this  operation can  fail,  unlike `assign_id/2`  in
+  `AddUsernamePasswordCredential`,  and  this  is  not
+  a  validation  issue  that  should be  stored  in  a
+  changeset, but an input error.
+  """
 
-  #   case ACS.imbue_command(%Commands.ResetPassword{}, attrs) do
-  #     {:ok, command} ->
-  #       ACR.dispatch(command, consistency: :strong)
-  #       # TODO: what to return?
-  #     errors ->
-  #       errors
-  #   end
-  # end
+  def reset_password(%{"username" => username, "new_password" => _} = attrs) do
+
+    with(
+    # TODO 2019-01-15_1255 (Why query the DB multiple times?)
+      credential when not(is_nil(credential)) <- Read.get(RS.Credential, :username, username),
+      credential_id <- Map.get(credential, :credential_id),
+      attrs_with_id <- Map.put(attrs, "credential_id", credential_id),
+    {:ok, reset_password} <- ACS.imbue_command(%C.ResetPassword{}, attrs_with_id)
+    ) do
+      ACR.dispatch(reset_password, consistency: :strong)
+    else
+      nil -> {:error, :username_not_found}
+    end
+  end
 
 #   import Ecto.Query, warn: false
 #   alias Aquir.Repo

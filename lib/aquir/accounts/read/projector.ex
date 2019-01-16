@@ -88,9 +88,11 @@ defmodule Aquir.Accounts.Read.Projector do
   the most up to date information?
   """
 
-  alias Aquir.Accounts.Read.Schemas, as: RS
+  alias Aquir.Accounts.Read
+  alias Read.Schemas, as: RS
+
   alias Aquir.Accounts.Events
-  alias Aquir.Commanded
+  alias Aquir.Commanded.Support, as: ACS
 
   @doc """
   The  UserRegistered event  and the  Read.Schemas.User
@@ -106,7 +108,7 @@ defmodule Aquir.Accounts.Read.Projector do
       Ecto.Multi.insert(
         multi,
         :add_user,
-        Commanded.Support.convert_struct(event, RS.User)
+        ACS.convert_struct(event, RS.User)
       )
     end
 
@@ -148,17 +150,20 @@ defmodule Aquir.Accounts.Read.Projector do
     such  respawn or  do I  need  to bring  back to  a
     consistent state manually re-applying the events?
   """
-  # project %Events.PasswordReset{} = u do
+  project %Events.PasswordReset{} = event,
+    _metadata,
+    fn(multi) ->
+      # No need to check whether credential  exists  because
+      # it would have already been catched  in  the  context
+      # (`Accounts.reset_password/1`)
 
-  #   case Projections.User.get_user_by_email(u.email) do
-  #     nil ->
-  #       multi
-  #     user ->
-  #       user
-  #       |> Ecto.Changeset.change(password_hash: u.password_hash)
-  #       |> (&Ecto.Multi.update(multi, :reset_password, &1)).()
-  #   end
-  # end
+      # TODO 2019-01-15_1255 (Why query the DB multiple times?)
+      credential = Read.get(RS.Credential, :username, event.username)
+
+      credential
+        |> Ecto.Changeset.change(password_hash: event.password_hash)
+        |> (&Ecto.Multi.update(multi, :reset_password, &1)).()
+    end
 end
 # Aquir.Accounts.register_user(%{"email" => "alvaro@miez.com", "password" => "balabab"})
 # Aquir.Accounts.reset_password(%{"email" => "alvaro@miez.com", "password" => "mas"})
