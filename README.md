@@ -765,6 +765,13 @@ pass  the `user_id`  of  a new  `User` aggregate  to
 the  `Credential`  commands), and  projections  will
 explicitly show the relationship(s).
 
+UPDATE 2019-01-16_0804
+Also unnecessary  because this  the "write"  side of
+CQRS, only used for  command validation on dispatch.
+The "read"  side (`Aquir.Accounts.Read.Schemas`) has
+the proper association to make more involved queries
+(e.g., `has_many/?` in `Schemas.User`).
+
 ### 2019-01-07 TODO
 
 Allow event and command definition in aggregates.

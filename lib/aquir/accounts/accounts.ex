@@ -96,9 +96,10 @@ defmodule Aquir.Accounts do
       credential when not(is_nil(credential)) <- Read.get(RS.Credential, :username, username),
       credential_id <- Map.get(credential, :credential_id),
       attrs_with_id <- Map.put(attrs, "credential_id", credential_id),
-    {:ok, reset_password} <- ACS.imbue_command(%C.ResetPassword{}, attrs_with_id)
+      {:ok, reset_password} <- ACS.imbue_command(%C.ResetPassword{}, attrs_with_id)
     ) do
       ACR.dispatch(reset_password, consistency: :strong)
+      # ACR.dispatch(reset_password, consistency: :strong, include_aggregate_version: true)
     else
       nil -> {:error, :username_not_found}
     end

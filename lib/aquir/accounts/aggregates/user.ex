@@ -2,6 +2,11 @@ defmodule Aquir.Accounts.Aggregates.User do
   require Logger
   use Ecto.Schema
 
+  # 2019_01-16_0804 TODO
+  # Think  about  stream  lifespan (Commanded  calls  it
+  # "aggregate  lifespan"  but  it  is  about  aggregate
+  # instance processes so ...)
+  # https://github.com/commanded/commanded/blob/master/guides/Commands.md#aggregate-lifespan
   @primary_key false
   embedded_schema do
     field :user_id, :binary_id

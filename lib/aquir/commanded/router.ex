@@ -7,6 +7,14 @@ defmodule Aquir.Commanded.Router do
   account  context. We'll  see how  interesting things
   will become with more contexts, so this is a maybe.
   """
+
+  # 2019-01-16_0814 TODO (ComositeRouter)
+  @doc """
+  Related to 2019-01-16_0604, just what I was thinking
+  about when moving the router out of `Accounts`.
+  https://github.com/commanded/commanded/blob/master/guides/Commands.md#composite-command-routers
+  """
+
   alias Aquir.Accounts.Aggregates, as: A
   alias Aquir.Accounts.Commands,   as: C
 
