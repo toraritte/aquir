@@ -327,9 +327,16 @@ created_at     | 2018-10-24 05:36:46.740172
 
 ## NOTEs, long/obscure TODOs, QUESTIONs
 
-### 2018-10-11_2312 NOTE
-RegisterUser command validation is done here instead
-of Aquir.Commanded.Router  using Commanded.Middleware,
+### 2018-10-11_2312 NOTE TODO (Commanded.Middleware)
+
+2018-10-11_2312
+2018-10-23_0914
+2018-10-19_2246
+2018-10-18_0004
+
+RegisterUser   command  validation   is  done   here
+(i.e.,  in  the   `Accounts`  context),  instead  of
+Aquir.Commanded.Router  using  Commanded.Middleware,
 (as   described   in  Building   Conduit),   because
 RegisterUser will  only be called from  the Accounts
 context.  After  all,  its  whole  point  is  to  be
@@ -395,7 +402,12 @@ the  time the  command  gets here,  it already  went
 through validation  via changesets in  context (such
 as `accounts.ex`).
 
-### 2018-10-18_0004 NOTE
+### 2018-10-18_0004 NOTE TODO (Commanded.Middleware)
+
+2018-10-11_2312
+2018-10-23_0914
+2018-10-19_2246
+2018-10-18_0004
 
 Keeping   command   validation    in   the   context
 (i.e.,  `Account.ex`)  as  I  am  not  fond  of  the
@@ -421,7 +433,12 @@ submitted  in   RegisterUser  via  an   atom  (e.g.,
 
 TODO This is pretty vague, work it out.
 
-### 2018-10-19_2246 NOTE TODO
+### 2018-10-19_2246 NOTE TODO (Commanded.Middleware)
+
+2018-10-11_2312
+2018-10-23_0914
+2018-10-19_2246
+2018-10-18_0004
 
 Commanded.Middleware is  currently implemented  as a
 behaviour with before  and after dispatch callbacks,
@@ -438,13 +455,20 @@ Use something  similar to `pipeline/2` and
 there are  default middleware  implementations added
 in Commanded.Commands.Router.
 
-### 2018-10-23_0914 NOTE TODO(?)
+### 2018-10-23_0914 NOTE TODO(?) (Commanded.Middleware also?)
 
   Related notes:
   + 2019-01-04_1152
   + 2019-01-09_1200
   + 2018-12-31_1019
   + 2018-10-23_0914
+
+(Regarding Commanded.Middleware:
+
+ 2018-10-11_2312
+ 2018-10-23_0914
+ 2018-10-19_2246
+ 2018-10-18_0004               )
 
 Unique (and  other) constraints  should live  in the
 aggregates and not in arbitrary places. For example,
