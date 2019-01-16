@@ -67,7 +67,13 @@ defmodule Aquir.Accounts do
     ) do
       ACR.dispatch(register_user, consistency: :strong)
       ACR.dispatch(add_username_password_credential, consistency: :strong)
+
+      # {ACR.dispatch(register_user, consistency: :strong, include_execution_result: true),
+      # ACR.dispatch(add_username_password_credential, consistency: :strong, include_execution_result: true)}
+
       # Read.get_user_by_id(register_user.user_id)
+
+    # This happens by default with `with/1`
     # else
     #   err -> err
     end
