@@ -4,9 +4,10 @@
   <%= for user <- @users do %>
     <tr>
       <td><%= user.user_id %></td>
-      <td><b><%= user.username %></b></td>
+      <td><b><%= user.credentials.username %></b></td>
       <td><%= user.name %></td>
       <td><%= user.email %></td>
+      <td><%= link "View", to: user_path(@conn, :show, user.user_id) %></td>
     </tr>
   <% end %>
 </table>
