@@ -1,0 +1,12 @@
+<h1>Listing users</h1>
+
+<table>
+  <%= for user <- @users do %>
+    <tr>
+      <td><%= user.user_id %></td>
+      <td><b><%= user.username %></b></td>
+      <td><%= user.name %></td>
+      <td><%= user.email %></td>
+    </tr>
+  <% end %>
+</table>

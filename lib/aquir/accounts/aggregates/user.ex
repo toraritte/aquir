@@ -10,8 +10,8 @@ defmodule Aquir.Accounts.Aggregates.User do
   @primary_key false
   embedded_schema do
     field :user_id, :binary_id
-    field :name, :string
-    field :email, :string
+    field :name,    :string
+    field :email,   :string
     # TODO see the papers for more
 
     # See NOTE 2019-01-06_1938 on the missing `embeds_many/3`

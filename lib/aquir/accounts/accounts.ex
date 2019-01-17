@@ -19,6 +19,9 @@ defmodule Aquir.Accounts do
   alias Aquir.Commanded.Support, as: ACS
   alias Aquir.Commanded.Router,  as: ACR
 
+  alias Aquir.Repo
+  import Ecto.Query
+
   alias __MODULE__.Commands, as: C
   alias __MODULE__.Read
   alias __MODULE__.Read.Schemas, as: RS
@@ -89,24 +92,6 @@ defmodule Aquir.Accounts do
   changeset, but an input error.
   """
 
-  # 2019-01-16_0858 TODO (mv {aggregate,stream}_version)
-  @doc """
-  Attila Gulyas @toraritte 07:42
-  > Hi,  I just  found out  about the  dispatch/2 option
-  > :include_aggregate_version   and  I   was  wondering
-  > whether this  refers to  stream version? I'm  new at
-  > CQRS  and  DDD,  and  my  current  understanding  is
-  > that stream  == aggregate instance  process. Indeed,
-  > in  the event  store  the result  also  seems to  be
-  > mapped to the  stream_version column, but throughout
-  > the  Commanded   repo  it  is   consistently  called
-  > aggregate_version. Am I missing something?
-
-  Ben Smith @slashdotdash 08:23
-  > Stream version  and aggregate  version are  the same
-  > thing.
-  """
-
   def reset_password(%{"username" => username, "new_password" => _} = attrs) do
 
     with(
@@ -123,102 +108,12 @@ defmodule Aquir.Accounts do
     end
   end
 
-#   import Ecto.Query, warn: false
-#   alias Aquir.Repo
-
-#   alias Aquir.Accounts.User
-
-#   @doc """
-#   Returns the list of users.
-
-#   ## Examples
-
-#       iex> list_users()
-#       [%User{}, ...]
-
-#   """
-#   def list_users do
-#     Repo.all(User)
-#   end
-
-#   @doc """
-#   Gets a single user.
-
-#   Raises `Ecto.NoResultsError` if the User does not exist.
-
-#   ## Examples
-
-#       iex> get_user!(123)
-#       %User{}
-
-#       iex> get_user!(456)
-#       ** (Ecto.NoResultsError)
-
-#   """
-#   def get_user!(id), do: Repo.get!(User, id)
-
-#   @doc """
-#   Creates a user.
-
-#   ## Examples
-
-#       iex> create_user(%{field: value})
-#       {:ok, %User{}}
-
-#       iex> create_user(%{field: bad_value})
-#       {:error, %Ecto.Changeset{}}
-
-#   """
-#   def create_user(attrs \\ %{}) do
-#     %User{}
-#     |> User.changeset(attrs)
-#     |> Repo.insert()
-#   end
-
-#   @doc """
-#   Updates a user.
-
-#   ## Examples
-
-#       iex> update_user(user, %{field: new_value})
-#       {:ok, %User{}}
-
-#       iex> update_user(user, %{field: bad_value})
-#       {:error, %Ecto.Changeset{}}
-
-#   """
-#   def update_user(%User{} = user, attrs) do
-#     user
-#     |> User.changeset(attrs)
-#     |> Repo.update()
-#   end
-
-#   @doc """
-#   Deletes a User.
-
-#   ## Examples
-
-#       iex> delete_user(user)
-#       {:ok, %User{}}
-
-#       iex> delete_user(user)
-#       {:error, %Ecto.Changeset{}}
-
-#   """
-#   def delete_user(%User{} = user) do
-#     Repo.delete(user)
-#   end
-
-#   @doc """
-#   Returns an `%Ecto.Changeset{}` for tracking user changes.
-
-#   ## Examples
-
-#       iex> change_user(user)
-#       %Ecto.Changeset{source: %User{}}
-
-#   """
-#   def change_user(%User{} = user) do
-#     User.changeset(user, %{})
-#   end
+  def list_users_with_credentials do
+    Repo.all(
+      from u in RS.User,
+        join: c in RS.Credential,
+        on: u.user_id == c.for_user_id,
+        preload: [credentials: c]
+    )
+  end
 end

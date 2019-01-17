@@ -778,7 +778,7 @@ for  documentation's sake.  `embeds_many` in  `User`
 aggregate and `:for_user_id` in Credential aggregate
 reflects this relationship clearly.
 
-### 2019-01-06_1938 NOTE
+### 2019-01-06_1938 NOTE (Why no `embeds_many/3` in `User` aggregate?)
 
 Removed   `embeds_many/3`   from  `User`   aggregate
 because it would couple the aggregates, complicating
@@ -790,7 +790,7 @@ the  `Credential`  commands), and  projections  will
 explicitly show the relationship(s).
 
 UPDATE 2019-01-16_0804
-Also unnecessary  because this  the "write"  side of
+Also unnecessary because this is the "write" side of
 CQRS, only used for  command validation on dispatch.
 The "read"  side (`Aquir.Accounts.Read.Schemas`) has
 the proper association to make more involved queries
