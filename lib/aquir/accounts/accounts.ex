@@ -19,9 +19,6 @@ defmodule Aquir.Accounts do
   alias Aquir.Commanded.Support, as: ACS
   alias Aquir.Commanded.Router,  as: ACR
 
-  alias Aquir.Repo
-  import Ecto.Query
-
   alias __MODULE__.Commands, as: C
   alias __MODULE__.Read
   alias __MODULE__.Read.Schemas, as: RS
@@ -66,19 +63,19 @@ defmodule Aquir.Accounts do
       :ok <- __MODULE__.Support.UniqueUsername.claim(username),
       :ok <- Read.check_dup(RS.Credential, :username, username),
 
-      :ok <- Read.check_dup(RS.User, :email, email)
+      :ok <- Read.check_dup(RS.User, :email, email),
+      :ok <- ACR.dispatch(register_user, consistency: :strong),
+      :ok <- ACR.dispatch(add_username_password_credential, consistency: :strong)
     ) do
-      ACR.dispatch(register_user, consistency: :strong)
-      ACR.dispatch(add_username_password_credential, consistency: :strong)
 
       # {ACR.dispatch(register_user, consistency: :strong, include_execution_result: true),
       # ACR.dispatch(add_username_password_credential, consistency: :strong, include_execution_result: true)}
 
-      # Read.get_user_by_id(register_user.user_id)
+      {:ok, Read.get_user_by_id(register_user.user_id)}
 
     # This happens by default with `with/1`
-    # else
-    #   err -> err
+    else
+      err ->{:error, err}
     end
   end
   # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
@@ -106,25 +103,5 @@ defmodule Aquir.Accounts do
     else
       nil -> {:error, :username_not_found}
     end
-  end
-
-  defp all_users_with_credentials_query do
-      from u in RS.User,
-        join: c in RS.Credential,
-        on: u.user_id == c.for_user_id,
-        preload: [credentials: c]
-  end
-
-  defp user_with_credential_by_user_id_query(user_id) do
-    from q in all_users_with_credentials_query(),
-      where: q.user_id == ^user_id
-  end
-
-  def list_users_with_credentials do
-    Repo.all all_users_with_credentials_query()
-  end
-
-  def get_user_by_id(user_id) do
-    Repo.one user_with_credential_by_user_id_query(user_id)
   end
 end

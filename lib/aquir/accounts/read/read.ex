@@ -1,5 +1,9 @@
 defmodule Aquir.Accounts.Read do
+
   import Ecto.Query
+
+  alias Aquir.Repo
+  alias __MODULE__.Schemas, as: RS
 
   # alias __MODULE__.Schemas, as: RS
 
@@ -36,6 +40,25 @@ defmodule Aquir.Accounts.Read do
     end
   end
 
+  defp all_users_with_credentials_query do
+      from u in RS.User,
+        join: c in RS.Credential,
+        on: u.user_id == c.for_user_id,
+        preload: [credentials: c]
+  end
+
+  defp user_with_credential_by_user_id_query(user_id) do
+    from q in all_users_with_credentials_query(),
+      where: q.user_id == ^user_id
+  end
+
+  def list_users_with_credentials do
+    Repo.all all_users_with_credentials_query()
+  end
+
+  def get_user_by_id(user_id) do
+    Repo.one user_with_credential_by_user_id_query(user_id)
+  end
   # def get_user_by_id(user_id) do
   #   Aquir.Repo.get(__MODULE__, user_id)
   # end
