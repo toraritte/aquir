@@ -41,8 +41,17 @@ defmodule AquirWeb.UserController do
     render(conn, "new.html")
   end
 
+  @doc """
+  The form (`new.html.eex`) only  asks for name, email
+  address  and  password,  because at  this  time  the
+  username is  extracted from  the email  address (see
+  `user_with_username`). This  can be  easily modified
+  because  `Accounts.register_user/1`  would accept  a
+  username as well.
+  """
   def create(conn, %{"user" => user}) do
     # require IEx; IEx.pry
+
     user_with_username =
       user["email"]
       |> String.split("@")

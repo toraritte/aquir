@@ -24,13 +24,17 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
 
   import Ecto.Changeset
 
-  def changeset(command, params) do
+  def changeset(%__MODULE__{} = command, params) do
 
     # TODO:
     # + add tests and email, password constraints
     #   (these could be in Support)
     # + separate credentials and user info
-    required_fields = [:user_id, :name, :email]
+    required_fields = [
+      :user_id,
+      :name,
+      :email,
+    ]
 
     command
     |> Aquir.Commanded.Support.assign_id(:user_id)

@@ -6,6 +6,10 @@ defmodule AquirWeb.FallbackController do
   """
   use AquirWeb, :controller
 
+  def call(conn, all) do
+    require IEx; IEx.pry
+  end
+
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:unprocessable_entity)

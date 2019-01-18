@@ -40,24 +40,21 @@ defmodule Aquir.Accounts do
       # changeset returns  any error, then  subsequent tries
       # will  fail  as the  name  check  will come  back  as
       # already taken.
-      {:ok, register_user} <-
-        ACS.imbue_command(
-          %C.RegisterUser{},
-          %{
-            name:  name,
-            email: email
-           }),
-
-      {:ok, add_username_password_credential} <-
-        ACS.imbue_command(
-          %C.AddUsernamePasswordCredential{},
-          %{
-            for_user_id: register_user.user_id,
-            payload: %{
-              username: username,
-              password: password,
-            }
-           }),
+      register_user_tuple = {
+        %C.RegisterUser{},
+        %{name:  name, email: email}
+      },
+      add_credential_tuple = {
+        %C.AddUsernamePasswordCredential{},
+        %{
+          payload: %{
+            username: username,
+            password: password,
+          }
+        }
+      },
+      {:ok, [register_user, add_credential]} <-
+        ACS.imbue_command([register_user_tuple, add_credential_tuple]),
 
       # TODO Clean up. See NOTE 2018-10-23_0914
       :ok <- __MODULE__.Support.UniqueUsername.claim(username),
@@ -65,11 +62,11 @@ defmodule Aquir.Accounts do
 
       :ok <- Read.check_dup(RS.User, :email, email),
       :ok <- ACR.dispatch(register_user, consistency: :strong),
-      :ok <- ACR.dispatch(add_username_password_credential, consistency: :strong)
+      :ok <- ACR.dispatch(add_credential, consistency: :strong)
     ) do
 
       # {ACR.dispatch(register_user, consistency: :strong, include_execution_result: true),
-      # ACR.dispatch(add_username_password_credential, consistency: :strong, include_execution_result: true)}
+      # ACR.dispatch(add_credential, consistency: :strong, include_execution_result: true)}
 
       {:ok, Read.get_user_by_id(register_user.user_id)}
 
@@ -93,10 +90,13 @@ defmodule Aquir.Accounts do
 
     with(
     # TODO 2019-01-15_1255 (Why query the DB multiple times?)
-      credential when not(is_nil(credential)) <- Read.get(RS.Credential, :username, username),
+      credential when not(is_nil(credential)) <-
+        Read.get(RS.Credential, :username, username),
+
       credential_id <- Map.get(credential, :credential_id),
       attrs_with_id <- Map.put(attrs, "credential_id", credential_id),
-      {:ok, reset_password} <- ACS.imbue_command(%C.ResetPassword{}, attrs_with_id)
+
+      {:ok, [reset_password]} <- ACS.imbue_command([%C.ResetPassword{}, attrs_with_id])
     ) do
       ACR.dispatch(reset_password, consistency: :strong)
       # ACR.dispatch(reset_password, consistency: :strong, include_aggregate_version: true)

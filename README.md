@@ -968,6 +968,45 @@ iex(58)> Ecto.Changeset.apply_changes(c)
 }
 ```
 
+### 2019-01-06_0838 NOTE (Evolution of `imbue_command`)u
+
+A single context function handles multiple commands,
+and at the time of this writing, handling validation
+sequentially. Context function  arguments would have
+to be handled atomically though. A use case:
+
+  `Accounts.register_user/1`  accepts  a  map  with  4
+  keys,  2-2 for  each command.  If the  first command
+  isn't   valid,  the   entire  function   returns  an
+  `{:error,  changeset}`  tuple,  but  the  subsequent
+  command is never checked.
+
+It   would  be   prudent   to  let   the  end   user
+know   about   all    of   the   errors,   therefore
+refactoring  `imbue_command`  to  accept a  list  of
+`{command_struct,  attrs_map}`  tuples, and  provide
+all errors in  the form of a list  of changesets, or
+the imbued commands otherwise.
+
+NOTE Why this output? (i.e., changesets on error, commands otherwise)
+
+Because
+
++  on  **success**,  the  commands will  be  fed  to
+   `Aquir.Commanded.Router` to be dispatched
+
++ on **failure**,  the context will return  the errors
+  as changesets  because all validations are  done via
+  Ecto.Changesets.  This  means  that  any  sub-system
+  consuming  this output  can  do any  transformations
+  they want.
+
+  For example, views and templates can take changesets
+  and  then extract  errors if  any. But  what if  the
+  front  end  is  moved  from Phoenix  to  a  JS  lib?
+  Then  just  extract  the errors  from  the  (nested
+  changesets into a map, etc.
+
 ### 2019-01-05_2302 NOTE (How to add change to a changeset?)
 
 ```elixir

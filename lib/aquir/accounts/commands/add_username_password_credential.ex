@@ -36,13 +36,19 @@ defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
 
   import Ecto.Changeset
 
-  def changeset(command, params) do
+  def changeset(%__MODULE__{} = command, params) do
+
+    required_fields = [
+      :credential_id,
+      :for_user_id,
+      :payload,
+    ]
 
     command
     |> Aquir.Commanded.Support.assign_id(:credential_id)
     |> cast(params, [:for_user_id])
     |> cast_embed(:payload, with: &payload_changeset/2)
-    |> validate_required([:credential_id, :for_user_id, :payload])
+    |> validate_required(required_fields)
   end
 
   defp payload_changeset(payload, params) do

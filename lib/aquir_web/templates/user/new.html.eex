@@ -5,10 +5,40 @@
     <%= text_input f, :name, placeholder: "Full Name" %>
   </div>
   <div>
-    <%= text_input f, :email, placeholder: "Email" %>
+
+    <%#
+    2019-01-18 TODO (email validation)
+    ---------------
+    Only using a very broad pattern, because to properly
+    validate an email address  with regex borders on the
+    impossible and email confirmation would be necessary
+    anyway. See this answer in particular:
+
+    https://stackoverflow.com/a/202528/1498178
+
+    This post shows  a high level, but  helpful, flow on
+    how  to do  email  verification  securely with  only
+    built-in Phoenix tools:
+
+    https://dockyard.com/blog/2017/09/06/adding-email-verification-flow-with-phoenix
+    %>
+
+    <%= email_input f, :email,
+          pattern: ".+@.+\\..{2,4}",
+          title: "An example for a valid email address: sample@company.org",
+          placeholder: "Email" %>
   </div>
   <div>
-    <%= text_input f, :password, placeholder: "password" %>
+    <%= password_input f, :password, placeholder: "password" %>
   </div>
+
+      <%#
+      2019-01-18_0503 TODO (multi-round password validation)
+      ---------------
+      Validate password by having  users enter them again.
+      Or  admins, if  this is  not  going to  be a  public
+      facing page.
+      %>
+
   <%= submit "Create User" %>
 <% end %>

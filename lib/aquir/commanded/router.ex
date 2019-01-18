@@ -8,12 +8,14 @@ defmodule Aquir.Commanded.Router do
   will become with more contexts, so this is a maybe.
   """
 
-  # 2019-01-16_0814 TODO (ComositeRouter)
+  # 2019-01-16_0814 TODO (CompositeRouter)
   @doc """
   Related to 2019-01-16_0604, just what I was thinking
   about when moving the router out of `Accounts`.
   https://github.com/commanded/commanded/blob/master/guides/Commands.md#composite-command-routers
   """
+
+  # 2019-01-18_0455 TODO (Add Commanded middlewares)
 
   alias Aquir.Accounts.Aggregates, as: A
   alias Aquir.Accounts.Commands,   as: C
