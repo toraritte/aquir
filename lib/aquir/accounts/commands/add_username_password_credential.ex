@@ -58,6 +58,7 @@ defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
     payload
     |> cast(params, required_fields)
     |> validate_required(required_fields)
+    |> validate_length(:password, min: 7)
     |> Aquir.Accounts.Support.Auth.secure_password(:password)
   end
 end

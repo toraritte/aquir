@@ -19,28 +19,25 @@ defmodule AquirWeb.UserController do
       &unwrap_credentials_in_user/1)
   end
 
-  defp unwrap_credentials_in_user(user_with_credentials) do
-    cs = user_with_credentials.credentials
-    Map.put(user_with_credentials, :credentials, hd(cs))
-  end
-
   def show(conn, %{"user_id" => user_id}) do
 
     user =
       Accounts.Read.get_user_by_id(user_id)
       |> unwrap_credentials_in_user()
 
-    render(
-      conn,
-      "show.html",
-      user: user
-    )
+    render(conn, "show.html", user: user)
+  end
+
+  defp unwrap_credentials_in_user(user_with_credentials) do
+    cs = user_with_credentials.credentials
+    Map.put(user_with_credentials, :credentials, hd(cs))
   end
 
   def new(conn, _params) do
     render(conn, "new.html")
   end
 
+  # 2019-01-18_1312 NOTE
   @doc """
   The form (`new.html.eex`) only  asks for name, email
   address  and  password,  because at  this  time  the
@@ -50,7 +47,6 @@ defmodule AquirWeb.UserController do
   username as well.
   """
   def create(conn, %{"user" => user}) do
-    # require IEx; IEx.pry
 
     user_with_username =
       user["email"]
@@ -62,7 +58,7 @@ defmodule AquirWeb.UserController do
 
     conn
     |> put_flash(:info, "#{user.name} created!")
-    |> redirect(to: user_path(conn, :index))
+    |> redirect(to: user_path(conn, :show, user.user_id))
   end
 
   # def index(conn, _params) do

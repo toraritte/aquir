@@ -71,8 +71,8 @@ defmodule Aquir.Accounts do
       {:ok, Read.get_user_by_id(register_user.user_id)}
 
     # This happens by default with `with/1`
-    else
-      err ->{:error, err}
+    # else
+    #   err -> err
     end
   end
   # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
