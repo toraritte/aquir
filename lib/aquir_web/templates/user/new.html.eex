@@ -1,6 +1,21 @@
 <h1>New User</h1>
 
-<%= form_for @conn, user_path(@conn, :create), [as: :user], fn f -> %>
+<%#
+2019-01-19_1434 TODO (Make more descriptive foldtexts)
+---------------
+For example, what is the main tag under the <div>s?
+https://stackoverflow.com/questions/5983396/
+%>
+
+<%= form_for @conn, user_path(@conn, :create), [as: :user, errors: @conn.assigns[:errors]], fn f -> %>
+
+  <%# <%= require IEx; IEx.pry %1> %>
+  <%= if f.errors do %>
+    <div>
+      <%= content_tag :span, "lofa" %>
+    </div>
+  <% end %>
+
   <div>
     <%= text_input f, :name, placeholder: "Full Name" %>
   </div>
@@ -29,8 +44,6 @@
           placeholder: "Email" %>
   </div>
   <div>
-    <%= password_input f, :password, placeholder: "password" %>
-  </div>
 
       <%#
       2019-01-18_0503 TODO (multi-round password validation)
@@ -39,6 +52,9 @@
       Or  admins, if  this is  not  going to  be a  public
       facing page.
       %>
+
+    <%= password_input f, :password, placeholder: "password" %>
+  </div>
 
   <%= submit "Create User" %>
 <% end %>

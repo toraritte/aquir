@@ -19,10 +19,10 @@ defmodule AquirWeb.UserController do
       &unwrap_credentials_in_user/1)
   end
 
-  def show(conn, %{"user_id" => user_id}) do
+  def show(conn, %{"username" => username}) do
 
     user =
-      Accounts.Read.get_user_by_id(user_id)
+      Accounts.Read.get_user_by(username: username)
       |> unwrap_credentials_in_user()
 
     render(conn, "show.html", user: user)
@@ -42,23 +42,28 @@ defmodule AquirWeb.UserController do
   The form (`new.html.eex`) only  asks for name, email
   address  and  password,  because at  this  time  the
   username is  extracted from  the email  address (see
-  `user_with_username`). This  can be  easily modified
+  `user_params_with_username`). This  can be  easily modified
   because  `Accounts.register_user/1`  would accept  a
   username as well.
   """
   def create(conn, %{"user" => user}) do
 
-    user_with_username =
-      user["email"]
-      |> String.split("@")
-      |> hd()
-      |> (&Map.put(user, "username", &1)).()
+    case Accounts.register_user(user) do
+      {:ok, user_with_credentials} ->
 
-    {:ok, user} = Accounts.register_user(user_with_username)
+        user = unwrap_credentials_in_user(user_with_credentials)
+        username = user.credentials.username
 
-    conn
-    |> put_flash(:info, "#{user.name} created!")
-    |> redirect(to: user_path(conn, :show, user.user_id))
+        conn
+        |> put_flash(:info, "#{username} created!")
+        |> redirect(to: user_path(conn, :show, username))
+
+      # {:error, changesets_list} ->
+      {:error, error} ->
+        render(conn, "new.html", errors: [error])
+      # {:error, [:username_already_in_database, username]} ->
+      # {:error, [:username_already_in_database, username]} ->
+    end
   end
 
   # def index(conn, _params) do

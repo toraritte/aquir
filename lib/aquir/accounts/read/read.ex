@@ -25,12 +25,14 @@ defmodule Aquir.Accounts.Read do
   the event  store should  never be edited.  Hence the
   workaround in the account context (`account.ex`).
   """
+  # INTERNAL TO ACCOUNTS
+  # --------------------
   def get(schema, entity_key, entity) do
 
     query = from e in schema,
               where: field(e, ^entity_key) == ^entity
 
-    Aquir.Repo.one(query)
+    Repo.one(query)
   end
 
   def check_dup(schema, entity_key, entity) do
@@ -40,6 +42,8 @@ defmodule Aquir.Accounts.Read do
     end
   end
 
+  # EXTERNAL TO ACCOUNTS
+  # --------------------
   defp all_users_with_credentials_query do
       from u in RS.User,
         join: c in RS.Credential,
@@ -47,23 +51,21 @@ defmodule Aquir.Accounts.Read do
         preload: [credentials: c]
   end
 
-  defp user_with_credential_by_user_id_query(user_id) do
-    from q in all_users_with_credentials_query(),
-      where: q.user_id == ^user_id
-  end
-
   def list_users_with_credentials do
     Repo.all all_users_with_credentials_query()
   end
 
-  def get_user_by_id(user_id) do
-    Repo.one user_with_credential_by_user_id_query(user_id)
+  def get_user_by(user_id: user_id) do
+    from(
+      [u,c] in all_users_with_credentials_query(),
+      where: u.user_id == ^user_id)
+    |> Repo.one()
   end
-  # def get_user_by_id(user_id) do
-  #   Aquir.Repo.get(__MODULE__, user_id)
-  # end
 
-  # def get_user_by_email(email) do
-  #   Aquir.Repo.get_by(__MODULE__, email: email)
-  # end
+  def get_user_by(username: username) do
+    from(
+      [u,c] in all_users_with_credentials_query(),
+      where: c.username == ^username)
+    |> Repo.one()
+  end
 end

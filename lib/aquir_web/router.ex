@@ -16,7 +16,7 @@ defmodule AquirWeb.Router do
   scope "/", AquirWeb do
     pipe_through :browser # Use the default browser stack
 
-    resources "/users", UserController, param: "user_id"
+    resources "/users", UserController, param: "username"
     get "/", PageController, :index
   end
 

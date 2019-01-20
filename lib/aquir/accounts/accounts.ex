@@ -24,6 +24,25 @@ defmodule Aquir.Accounts do
   alias __MODULE__.Read.Schemas, as: RS
   # `alias Read.Schemas, as: RS` would have been enough but being pedantic
 
+  # 2019-01-19_1324 NOTE
+  @doc """
+  Moving this here from `UserController.new/2` because
+  it  is a  business domain  decision to  generate the
+  username from the email address.
+
+  Phoenix is  just (albeit huge) wrapper  around these
+  contexts.
+  """
+  def register_user(%{"name" => _, "email" => _, "password" => _} = user)
+    when map_size(user) == 3
+  do
+    user["email"]
+    |> String.split("@")
+    |> hd()
+    |> (&Map.put(user, "username", &1)).()
+    |> register_user()
+  end
+
   def register_user(
     %{
       "name"  => name,
@@ -31,8 +50,8 @@ defmodule Aquir.Accounts do
       # "for_user_id" => , not needed because it is the user_id
       "username" => username,
       "password" => password,
-    }
-  ) do
+    } = user
+  ) when map_size(user) == 4 do
 
     with(
       # `changeset`  needs  to  come first  because  if  the
@@ -55,24 +74,24 @@ defmodule Aquir.Accounts do
       },
       {:ok, [register_user, add_credential]} <-
         ACS.imbue_command([register_user_tuple, add_credential_tuple]),
+      # {:error, [changeset_1, ..., changeset_N]}
 
       # TODO Clean up. See NOTE 2018-10-23_0914
       :ok <- __MODULE__.Support.UniqueUsername.claim(username),
-      :ok <- Read.check_dup(RS.Credential, :username, username),
+      # {:error, :username_already_taken}
 
+      :ok <- Read.check_dup(RS.Credential, :username, username),
       :ok <- Read.check_dup(RS.User, :email, email),
+      # {:error, [:"#{entity_key}_already_in_database", entity]}
+
       :ok <- ACR.dispatch(register_user, consistency: :strong),
       :ok <- ACR.dispatch(add_credential, consistency: :strong)
     ) do
-
-      # {ACR.dispatch(register_user, consistency: :strong, include_execution_result: true),
-      # ACR.dispatch(add_credential, consistency: :strong, include_execution_result: true)}
-
-      {:ok, Read.get_user_by_id(register_user.user_id)}
-
-    # This happens by default with `with/1`
-    # else
-    #   err -> err
+      {:ok, Read.get_user_by(user_id: register_user.user_id)}
+      # The below happens by default with `with/1`:
+      #
+      #   else
+      #     err -> err
     end
   end
   # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
