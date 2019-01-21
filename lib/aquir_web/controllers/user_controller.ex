@@ -58,12 +58,23 @@ defmodule AquirWeb.UserController do
         |> put_flash(:info, "#{username} created!")
         |> redirect(to: user_path(conn, :show, username))
 
+      # {:error, [changeset_1, ..., changeset_N]}
+      {:error, :username_already_taken = error, username} ->
+        error_text = Phoenix.HTML.Form.humanize(error) <> ": #{username}"
+        render(conn, "new.html", errors: [error_text])
+
+      # {:error, :username_already_in_database, username} ->
+      # {:error, :email_already_in_database, email} ->
+
       # {:error, changesets_list} ->
       {:error, error} ->
         render(conn, "new.html", errors: [error])
-      # {:error, [:username_already_in_database, username]} ->
-      # {:error, [:username_already_in_database, username]} ->
     end
+  end
+
+  defp render_error(path, error, entity) when is_atom(error) do
+    error_text = Phoenix.HTML.Form.humanize(error) <> ": #{entity}"
+    render(conn, path, errors: [error_text])
   end
 
   # def index(conn, _params) do

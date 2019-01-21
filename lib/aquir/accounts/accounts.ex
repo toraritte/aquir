@@ -20,6 +20,7 @@ defmodule Aquir.Accounts do
   alias Aquir.Commanded.Router,  as: ACR
 
   alias __MODULE__.Commands, as: C
+  alias __MODULE__.Support.Unique
   alias __MODULE__.Read
   alias __MODULE__.Read.Schemas, as: RS
   # `alias Read.Schemas, as: RS` would have been enough but being pedantic
@@ -53,46 +54,65 @@ defmodule Aquir.Accounts do
     } = user
   ) when map_size(user) == 4 do
 
-    with(
-      # `changeset`  needs  to  come first  because  if  the
-      # UniqueUsername agent  saves the username  first, but
-      # changeset returns  any error, then  subsequent tries
-      # will  fail  as the  name  check  will come  back  as
-      # already taken.
-      register_user_tuple = {
-        %C.RegisterUser{},
-        %{name:  name, email: email}
-      },
-      add_credential_tuple = {
-        %C.AddUsernamePasswordCredential{},
-        %{
-          payload: %{
-            username: username,
-            password: password,
-          }
+    r_tuple = {
+      %C.RegisterUser{},
+      %{name:  name, email: email}
+    }
+    a_tuple = {
+      %C.AddUsernamePasswordCredential{},
+      %{
+        payload: %{
+          username: username,
+          password: password,
         }
-      },
-      {:ok, [register_user, add_credential]} <-
-        ACS.imbue_command([register_user_tuple, add_credential_tuple]),
-      # {:error, [changeset_1, ..., changeset_N]}
+      }
+    }
 
+    results = [
+      ACS.imbue_command([r_tuple, a_tuple]),
+    # {:ok, [register_user, add_credential]} <-
+    # {:error, [changeset_1, ..., changeset_N]}
+      Unique.taken?(:email, email),
+      Unique.taken?(:username, username),
+      # {:ok, :"#{key}_available", value}
+      # {:error, :"#{key}_already_taken", value}
+    ]
+
+    errors =
+      Enum.filter(
+        results,
+        fn({status, _}) -> status == :error end)
+
+    case length(errors) == 0 do
+      true ->
+        claim_results =
+          [username: username, email: email]
+          |> Enum.map(
+               fn({key, value}) ->
+                 Unique.claim(key, value)
+                 # {:error, :"#{key}_already_taken", value}
+                 # {:ok, :"#{key}_claimed_successfully", value}
+               end)
+    end
       # TODO Clean up. See NOTE 2018-10-23_0914
-      :ok <- __MODULE__.Support.UniqueUsername.claim(username),
-      # {:error, :username_already_taken}
+      # :ok <- Unique.claim(username),
+      # {:error, :username_already_taken, username}
 
-      :ok <- Read.check_dup(RS.Credential, :username, username),
-      :ok <- Read.check_dup(RS.User, :email, email),
-      # {:error, [:"#{entity_key}_already_in_database", entity]}
+      # :ok <- Read.check_dup(RS.Credential, :username, username),
+      # :ok <- Read.check_dup(RS.User,       :email,    email)
+      # # {:error, :"#{entity_key}_already_in_database", entity}
+    # ) do
 
-      :ok <- ACR.dispatch(register_user, consistency: :strong),
-      :ok <- ACR.dispatch(add_credential, consistency: :strong)
-    ) do
-      {:ok, Read.get_user_by(user_id: register_user.user_id)}
+      # ACR.dispatch(register_user,  consistency: :strong)
+      # ACR.dispatch(add_credential, consistency: :strong)
+
+      # {:ok, Read.get_user_by(user_id: register_user.user_id)}
+
       # The below happens by default with `with/1`:
       #
       #   else
       #     err -> err
-    end
+    # end
   end
   # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
 

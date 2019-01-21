@@ -38,9 +38,15 @@ defmodule Aquir.Accounts.Read do
   def check_dup(schema, entity_key, entity) do
     case    get(schema, entity_key, entity) do
       nil -> :ok
-      _   -> {:error, [:"#{entity_key}_already_in_database", entity]}
+      _   -> {:error, :"#{entity_key}_already_in_database", entity}
     end
   end
+
+  def get_all(field, schema) do
+    from(e in schema, select: field(e, ^field))
+    |> Aquir.Repo.all()
+  end
+
 
   # EXTERNAL TO ACCOUNTS
   # --------------------
@@ -69,3 +75,17 @@ defmodule Aquir.Accounts.Read do
     |> Repo.one()
   end
 end
+# iex(4)> defmodule A do
+# ...(4)>   defmacro error!(args) do
+# ...(4)>     quote do
+# ...(4)>       _ = unquote(args)
+# ...(4)> 
+# ...(4)>       message =
+# ...(4)>         "Elixir's special forms are expanded by the compiler and must not be invoked dir
+# ectly"
+# ...(4)> 
+# ...(4)>       :erlang.error(RuntimeError.exception(message))
+# ...(4)>     end
+# ...(4)>   end
+# ...(4)>   defmacro with(args), do: error!([args])
+# ...(4)> end
