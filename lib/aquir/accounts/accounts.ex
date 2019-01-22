@@ -84,7 +84,7 @@ defmodule Aquir.Accounts do
     }
 
     results = [
-      ACS.imbue_command([r_tuple, a_tuple]),
+      ACS.imbue_commands([r_tuple, a_tuple]),
       # {:ok, [register_user, add_credential]}
       # {:error, [changeset_1, ..., changeset_N]}
       Unique.taken?(:email, email),
@@ -96,6 +96,7 @@ defmodule Aquir.Accounts do
     errors = error_filter(results)
 
     case length(errors) == 0 do
+
       true ->
         case Unique.claim(username: username, email: email) do
 
@@ -109,8 +110,12 @@ defmodule Aquir.Accounts do
 
             {:ok, Read.get_user_by(user_id: register_user.user_id)}
         end
+
       false ->
         {:errors, errors}
+        # Where `errors` is a list with one or both:
+        # {:error, [changeset_1, ..., changeset_N]}
+        # {:error, :"#{key}_already_taken", value}
     end
   end
   # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
@@ -147,7 +152,7 @@ defmodule Aquir.Accounts do
        }
 
     imbue_result =
-      ACS.imbue_command([
+      ACS.imbue_commands([
         {%C.ResetPassword{}, attrs_with_maybe_fake_credential_id}
       ])
     # {:ok, [reset_password]}

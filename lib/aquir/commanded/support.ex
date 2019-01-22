@@ -13,9 +13,9 @@ defmodule Aquir.Commanded.Support do
 
   # See (Evolution of `imbue_command`) NOTEs
   # [command_struct, attrs_map] ->
-  #     {:ok,    [command_changeset]}
+  #     {:ok,    [command]}
   #   | {:error, [command_changeset]}
-  def imbue_command(
+  def imbue_commands(
     [ {                 %C.RegisterUser{} = r_struct, r_attrs},
       {%C.AddUsernamePasswordCredential{},            a_attrs},
     ]
@@ -29,8 +29,6 @@ defmodule Aquir.Commanded.Support do
       end
 
     r_changeset = generate_changeset(r_struct, r_attrs)
-
-    result = []
 
     case r_changeset.valid? do
 
@@ -65,10 +63,9 @@ defmodule Aquir.Commanded.Support do
 
   # USE CASE: for independent commands
   # [command_struct, attrs_map] ->
-  #     {:ok,    [command_changeset]}
+  #     {:ok,    [command]}
   #   | {:error, [command_changeset]}
-  def imbue_command(command_param_tuples) when is_list(command_param_tuples) do
-  # def imbue_command(%command{} = command_struct, attrs) do
+  def imbue_commands(command_param_tuples) when is_list(command_param_tuples) do
 
     applied_changesets =
       Enum.map(
