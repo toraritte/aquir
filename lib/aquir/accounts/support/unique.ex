@@ -63,35 +63,34 @@ defmodule Aquir.Accounts.Support.Unique do
             key_statuses
             |> Enum.filter(fn({status, _, _}) -> status == :taken end)
             |> Enum.map(fn({:taken, key, value}) -> {key, value} end)
-              # entites_mapset = Map.get(state, key)
 
               # case value_in_state?(state, key, value) do
               #   true ->
               #     {true, :already_claimed}
               #   false ->
-              #     {false, MapSet.put(entites_mapset, value)}
               # end
             # end)
 
           case length(keys_taken) do
             0 ->
               new_state =
-                keywords # eltenni mindegyiket a megfelelo helyre
-              # remember, state is:
-              # %{key1: mapset1, key2: mapset2, etc}
-
-              {false, Map.put(state, key, new_entities_mapset)}
+                Enum.reduce(keywords, state, fn({key, value}, state_acc) ->
+                  Map.update(state_acc, key, MapSet.new([value]), fn(entities_mapset) ->
+                    MapSet.put(entities_mapset, value)
+                  end)
+                end)
+              {false, new_state}
             _ ->
               # get, new_state
               {{true, keys_taken}, state}
           end
         end)
 
-    case claimed? do
+    case any_claimed_already? do
       {true, keys_taken} ->
         {:error, :keys_already_taken, keys_taken}
       false ->
-        {:ok, :claim_successfully, keywords}
+        {:ok, :claim_successful, keywords}
     end
   end
 
