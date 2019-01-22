@@ -32,9 +32,9 @@ defmodule Aquir.Accounts.Support.Unique do
 
     case is_it? do
       true ->
-        {:ok, :"#{key}_available", value}
-      false ->
         {:error, :"#{key}_already_taken", value}
+      false ->
+        {:ok, :"#{key}_available", value}
     end
   end
 

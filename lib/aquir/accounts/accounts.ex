@@ -34,16 +34,31 @@ defmodule Aquir.Accounts do
   Phoenix is  just (albeit huge) wrapper  around these
   contexts.
   """
-  def register_user(%{"name" => _, "email" => _, "password" => _} = user)
+  def register_user(%{"name" => _, "email" => email, "password" => _} = user)
     when map_size(user) == 3
   do
-    user["email"]
+    email
     |> String.split("@")
     |> hd()
     |> (&Map.put(user, "username", &1)).()
     |> register_user()
   end
 
+  # TODO Clean up. See NOTE 2018-10-23_0914
+  # 2019-01-21_0550 NOTE (`Accounts.register_user/1` refactor)
+  # 2019-01-21_0555 QUESTION (Is this Applicative?)
+  # 2019-01-21_0827 TODO (`with/2`-like macro collecting results with deps)
+  # 2019-01-21_0954 TODO (Accept only atom maps, or support both?)
+
+  @doc """
+  Phase 1: Check for errors. (Command validation and
+           unique claims.)
+  Phase 2: Claim username and email.
+  Phase 3: Dispatch commands and return new user.
+
+  Failure in  any phase will skip  subsequent phases
+  and return erros
+  """
   def register_user(
     %{
       "name"  => name,
@@ -70,49 +85,33 @@ defmodule Aquir.Accounts do
 
     results = [
       ACS.imbue_command([r_tuple, a_tuple]),
-    # {:ok, [register_user, add_credential]} <-
-    # {:error, [changeset_1, ..., changeset_N]}
+      # {:ok, [register_user, add_credential]}
+      # {:error, [changeset_1, ..., changeset_N]}
       Unique.taken?(:email, email),
       Unique.taken?(:username, username),
       # {:ok, :"#{key}_available", value}
       # {:error, :"#{key}_already_taken", value}
     ]
 
-    errors =
-      Enum.filter(
-        results,
-        fn({status, _}) -> status == :error end)
+    errors = error_filter(results)
 
     case length(errors) == 0 do
       true ->
-        claim_results =
-          [username: username, email: email]
-          |> Enum.map(
-               fn({key, value}) ->
-                 Unique.claim(key, value)
-                 # {:error, :"#{key}_already_taken", value}
-                 # {:ok, :"#{key}_claimed_successfully", value}
-               end)
+        case Unique.claim(username: username, email: email) do
+
+          {:error, :keys_already_taken, _keys_taken} = error ->
+            {:errors, [error]}
+
+          {:ok, :claim_successful, _keywords} ->
+            [{:ok, [register_user, add_credential]} | _] = results
+            ACR.dispatch(register_user,  consistency: :strong)
+            ACR.dispatch(add_credential, consistency: :strong)
+
+            {:ok, Read.get_user_by(user_id: register_user.user_id)}
+        end
+      false ->
+        {:errors, errors}
     end
-      # TODO Clean up. See NOTE 2018-10-23_0914
-      # :ok <- Unique.claim(username),
-      # {:error, :username_already_taken, username}
-
-      # :ok <- Read.check_dup(RS.Credential, :username, username),
-      # :ok <- Read.check_dup(RS.User,       :email,    email)
-      # # {:error, :"#{entity_key}_already_in_database", entity}
-    # ) do
-
-      # ACR.dispatch(register_user,  consistency: :strong)
-      # ACR.dispatch(add_credential, consistency: :strong)
-
-      # {:ok, Read.get_user_by(user_id: register_user.user_id)}
-
-      # The below happens by default with `with/1`:
-      #
-      #   else
-      #     err -> err
-    # end
   end
   # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
 
@@ -125,22 +124,62 @@ defmodule Aquir.Accounts do
   changeset, but an input error.
   """
 
-  def reset_password(%{"username" => username, "new_password" => _} = attrs) do
+  def reset_password(
+    %{
+      "username"     => username,
+      "new_password" => new_password
+    }
+  ) do
 
-    with(
-    # TODO 2019-01-15_1255 (Why query the DB multiple times?)
-      credential when not(is_nil(credential)) <-
-        Read.get(RS.Credential, :username, username),
+    # 2019-01-15_1255 TODO (Why query the DB multiple times?)
 
-      credential_id <- Map.get(credential, :credential_id),
-      attrs_with_id <- Map.put(attrs, "credential_id", credential_id),
+    credential = Read.get(RS.Credential, :username, username)
 
-      {:ok, [reset_password]} <- ACS.imbue_command([%C.ResetPassword{}, attrs_with_id])
-    ) do
-      ACR.dispatch(reset_password, consistency: :strong)
-      # ACR.dispatch(reset_password, consistency: :strong, include_aggregate_version: true)
-    else
-      nil -> {:error, :username_not_found}
+    maybe_fake_credential_id =
+        # See 2019-01-21_0827
+      (credential != nil && credential.credential_id) || Ecto.UUID.generate()
+
+    attrs_with_maybe_fake_credential_id =
+      %{
+        credential_id: maybe_fake_credential_id,
+        username: username,
+        new_password: new_password
+       }
+
+    imbue_result =
+      ACS.imbue_command([
+        {%C.ResetPassword{}, attrs_with_maybe_fake_credential_id}
+      ])
+    # {:ok, [reset_password]}
+    # {:error, [changeset]}
+
+    errors =
+      [
+        case credential do
+          nil -> {:error, :user_does_not_exist}
+          # needs to be wrapped in tuple because of `error_filter/1`
+          # (only errors are needed anyway)
+          _ -> {:ok}
+        end,
+        imbue_result
+      ]
+      |> error_filter()
+
+    case length(errors) == 0 do
+      true  ->
+        {:ok, [reset_password]} = imbue_result
+        ACR.dispatch(reset_password, consistency: :strong)
+        {:ok, :password_changed_succesfully}
+      false ->
+        {:errors, errors}
     end
+  end
+
+  defp error_filter(result_list) do
+      Enum.filter(
+        result_list,
+        fn(either_tuple) -> elem(either_tuple, 0) == :error end)
+        # `either_tuple` is a tuple of arbitrary size with the
+        # first element being either `:ok` or `:error`
   end
 end

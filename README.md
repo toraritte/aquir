@@ -1128,3 +1128,80 @@ SELECT stream_id, stream_events.event_id, event_type, causation_id, correlation_
 
   SOLUTION: Query the aggregate instance process.
             See 2019-01-10_0752
+
+### 2019-01-21_0550 NOTE (`Accounts.register_user/1` and `Unique.claim/1` refactor)
+
++ Removing `with/1`  because all error  messages are
+  needed  to be  collected,  but  `with/1` fails  on
+  the first  one and  ignoring any  subsequent ones.
+  (See  2019-01-21_0555  QUESTION  for  the  pattern
+  description.)
+
++ Checking   for    claimed   entities    TWICE   in
+  `Accounts.register_user/1`:
+
+  when applying  functions to  get all  results, and
+  when actually  claiming (i.e.,  registering) these
+  entities on  no errors. The rationale  for this is
+  that  between  just  checking and  claiming  there
+  could  be  another  process doing  the  same  (yay
+  distribution).
+
++ Making `Unique.claim/1`  more complicated  so that
+  all registration in a context function can be done
+  in  a transaction.  If done  using iteration  on a
+  list  of key-value  pairs, it  is possible  that a
+  function  is running  in  parallel  with the  same
+  arguments,  making one  pair register  and another
+  one fail. Then the  context function would have to
+  have  a more  complicated checking  mechanism, and
+  figure out how to  roll back partial claims, maybe
+  even causing oscillations in the other conflicting
+  function invocations.  This way, either  all pairs
+  fail or  succeed because  the Unique  process will
+  execute any requests sequentially.
+
+  For example:
+
+  ```text
+    register_user(params1)             register_user(params2)
+    | claim(email: "@a") -> :ok        |
+    |                                  | claim(email: "@a") -> :error
+    |                                  | claim(username: "aa") -> :ok
+    | claim(username: "aa") -> :error  |
+    ?                                  ?
+  ```
+
+### 2019-01-21_0555 QUESTION (Is this Applicative?)
+
+In 2019-01-15_1255 refactor functions are applied in
+a list,  and each function is  an `Either` returning
+tagged tuples in the form of `{:ok, _}` or `{:error,
+_}`.  That   result  list  is  then   filtered,  and
+execution only continues when no errors are present,
+returning the accumulated errors otherwise.
+
+Remember this  pattern from  the _Haskell  Book_ and
+_PureScript  By  Example_  but not  sure  about  the
+specifics. Look it up.
+
+(Just  realized that  the  same pattern  is used  in
+`Unique.claim/1`,  only  the  tags are  `:free`  and
+`:taken`.)
+
+### 2019-01-21_0827 TODO (`with/2`-like macro collecting results with deps)
+
+See 2019-01-21_0550 and 2019-01-21_0555 for context.
+See  `Accounts.reset_password/1` especially,  as the
+second function call  (`imbue_command/2`) depends on
+the first (getting the user credential).
+
+In `Accounts.reset_password/1`, `imbue_command/2` is
+called   with  `attrs_with_maybe_fake_credential_id`
+that  is generated  depending  whether a  credential
+exists  or not.  The  reason is  that if  credential
+does  not exist  then `imbue_command`  will fail  as
+`PasswordReset` changeset  needs a `:credential_id`.
+So,  in  order to  still  allow  checking the  input
+attributes, it is being faked; the entire thing will
+fail anyway.
