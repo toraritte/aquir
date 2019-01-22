@@ -9,28 +9,16 @@ defmodule AquirWeb.UserController do
     render(
       conn,
       "index.html",
-      users: transform_userlist_with_credentials()
+      users: Accounts.Read.list_users_with_credentials()
     )
   end
 
-  defp transform_userlist_with_credentials do
-    Enum.map(
-      Accounts.Read.list_users_with_credentials(),
-      &unwrap_credentials_in_user/1)
-  end
-
   def show(conn, %{"username" => username}) do
-
-    user =
-      Accounts.Read.get_user_by(username: username)
-      |> unwrap_credentials_in_user()
-
-    render(conn, "show.html", user: user)
-  end
-
-  defp unwrap_credentials_in_user(user_with_credentials) do
-    cs = user_with_credentials.credentials
-    Map.put(user_with_credentials, :credentials, hd(cs))
+    render(
+      conn,
+      "show.html",
+      user: Accounts.Read.get_user_by(username: username)
+    )
   end
 
   def new(conn, _params) do
@@ -51,8 +39,7 @@ defmodule AquirWeb.UserController do
     case Accounts.register_user(user) do
       {:ok, user_with_credentials} ->
 
-        user = unwrap_credentials_in_user(user_with_credentials)
-        username = user.credentials.username
+        username = AquirWeb.UserView.username(user_with_credentials)
 
         conn
         |> put_flash(:info, "#{username} created!")

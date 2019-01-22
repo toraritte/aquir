@@ -8,6 +8,10 @@ defmodule AquirWeb.UserView do
     end
   end
 
+  def username(user_with_credentials) do
+    hd(user_with_credentials.credentials).username
+  end
+
   # def render("index.json", %{users: users}) do
   #   %{data: render_many(users, UserView, "user.json")}
   # end
