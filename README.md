@@ -1473,3 +1473,13 @@ that matter. Is it generated with a Phoenix project?
 Make  proper visual  and  non-visual  tags that  are
 accessible.
 
+### 2019-01-24_1339 TODO (release and deployment)
+
+Plan for deployment and make a proper release.
+http://blog.plataformatec.com.br/2016/07/understanding-deps-and-applications-in-your-mixfile/
+
+Make  sure  that  production Comeonin  settings  are
+secure!
+
+
+
