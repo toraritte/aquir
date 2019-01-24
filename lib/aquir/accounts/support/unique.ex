@@ -32,14 +32,16 @@ defmodule Aquir.Accounts.Support.Unique do
 
     case is_it? do
       true ->
-        {:error, :"#{key}_already_taken", value}
+        {:error, taken_error(key), value}
       false ->
         {:ok, :"#{key}_available", value}
     end
   end
 
-  # 2019-01-20_1048 TODO (Make generic across contexts)
+  defp taken_error(key), do: :"#{key}_already_taken"
+
   # 2019-01-20_1048 TODO DONE (Re-populate on startup)
+  # 2019-01-20_1048 TODO (Make generic across contexts)
 
   def claim(keywords) do
     any_claimed_already? =
@@ -59,19 +61,13 @@ defmodule Aquir.Accounts.Support.Unique do
                    end
                  end)
 
-          keys_taken =
+          taken_keyword =
             key_statuses
             |> Enum.filter(fn({status, _, _}) -> status == :taken end)
             |> Enum.map(fn({:taken, key, value}) -> {key, value} end)
 
-              # case value_in_state?(state, key, value) do
-              #   true ->
-              #     {true, :already_claimed}
-              #   false ->
-              # end
-            # end)
-
-          case length(keys_taken) do
+          # 2019-01-23_0535 NOTE (tuple -> map -> tuple)
+          case length(taken_keyword) do
             0 ->
               new_state =
                 Enum.reduce(keywords, state, fn({key, value}, state_acc) ->
@@ -82,13 +78,17 @@ defmodule Aquir.Accounts.Support.Unique do
               {false, new_state}
             _ ->
               # get, new_state
-              {{true, keys_taken}, state}
+              {{true, taken_keyword}, state}
           end
         end)
 
     case any_claimed_already? do
-      {true, keys_taken} ->
-        {:error, :keys_already_taken, keys_taken}
+      {true, taken_keyword} ->
+        taken_errors_keyword =
+          Enum.map(taken_keyword, fn({key, value}) ->
+            {taken_error(key), value}
+          end)
+        {:errors, taken_errors_keyword}
       false ->
         {:ok, :claim_successful, keywords}
     end

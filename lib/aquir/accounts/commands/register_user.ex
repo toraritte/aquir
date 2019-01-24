@@ -40,5 +40,7 @@ defmodule Aquir.Accounts.Commands.RegisterUser do
     |> Aquir.Commanded.Support.assign_id(:user_id)
     |> cast(params, required_fields)
     |> validate_required(required_fields)
+    # 2019-01-18_0000 (The reason for such meager validation)
+    |> validate_format(:email, ~r/.+@.+\..{2,4}/)
   end
 end

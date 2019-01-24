@@ -21,7 +21,6 @@ defmodule Aquir.Commanded.Support do
     ]
   ) do
 
-        # require IEx; IEx.pry
     make_add_changeset =
       fn(user_id) ->
         %C.AddUsernamePasswordCredential{for_user_id: user_id}

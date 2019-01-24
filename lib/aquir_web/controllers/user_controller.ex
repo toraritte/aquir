@@ -36,32 +36,113 @@ defmodule AquirWeb.UserController do
   """
   def create(conn, %{"user" => user}) do
 
-    case Accounts.register_user(user) do
-      {:ok, user_with_credentials} ->
+    # OUTPUT
+    # -------
+    #  {:ok, user_with_credentials}
+    #
+    #            taken_error_keywords
+    #  {:errors, [{:(username|email)_already_taken, value}]}
+    #
+    #  { :errors,
+    #    [    {:invalid_changesets, [changeset_1, ..., changeset_N]},
+    #       | {:(username|email)_already_taken, value}
+    #    ]
+    #  }
 
-        username = AquirWeb.UserView.username(user_with_credentials)
+    with(
+      {:ok, user_with_credentials} <- Accounts.register_user(user)
+    ) do
+      username = AquirWeb.UserView.username(user_with_credentials)
 
-        conn
-        |> put_flash(:info, "#{username} created!")
-        |> redirect(to: user_path(conn, :show, username))
+      conn
+      |> put_flash(:info, "#{username} created!")
+      |> redirect(to: user_path(conn, :show, username))
 
-      # {:error, [changeset_1, ..., changeset_N]}
-      {:error, :username_already_taken = error, username} ->
-        error_text = Phoenix.HTML.Form.humanize(error) <> ": #{username}"
-        render(conn, "new.html", errors: [error_text])
-
-      # {:error, :username_already_in_database, username} ->
-      # {:error, :email_already_in_database, email} ->
-
-      # {:error, changesets_list} ->
-      {:error, error} ->
-        render(conn, "new.html", errors: [error])
+    else
+      {:errors, mixed_or_taken_only_keywords} ->
+        mixed_or_taken_only_keywords
+        |> parse_errors()
+        |> (&render(conn, "new.html", errors: &1)).()
     end
   end
 
-  defp render_error(path, error, entity) when is_atom(error) do
-    error_text = Phoenix.HTML.Form.humanize(error) <> ": #{entity}"
-    render(conn, path, errors: [error_text])
+# {:errors, cs_with_other} = Aquir.Accounts.register_user(%{"name" => "F", "email" => "aa@a.aaa", "password" => "lofa"})
+# {:errors, cs_only} = Aquir.Accounts.register_user(%{"name" => "F", "email" => "@a.a", "password" => "lofa"})
+
+  # 2019-01-24_0810 NOTE (Breaking down `UserController.parse_errors/1`)
+  def parse_errors(keywords) do
+
+    parsed_errors =
+      Enum.map(
+        keywords,
+        fn
+          # 2019-01-23_0603 NOTE (Why only check for email?)
+          ({:email_already_taken, email}) -> email_taken_keyword(email)
+
+          # 2019-01-23_0800 NOTE (Why not `nil`? Or ...)
+          ({:username_already_taken, _})  -> []
+
+          # 2019-01-23_0745 NOTE (`traverse_errors/2` example)
+          ({:invalid_changesets, changesets}) ->
+            Enum.reduce(changesets, %{}, fn(changeset, acc) ->
+              changeset
+              |> Ecto.Changeset.traverse_errors(&reduce_errors/3)
+              |> unwrap_add_credential_payload()
+              |> Map.merge(acc)
+            end)
+            |> Map.to_list()
+        end)
+
+    case List.flatten(parsed_errors) do
+      []    -> nil
+      other -> other
+    end
+  end
+
+  defp email_taken_keyword(email) do
+    [email: ["Email address #{email} already exists."]]
+  end
+
+  defp reduce_errors(_changeset, field, {msg, opts}) do
+    field_str =
+      field
+      |> to_string()
+      |> String.capitalize()
+
+    Enum.reduce(opts, "#{field_str} #{msg}", fn({key, value}, acc) ->
+      String.replace(acc, "%{#{key}}", to_string(value))
+    end)
+  end
+
+  # 2019-01-24_0902 !!!NOTE!!!
+  @doc """
+  If there are keys in  the map other than `:payload`,
+  those will be ignored!
+
+  The     only     content     relevant     in     the
+  `AddUsernamePasswordCredential`   command    is   in
+  the   payload,   everything   else  is   static   or
+  auto-generated.
+  """
+  defp unwrap_add_credential_payload(%{payload: payload}), do: payload
+  defp unwrap_add_credential_payload(map), do: map
+
+  def rec_map_to_list(nested_maps) do
+
+    mlist = Map.to_list(nested_maps)
+
+    Enum.map(
+      Keyword.keys(mlist),
+      fn(key) ->
+        {
+          key,
+          case mlist[key] do
+            next_map when is_map(next_map) ->
+              rec_map_to_list(next_map)
+            value -> value
+          end
+        }
+    end)
   end
 
   # def index(conn, _params) do

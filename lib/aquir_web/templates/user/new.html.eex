@@ -1,59 +1,34 @@
 <h1>New User</h1>
 
-<%#
-2019-01-19_1434 TODO (Make more descriptive foldtexts)
----------------
-For example, what is the main tag under the <div>s?
-https://stackoverflow.com/questions/5983396/
-%>
-
 <%= form_for @conn, user_path(@conn, :create), [as: :user, errors: @conn.assigns[:errors]], fn f -> %>
 
   <%# <%= require IEx; IEx.pry %1> %>
   <%= if f.errors do %>
     <div>
-      <%= content_tag :span, "lofa" %>
+      <%= content_tag :span, "Please check out the errors below" %>
     </div>
   <% end %>
 
+  <%# 2019-01-19_1434 TODO (Make more descriptive foldtexts) %>
+
   <div>
     <%= text_input f, :name, placeholder: "Full Name" %>
+    <%= error_tag f, :name %>
   </div>
   <div>
 
-    <%#
-    2019-01-18 TODO (email validation)
-    ---------------
-    Only using a very broad pattern, because to properly
-    validate an email address  with regex borders on the
-    impossible and email confirmation would be necessary
-    anyway. See this answer in particular:
-
-    https://stackoverflow.com/a/202528/1498178
-
-    This post shows  a high level, but  helpful, flow on
-    how  to do  email  verification  securely with  only
-    built-in Phoenix tools:
-
-    https://dockyard.com/blog/2017/09/06/adding-email-verification-flow-with-phoenix
-    %>
-
+    <%# 2019-01-18_0000 TODO (email validation) %>
+    <%# 2019-01-23_1150 TODO (tooltip accessibility) %>
     <%= email_input f, :email,
-          pattern: ".+@.+\\..{2,4}",
           title: "An example for a valid email address: sample@company.org",
           placeholder: "Email" %>
+    <%= error_tag f, :email %>
   </div>
   <div>
 
-      <%#
-      2019-01-18_0503 TODO (multi-round password validation)
-      ---------------
-      Validate password by having  users enter them again.
-      Or  admins, if  this is  not  going to  be a  public
-      facing page.
-      %>
-
+    <%# 2019-01-18_0503 TODO (multi-round password validation) %>
     <%= password_input f, :password, placeholder: "password" %>
+    <%= error_tag f, :password %>
   </div>
 
   <%= submit "Create User" %>

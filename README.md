@@ -457,18 +457,18 @@ in Commanded.Commands.Router.
 
 ### 2018-10-23_0914 NOTE TODO(?) (Commanded.Middleware also?)
 
-  Related notes:
-  + 2019-01-04_1152
-  + 2019-01-09_1200
-  + 2018-12-31_1019
-  + 2018-10-23_0914
+Related notes:
++ 2019-01-04_1152
++ 2019-01-09_1200
++ 2018-12-31_1019
++ 2018-10-23_0914
 
 (Regarding Commanded.Middleware:
 
- 2018-10-11_2312
- 2018-10-23_0914
- 2018-10-19_2246
- 2018-10-18_0004               )
+2018-10-11_2312
+2018-10-23_0914
+2018-10-19_2246
+2018-10-18_0004               )
 
 Unique (and  other) constraints  should live  in the
 aggregates and not in arbitrary places. For example,
@@ -563,11 +563,11 @@ iex(5)> :sys.get_state(Commanded.Aggregates.Supervisor)
 
 ### 2018-12-31_1019 TODO(?) (duplicate?)
 
-  Related notes:
-  + 2019-01-04_1152
-  + 2019-01-09_1200
-  + 2018-12-31_1019
-  + 2018-10-23_0914
+Related notes:
++ 2019-01-04_1152
++ 2019-01-09_1200
++ 2018-12-31_1019
++ 2018-10-23_0914
 
 There is a simmetry between commands and events, and
 duplicated  code with  that it  seems. The  commands
@@ -743,11 +743,11 @@ IEx output will be the same as for the first version.
 
 ### 2019-01-04_1152 NOTE TODO(?) (Aggregate associations/relationships)
 
-  Related notes:
-  + 2019-01-04_1152
-  + 2019-01-09_1200
-  + 2018-12-31_1019
-  + 2018-10-23_0914
+Related notes:
++ 2019-01-04_1152
++ 2019-01-09_1200
++ 2018-12-31_1019
++ 2018-10-23_0914
 
 The notion is that the
 
@@ -968,7 +968,7 @@ iex(58)> Ecto.Changeset.apply_changes(c)
 }
 ```
 
-### 2019-01-06_0838 NOTE (Evolution of `imbue_command`)u
+### 2019-01-06_0838 NOTE (Evolution of `imbue_command`)
 
 A single context function handles multiple commands,
 and at the time of this writing, handling validation
@@ -1021,49 +1021,51 @@ def assign_id(command_changeset, struct_field) do
 end
 ```
 
-  # 2019-01-07_2123 QUESTION
-  # Follow along  with  IEx.pry when  `execute/2`
-  # and  `apply/2` functions  are invoked.  I don't  get
-  # the  necessity  of  the  `user_id:  nil`  match  for
-  # example  or  whether  in  the  `apply`  below  where
-  # the  `UserRegistered` event  is handled,  should the
-  # `:user_id` be matched  that is not `nil`  (or with a
-  # guard for UUID), etc.
-  #
-  # See "Building Conduit", page 28 before and after the
-  # example again.
-  #
-  # ANSWER
-  #
-  # When   dispatching   the   `RegisterUser`   command,
-  # Commanded  will   try  to  find   the  corresponding
-  # aggregate   using   the    `:user_id`   (i.e.,   the
-  # `:identity`  set   by  the  `dispatch/2`   macro  in
-  # `Aquir.Commanded.Router`).
-  #
-  # Commanded has great debug  output, so when trying to
-  # register a user (right now at commit 53c9a5f):
-  #
-  # ```text
-  # iex(1)> Aquir.Accounts.register_user(%{"name" => "d", "email" => "@d"})
-  # [debug] Locating aggregate process for `Aquir.Accounts.Aggregates.User` with UUID "c4c84fa8-5daa-4300-b63c-51d567560fe8"
-  # ```
-  #
-  # Not in the debug output, but I know that there isn't
-  # any `User`  stream with that  ID, so the  state will
-  # be:
-  #
-  # ```elixir
-  # %Aquir.Accounts.Aggregates.User{email: nil, name: nil, user_id: nil}
-  # ```
-  #
-  # Hence  the check  for  `user_id: nil`,  but at  this
-  # point one could simply  just omit this argument with
-  # `_`, but it is always prudent to check.
-  #
-  # TODO
-  # Commanded debug messages are  indeed good, but there
-  # doesn't seem to be any defined for `apply/2`.
+### 2019-01-07_2123 QUESTION
+
+Follow along  with  IEx.pry when  `execute/2`
+and  `apply/2` functions  are invoked.  I don't  get
+the  necessity  of  the  `user_id:  nil`  match  for
+example  or  whether  in  the  `apply`  below  where
+the  `UserRegistered` event  is handled,  should the
+`:user_id` be matched  that is not `nil`  (or with a
+guard for UUID), etc.
+
+See "Building Conduit", page 28 before and after the
+example again.
+
+ANSWER
+
+When   dispatching   the   `RegisterUser`   command,
+Commanded  will   try  to  find   the  corresponding
+aggregate   using   the    `:user_id`   (i.e.,   the
+`:identity`  set   by  the  `dispatch/2`   macro  in
+`Aquir.Commanded.Router`).
+
+Commanded has great debug  output, so when trying to
+register a user (right now at commit 53c9a5f):
+
+```text
+iex(1)> Aquir.Accounts.register_user(%{"name" => "d", "email" => "@d"})
+[debug] Locating aggregate process for `Aquir.Accounts.Aggregates.User` with UUID "c4c84fa8-5daa-4300-b63c-51d567560fe8"
+```
+
+Not in the debug output, but I know that there isn't
+any `User`  stream with that  ID, so the  state will
+be:
+
+```elixir
+%Aquir.Accounts.Aggregates.User{email: nil, name: nil, user_id: nil}
+```
+
+Hence  the check  for  `user_id: nil`,  but at  this
+point one could simply  just omit this argument with
+`_`, but it is always prudent to check.
+
+### 2019-01-07_2127 TODO
+
+Commanded debug messages are  indeed good, but there
+doesn't seem to be any defined for `apply/2`.
 
 
   # 2019-01-09_0643 QUESTION
@@ -1087,34 +1089,32 @@ SELECT stream_id, stream_events.event_id, event_type, causation_id, correlation_
 
 ### 2019-01-15_1223 NOTE (Why the `:credential_id`?)
 
-  COMMANDS
-  --------
+COMMANDS
 
-  Aggregate instances  are identified by  their unique
-  identifier. These  indentities are specified  in the
-  router (`Aquir.Commanded.Router`)  when commands are
-  dispatched:
+Aggregate instances  are identified by  their unique
+identifier. These  indentities are specified  in the
+router (`Aquir.Commanded.Router`)  when commands are
+dispatched:
 
-  ```elixir
-  dispatch [C.AddUsernamePasswordCredential],
-    to: A.Credential,
-    identity: :credential_id
-  ```
+```elixir
+dispatch [C.AddUsernamePasswordCredential],
+to: A.Credential,
+identity: :credential_id
+```
 
-  If this identity is not  part of all the commands in
-  the aggregate, the aggregate may  start a new one or
-  just  fails.  See  2019-01-15_0918 to  change  these
-  IDs  to `_aid`s  (as  in aggregate  IDs  to be  more
-  descriptive.
+If this identity is not  part of all the commands in
+the aggregate, the aggregate may  start a new one or
+just  fails.  See  2019-01-15_0918 to  change  these
+IDs  to `_aid`s  (as  in aggregate  IDs  to be  more
+descriptive.
 
-  EVENTS
-  ------
+EVENTS
 
-  In  the  case  of   `PasswordReset`  event,  the  ID
-  wouldn't be  strictly necessary, because  the record
-  could be  looked up  by the  username, but  it never
-  hurts to  hold this information. Maybe  in metadata?
-  See 2019-01-15_0918
+In  the  case  of   `PasswordReset`  event,  the  ID
+wouldn't be  strictly necessary, because  the record
+could be  looked up  by the  username, but  it never
+hurts to  hold this information. Maybe  in metadata?
+See 2019-01-15_0918
 
 ### 2019-01-15_1255 TODO (Why query the DB multiple times?)
 
@@ -1205,3 +1205,271 @@ does  not exist  then `imbue_command`  will fail  as
 So,  in  order to  still  allow  checking the  input
 attributes, it is being faked; the entire thing will
 fail anyway.
+
+### 2019-01-23_0535 NOTE (tuple -> map -> tuple)
+
+Changed  it to  maps,  but then  realized that  when
+multiple  entities are  claimed with  the same  key,
+then the returned  map will only hold  one value for
+the same key (as it should).
+
+### 2019-01-23_0603 NOTE (Why only check for email?)
+
+Because at  the time of this  writing, usernames are
+derived  from email  addresses therefore  if one  is
+taken then the so is  the other. Also, usernames are
+not even part of the form.
+
+### 2019-01-23_0617 NOTE (homogeneous lists)
+
+Homogeneous  lists would  be  nice, or  a guard  for
+them.  Another reason  for switching  to purerl  (or
+witchcraft?).
+
+### 2019-01-23_0745 NOTE (`Ecto.Changeset.traverse_errors/2` example)
+
+```text
+iex(44)> a = Aquir.Accounts.Commands.AddUsernamePasswordCredential.changeset(%Aquir.Acco
+unts.Commands.AddUsernamePasswordCredential{}, %{payload: %{}})
+#Ecto.Changeset<
+  action: nil,
+  changes: %{
+    payload: #Ecto.Changeset<
+      action: :insert,
+      changes: %{},
+      errors: [
+        username: {"can't be blank", [validation: :required]},
+        password: {"can't be blank", [validation: :required]}
+      ],
+      data: #Aquir.Accounts.Commands.AddUsernamePasswordCredential.Payload<>,
+      valid?: false
+    >
+  },
+  errors: [for_user_id: {"can't be blank", [validation: :required]}],
+  data: #Aquir.Accounts.Commands.AddUsernamePasswordCredential<>,
+  valid?: false
+>
+iex(45)> Enum.map([a], fn(c) -> Ecto.Changeset.traverse_errors(c, &(&1)) end)
+[
+  %{
+    for_user_id: [{"can't be blank", [validation: :required]}],
+    payload: %{
+      password: [{"can't be blank", [validation: :required]}],
+      username: [{"can't be blank", [validation: :required]}]
+    }
+  }
+]
+```
+
+### 2019-01-23_0800 NOTE (Why not `nil`? Or ...)
+
+Or  check   for  empty  lists  after   flatten?  The
+`:errors`  assign should  be  `nil` if  there is  no
+errors (or only ones that can be ignored).
+
+The  reason  is that  (at  this  time) the  username
+is  derived  from  the  email address,  and  if  the
+address  is  invalid,  there would  be  a  changeset
+error. If  valid, then  the username  also shouldn't
+generate. (Detto for  uniqueness checks for username
+and email.)
+
+### 2019-01-19_1434 TODO (Make more descriptive foldtexts)
+
+For example, what is the main tag under the <div>s?
+https://stackoverflow.com/questions/5983396/
+
+### 2019-01-18_0000 TODO (email validation) %>
+
+Only using a very broad pattern, because to properly
+validate an email address  with regex borders on the
+impossible and email confirmation would be necessary
+anyway. See this answer in particular:
+
+https://stackoverflow.com/a/202528/1498178
+
+This post shows  a high level, but  helpful, flow on
+how  to do  email  verification  securely with  only
+built-in Phoenix tools:
+
+https://dockyard.com/blog/2017/09/06/adding-email-verification-flow-with-phoenix
+
+Before I forget:
+check out `Ecto.Changeset.validate_confirmation/3`
+
+### 2019-01-23_1150 TODO (tooltip accessibility)
+
+How accessible is the  popup tooltip when validating
+the email address?
+
+### 2019-01-18_0503 TODO (multi-round password validation)
+
+Validate password by having  users enter them again.
+Or  admins, if  this is  not  going to  be a  public
+facing page.
+
+### 2019-01-24_0810 NOTE (Breaking down `UserController.parse_errors/1`)
+
+```elixir
+# {:errors, cs_only} = Aquir.Accounts.register_user(%{"name" => "F", "email" => "@a.a", "password" => "lofa"})
+# -----------------------------------------
+
+{:errors,
+ [
+   invalid_changesets: [
+     #Ecto.Changeset<
+       action: nil,
+       changes: %{email: "@a.a", name: "F"},
+       errors: [email: {"has invalid format", [validation: :format]}],
+       data: #Aquir.Accounts.Commands.RegisterUser<>,
+       valid?: false
+     >,
+     #Ecto.Changeset<
+       action: nil,
+       changes: %{
+         payload: #Ecto.Changeset<
+           action: :insert,
+           changes: %{password: "lofa"},
+           errors: [
+             password: {"should be at least %{count} character(s)",
+              [count: 7, validation: :length, kind: :min]},
+             username: {"can't be blank", [validation: :required]}
+           ],
+           data: #Aquir.Accounts.Commands.AddUsernamePasswordCredential.Payload<>,
+           valid?: false
+         >
+       },
+       errors: [],
+       data: #Aquir.Accounts.Commands.AddUsernamePasswordCredential<>,
+       valid?: false
+     >
+   ]
+ ]}
+
+# parse_errors(cs_only) OUTPUT
+# -----------------------------------------
+
+[
+  email: ["Email has invalid format"],
+  password: ["Password should be at least 7 character(s)"],
+  username: ["Username can't be blank"]
+]
+
+# {:errors, cs_with_other} = Aquir.Accounts.register_user(%{"name" => "F", "email" => "aa@a.aaa", "password" => "lofa"})
+# -----------------------------------------
+
+{:errors,
+ [
+   invalid_changesets: [
+     #Ecto.Changeset<
+       action: nil,
+       changes: %{
+         payload: #Ecto.Changeset<
+           action: :insert,
+           changes: %{password: "lofa", username: "aa"},
+           errors: [
+             password: {"should be at least %{count} character(s)",
+              [count: 7, validation: :length, kind: :min]}
+           ],
+           data: #Aquir.Accounts.Commands.AddUsernamePasswordCredential.Payload<>,
+           valid?: false
+         >
+       },
+       errors: [],
+       data: #Aquir.Accounts.Commands.AddUsernamePasswordCredential<>,
+       valid?: false
+     >
+   ],
+   email_already_taken: "aa@a.aaa",
+   username_already_taken: "aa"
+ ]}
+
+# parse_errors(cs_with_other) OUTPUT
+# -----------------------------------------
+
+[
+  password: ["Password should be at least 7 character(s)"],
+  email: ["Email address aa@a.aaa already exists."]
+]
+```
+
+More details:
+
+```elixir
+##################################################################
+# `keywords` = [{:error_msg, maybe_list}]
+##################################################################
+def parse_errors(keywords) do
+
+  parsed_errors =
+    Enum.map(
+      keywords,
+      ##################################################################
+      # Each clause returns a keyword list.
+      ##################################################################
+      fn
+        ({:email_already_taken, email}) -> email_taken_keyword(email)
+
+        ({:username_already_taken, _})  -> []
+
+        ({:invalid_changesets, changesets}) ->
+          Enum.reduce(changesets, %{}, fn(changeset, acc) ->
+            ##################################################################
+            # #Ecto.Changeset<
+            #   action: nil,
+            #   changes: %{
+            #     payload: #Ecto.Changeset<
+            #       action: :insert,
+            #       changes: %{password: "lofa"},
+            #       errors: [
+            #         password: {"should be at least %{count} character(s)", 
+            #          [count: 7, validation: :length, kind: :min]},
+            #         username: {"can't be blank", [validation: :required]}
+            #       ],
+            #       data: #Aquir.Accounts.Commands.AddUsernamePasswordCredential.Payload<>,
+            #       valid?: false
+            #     >
+            #   },
+            #   errors: [],
+            #   data: #Aquir.Accounts.Commands.AddUsernamePasswordCredential<>,
+            #   valid?: false
+            # >
+            ##################################################################
+            changeset
+            |> Ecto.Changeset.traverse_errors(&reduce_errors/3)
+            ##################################################################
+            # %{
+            #   payload: %{
+            #     password: ["Password should be at least 7 character(s)"],
+            #     username: ["Username can't be blank"]
+            #   }
+            # }
+            ##################################################################
+            |> unwrap_add_credential_payload()
+            |> Map.merge(acc)
+          end)
+          ##################################################################
+          # The reduced  result  is a flat map,
+          # therefore generating a keyword list
+          # from it is simple.
+          ##################################################################
+          |> Map.to_list()
+      end)
+
+  case List.flatten(parsed_errors) do
+    []    -> nil
+    other -> other
+  end
+end
+```
+
+### 2019-01-24_0929 TODO (Translate error messages with `Gettext`)
+
+... and  figure out  where the documentation  is for
+that matter. Is it generated with a Phoenix project?
+
+### 2019-01-24_1208 TODO (Make `error_tag/2` accessible)
+
+Make  proper visual  and  non-visual  tags that  are
+accessible.
+

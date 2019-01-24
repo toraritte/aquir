@@ -93,30 +93,53 @@ defmodule Aquir.Accounts do
       # {:error, :"#{key}_already_taken", value}
     ]
 
+    # require IEx; IEx.pry
     errors = error_filter(results)
 
     case length(errors) == 0 do
 
       true ->
-        case Unique.claim(username: username, email: email) do
+        with(
+          {:ok, :claim_successful, _keywords} <-
+            Unique.claim(username: username, email: email)
+        ) do
+          [{:ok, [register_user, add_credential]} | _] = results
+          ACR.dispatch( register_user,  consistency: :strong)
+          ACR.dispatch( add_credential, consistency: :strong)
 
-          {:error, :keys_already_taken, _keys_taken} = error ->
-            {:errors, [error]}
+          {:ok, Read.get_user_by(user_id: register_user.user_id)}
 
-          {:ok, :claim_successful, _keywords} ->
-            [{:ok, [register_user, add_credential]} | _] = results
-            ACR.dispatch(register_user,  consistency: :strong)
-            ACR.dispatch(add_credential, consistency: :strong)
-
-            {:ok, Read.get_user_by(user_id: register_user.user_id)}
+        else
+          {:errors, taken_errors_keyword} = errors -> errors
         end
 
       false ->
-        {:errors, errors}
-        # Where `errors` is a list with one or both:
-        # {:error, [changeset_1, ..., changeset_N]}
-        # {:error, :"#{key}_already_taken", value}
+        {:errors,
+          Enum.map(
+            errors,
+            fn
+              ({:error, reason, taken_keyword} when is_atom(reason)) ->
+                {reason, taken_keyword}
+              # 2019-01-23_0617 NOTE (homogeneous lists)
+              ({:error, changesets} when is_list(changesets)) ->
+                {:invalid_changesets, changesets}
+            end)
+        }
     end
+
+    # OUTPUT
+    # -------
+    #  {:ok, user_with_credentials}
+    #
+    #            taken_error_keywords
+    #  {:errors, [{:(username|email)_already_taken, value}]}
+    #
+    #  { :errors,
+    #    [    {:invalid_changesets, [changeset_1, ..., changeset_N]},
+    #       | {:(username|email)_already_taken, value}
+    #    ]
+    #  }
+
   end
   # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
 

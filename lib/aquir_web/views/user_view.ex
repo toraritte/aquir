@@ -2,11 +2,14 @@ defmodule AquirWeb.UserView do
   use AquirWeb, :view
   alias AquirWeb.UserView
 
-  def error_tag(form, field) do
-    if error = form.errors[field] do
-      content_tag :span, translate_error(error), class: "help-block"
-    end
-  end
+  # def error_tag(form, field) do
+  #   if error = form.errors[field] do
+  #     content_tag :span, translate_error(error) #, class: "help-block"
+  #   end
+  # end
+
+  # defp translate_error() do
+  # end
 
   def username(user_with_credentials) do
     hd(user_with_credentials.credentials).username
