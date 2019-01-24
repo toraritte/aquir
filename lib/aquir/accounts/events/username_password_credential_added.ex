@@ -1,6 +1,6 @@
 defmodule Aquir.Accounts.Events.UsernamePasswordCredentialAdded do
 
-  @derive Poison.Encoder
+  @derive Jason.Encoder
   defstruct [
     :credential_id,
     :for_user_id,

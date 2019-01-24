@@ -94,63 +94,16 @@ defmodule Aquir.Commanded.Support do
     end
   end
 
-  # 2019-01-15_0523 NOTE
-  @doc """
-  The   only  reason   `Map.from_struct/1`  has   been
-  replaced with `from/1` (its recursive equivalent) in
-  `convert_struct/2`  is that  when converting  nested
-  structs to  events, the key types  get inconsistent.
-  Commands are schemas, events  are plain structs, but
-  probably the real reason for  this issue is that the
-  nested embedded schemas are  defined inline (to wit:
-  `AddUsernamePasswordCredential`).
-
-  Long story short, this command:
-
-  ```elixir
-  %Aquir.Accounts.Commands.AddUsernamePasswordCredential{
-    credential_id: "1fea592b-a308-41be-a78c-dac38617ba81",
-    for_user_id: "78ff3d89-c4dc-4f0e-96f4-b3ebde35c228",
-    payload: %Aquir.Accounts.Commands.AddUsernamePasswordCredential.Payload{
-      password: nil,
-      password_hash: "$2b$12$HRDwYhqVXF3vcZy/L7hzIeTybskR/qZs.HNdREyz/t1ruw7sy0lRy",
-      username: "lofa"
-    },
-    type: "username_password"
-  }}
-  ```
-
-  becomes this event:
-
-  ```elixir
-  %Aquir.Accounts.Events.UsernamePasswordCredentialAdded{
-    credential_id: "9c2de482-7671-4bfb-8a52-6d39f24ac8f4",
-    for_user_id: "daa9f152-4e77-4131-9f2e-6b8ab4dbd511",
-    payload: %{
-      "password" => nil,
-      "password_hash" => "$2b$12$Pl9yAyPYRuypwIfzqfTxXuiQfDtfffC5lAJKMgBuoOB8zlga9E11y",
-      "username" => "aa"
-    },
-    type: "username_password"
-  }
-  ```
-
-  and  won't  be  able  to use  the  dot  notation  on
-  `payload`'s keys.
-
-  --------------------------------------------------
-
-  UPDATE: Nope,  that wasn't the issue.  It's just how
-          it is I guess.
-  """
+  # 2019-01-24_1437 NOTE
 
   @doc """
   Convert from one type of struct to another.
   """
   def convert_struct(from, to) do
-    # See 2019-01-15_0523 above.
-    struct(to, Map.from_struct(from))
-    # struct(to, from(from))
+    # 2019-01-24_1437 NOTE
+    # (Why Jason necessitated `Map.from_struct/1` -> `from/1` switch)
+    struct(to, from(from))
+    # struct(to, Map.from_struct(from))
 
     # Leaving this for posterity that piping is nice
     # but it can be overdone.
@@ -224,7 +177,7 @@ defmodule Aquir.Commanded.Support do
 
   defmacro __using__(opts) do
     quote do
-      @derive Poison.Encoder
+      @derive Jason.Encoder
     end
   end
 end

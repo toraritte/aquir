@@ -145,8 +145,8 @@ defmodule Aquir.Accounts.Read.Projector do
           credential_id: event.credential_id,
           for_user_id:   event.for_user_id,
           type:          event.type,
-          username:      event.payload["username"],
-          password_hash: event.payload["password_hash"],
+          username:      event.payload.username,
+          password_hash: event.payload.password_hash,
         }
       )
     end
@@ -188,5 +188,5 @@ defmodule Aquir.Accounts.Read.Projector do
         |> (&Ecto.Multi.update(multi, :reset_password, &1)).()
     end
 end
-# Aquir.Accounts.register_user(%{"email" => "alvaro@miez.com", "password" => "balabab"})
-# Aquir.Accounts.reset_password(%{"email" => "alvaro@miez.com", "password" => "mas"})
+# Aquir.Accounts.register_user(%{"email" => "alvaro@miez.com",  "new_password" => "balabab"})
+# Aquir.Accounts.reset_password(%{"email" => "alvaro@miez.com", "new_password" => "mas"})

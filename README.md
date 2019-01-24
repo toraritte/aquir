@@ -529,7 +529,7 @@ Erlang/OTP 21 [erts-10.0] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads
 iex(1)> Supervisor.which_children(Commanded.Aggregates.Supervisor)
 > []
 
-iex(2)> Aquir.Accounts.reset_password(%{"email" => "alvaro@miez.com", "password" => "mas"})
+iex(2)> Aquir.Accounts.reset_password(%{"email" => "alvaro@miez.com", "new_password" => "mas"})
 > :ok
 
 iex(3)> Aquir.Accounts.Projections.User.get_user_by_email("alvaro@miez.com")
@@ -1480,6 +1480,45 @@ http://blog.plataformatec.com.br/2016/07/understanding-deps-and-applications-in-
 
 Make  sure  that  production Comeonin  settings  are
 secure!
+
+### 2019-01-24_1437 NOTE (Why Jason necessitated `Map.from_struct/1` -> `from/1` switch)
+
+Jason is stricter than  Poison, and all structs have
+to have an  explicit `Jason.Encoder` implementation.
+The   `Payload`  embed   (i.e.,  nested   schema  in
+`AddUsernamePasswordCredential`)  is only  important
+during  command validation,  but unimportant  during
+persisting   the  event,   therefore  removing   the
+`Payload` label with `from/1` (the recursive version
+of `Map.from_struct/1`).
+
+### 2019-01-24_1500 TODO (Make dependent commands execute in a transaction)
+
+(Failing to load /users even if nothing has changed)
+
+`RegisterUser`  and  `AddUsernamePasswordCredential`
+commands  are   executed  together,  but   it  could
+happen  (see 2019-01-24_1437,  where  the Poison  ->
+Jason  change   caused  an  error   when  persisting
+the  `UsernamePasswordCredentialAdded`  event. As  a
+result,   `/users`  (`user/index.html.eex`)   failed
+because it  was unable retrieve `username`  from the
+read model.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

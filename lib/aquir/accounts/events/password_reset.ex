@@ -16,7 +16,7 @@ defmodule Aquir.Accounts.Events.PasswordReset do
 
   ANSWER: https://github.com/commanded/commanded/blob/7f7d5b7642aa94e2de2515f1606c4cafb9dbe325/guides/Events.md#metadata
   """
-  @derive Poison.Encoder
+  @derive Jason.Encoder
   defstruct [
     # Why the `:credential_id`? See 2019-01-15_1223
     :credential_id,

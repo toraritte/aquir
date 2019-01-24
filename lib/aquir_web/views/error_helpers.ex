@@ -12,8 +12,10 @@ defmodule AquirWeb.ErrorHelpers do
   Generates tag for inlined form input errors.
   """
   def error_tag(form, field) do
-    errors = form.errors
-    if msg_list = Keyword.get(errors, field) do
+    with(
+      errors when not(is_nil(errors)) <- form.errors,
+      msg_list when not(is_nil(msg_list)) <- Keyword.get(errors, field)
+    ) do
       error_spans =
         Enum.map(
           msg_list,

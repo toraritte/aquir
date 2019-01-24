@@ -14,6 +14,7 @@ defmodule Aquir.Mixfile do
     ]
   end
 
+  # 2019-01-24_1339 TODO (release and deployment)
   # Configuration for the OTP application.
   #
   # Type `mix help compile.app` for more information.
@@ -58,6 +59,7 @@ defmodule Aquir.Mixfile do
         github:   "toraritte/commanded",
         branch:   "make-application-more-idiomatic-2",
       },
+      {:jason, "~> 1.1"},
 
       # The official lib includes `commanded/eventstore`!
       # {:commanded_eventstore_adapter, "~> 0.3"},

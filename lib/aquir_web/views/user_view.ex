@@ -11,6 +11,8 @@ defmodule AquirWeb.UserView do
   # defp translate_error() do
   # end
 
+  # 2019-01-24_1500 TODO (Make dependent commands execute in a transaction)
+  # (Failing to load /users even if nothing has changed)
   def username(user_with_credentials) do
     hd(user_with_credentials.credentials).username
   end
