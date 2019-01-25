@@ -1,6 +1,6 @@
 <h1>New User</h1>
 
-<%= form_for @conn, user_path(@conn, :create), [as: :user, errors: @conn.assigns[:errors]], fn f -> %>
+<%= form_for @conn, Routes.user_path(@conn, :create), [as: :user, errors: @conn.assigns[:errors]], fn f -> %>
 
   <%# <%= require IEx; IEx.pry %1> %>
   <%= if f.errors do %>

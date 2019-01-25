@@ -4,10 +4,36 @@ defmodule Aquir.Accounts.Support.Unique do
   alias Aquir.Accounts.Read
   alias Read.Schemas, as: RS
 
+  @moduledoc """
+  The   `Unique`   agent's   state  is   set   up   at
+  compile-time,   statically   at    the   moment   in
+  `Unique.start_link/1`.  The field  keys are  fetched
+  from the read model, but  it still works if the read
+  model  is  empty,  because `Repo.all/?`  returns  an
+  empty  list  in this  case,  and  `MapSet`s will  be
+  initialized with these.
+
+  Current entities:
+
+  + `:email`
+  + `:username`
+
+  The data structure holding the state:  
+  `%{ key_1: mapset(values), ..., :key_N: mapset(values)}`
+
+  Previous  version of  `claim/1`  allowed adding  new
+  keys  (see  commit  53bb32e  and  before,  unless  I
+  overwrote the history (again...)), but that wouldn't
+  be  prudent: the  application  has to  know its  own
+  entities. (Unless  there comes  a feature  idea that
+  needs this agent's state to be dynamic.)
+  """
+
   def start_link(_) do
     Agent.start_link(
       fn ->
 
+        # These result in empty lists if read model is empty.
         usernames = Read.get_all(:username, RS.Credential)
         emails    = Read.get_all(:email,    RS.User)
 
@@ -26,72 +52,73 @@ defmodule Aquir.Accounts.Support.Unique do
     |> MapSet.member?(value)
   end
 
-  def taken?(key, value) do
-    is_it? =
-      Agent.get(__MODULE__, &value_in_state?(&1, key, value))
+  defp free?(keywords) do
 
-    case is_it? do
-      true ->
-        {:error, taken_error(key), value}
-      false ->
-        {:ok, :"#{key}_available", value}
+    reserved = filter_reserved(keywords)
+
+    case length(reserved) do
+      0 -> true
+      _ -> {false, reserved}
     end
   end
 
-  defp taken_error(key), do: :"#{key}_already_taken"
+  # just a wrapper around `free?/1`
+  def check(keywords) do
+    case free?(keywords) do
+      true              -> {:ok, :entities_free, keywords}
+      {false, reserved} -> entities_reserved_error(reserved)
+    end
+  end
 
   # 2019-01-20_1048 TODO DONE (Re-populate on startup)
   # 2019-01-20_1048 TODO (Make generic across contexts)
 
   def claim(keywords) do
-    any_claimed_already? =
+
+    all_free? =
       Agent.get_and_update(
         __MODULE__,
         fn(state) ->
-
-          key_statuses =
-            keywords
-            |> Enum.map(
-                 fn({key, value}) ->
-                   case value_in_state?(state, key, value) do
-                     true ->
-                       {:taken, key, value}
-                     false ->
-                       {:free, key, value}
-                   end
-                 end)
-
-          taken_keyword =
-            key_statuses
-            |> Enum.filter(fn({status, _, _}) -> status == :taken end)
-            |> Enum.map(fn({:taken, key, value}) -> {key, value} end)
-
-          # 2019-01-23_0535 NOTE (tuple -> map -> tuple)
-          case length(taken_keyword) do
-            0 ->
-              new_state =
-                Enum.reduce(keywords, state, fn({key, value}, state_acc) ->
-                  Map.update(state_acc, key, MapSet.new([value]), fn(entities_mapset) ->
-                    MapSet.put(entities_mapset, value)
-                  end)
-                end)
-              {false, new_state}
-            _ ->
+          # has to be checked here to make updates atomic
+          case free?(keywords) do
+            true ->
+              new_state = update_state_mapsets(state, keywords)
               # get, new_state
-              {{true, taken_keyword}, state}
+              {true, new_state}
+            {false, reserved} ->
+              # get, new_state
+              {{false, reserved}, state}
           end
         end)
 
-    case any_claimed_already? do
-      {true, taken_keyword} ->
-        taken_errors_keyword =
-          Enum.map(taken_keyword, fn({key, value}) ->
-            {taken_error(key), value}
-          end)
-        {:errors, taken_errors_keyword}
-      false ->
-        {:ok, :claim_successful, keywords}
+    case all_free? do
+      true              -> {:ok, :claim_successful, keywords}
+      {false, reserved} -> entities_reserved_error(reserved)
     end
+  end
+
+  defp entities_reserved_error(keywords) do
+    {:error, :entities_reserved, keywords}
+  end
+
+  defp filter_reserved(keywords) do
+
+    Enum.reduce(
+      keywords,
+      [],
+      fn({key, value} = kv_tuple, acc) ->
+        case value_in_state?(get_state(), key, value) do
+          true  -> [kv_tuple | acc]
+          false -> acc
+        end
+      end)
+  end
+
+  defp update_state_mapsets(state, keywords) do
+    # 2019-01-25_0851 NOTE (Why `reduce` and some explanation)
+    Enum.reduce(keywords, state, fn({key, value}, state_acc) ->
+      Map.update!(state_acc, key, &MapSet.put(&1, value))
+    end)
   end
 
   def get_state, do: Agent.get(__MODULE__, &(&1))

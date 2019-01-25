@@ -114,9 +114,8 @@ $ mix do ecto.drop, ecto.create, ecto.migrate
 $ mix do event_store.drop, event_store.create, event_store.init
 ```
 
-(It did  work when  all of these  tasks were  on one
-line and  then it  didn't, then  again it  did, etc.
-This way seemed to be the most robust so far.)
+To run them all at once,  just put a `;` between the
+commands.
 
 ## 1 How to start this project on your machine (WIP)
 
@@ -1206,13 +1205,6 @@ So,  in  order to  still  allow  checking the  input
 attributes, it is being faked; the entire thing will
 fail anyway.
 
-### 2019-01-23_0535 NOTE (tuple -> map -> tuple)
-
-Changed  it to  maps,  but then  realized that  when
-multiple  entities are  claimed with  the same  key,
-then the returned  map will only hold  one value for
-the same key (as it should).
-
 ### 2019-01-23_0603 NOTE (Why only check for email?)
 
 Because at  the time of this  writing, usernames are
@@ -1422,7 +1414,7 @@ def parse_errors(keywords) do
             #       action: :insert,
             #       changes: %{password: "lofa"},
             #       errors: [
-            #         password: {"should be at least %{count} character(s)", 
+            #         password: {"should be at least %{count} character(s)",
             #          [count: 7, validation: :length, kind: :min]},
             #         username: {"can't be blank", [validation: :required]}
             #       ],
@@ -1506,11 +1498,51 @@ because it  was unable retrieve `username`  from the
 read model.
 
 
+### 2019-01-25_0749 NOTE (Illogical to check for no errors)
 
+`AquirWeb.UserController.parse_errors/1` should only be invoked if there are errors. If an `Accounts` (or any other) context funtion returns an `{:errors, _}` tuple with an empty list then that is a design error and should be addressed.
 
+### 2019-01-25_0851 NOTE (Why `reduce` and some explanation)
 
+Why `reduce` when updating `state`:
 
+```text
+iex(25)> state = %{a: MapSet.new(["aa", "bb"]), b: MapSet.new(["cc", "dd"])}
+iex(26)> keywords = [a: "ee", b: "ff"]
+iex(27)> keywords = [a: "ee", b: "ff"]
 
+iex(28)> Enum.each(keywords, fn({key, value}) -> Map.update(state, key, MapSet.new([value]), &MapSet.put(&1, value)) end)
+:ok
+
+iex(30)> Enum.map(keywords, fn({key, value}) -> Map.update(state, key, MapSet.new([value]) , &MapSet.put(&1, value)) end)
+[
+  %{a: #MapSet<["aa", "bb", "ee"]>, b: #MapSet<["cc", "dd"]>},
+  %{a: #MapSet<["aa", "bb"]>, b: #MapSet<["cc", "dd", "ff"]>}
+]
+```
+
+```elixir
+# end of Unique.claim/1
+#######################
+case length(reserved_keywords) do
+  0 ->
+    new_state =
+      # `state` is a map configured and populated at compile
+      # time (see moduledoc).
+      Enum.reduce(keywords, state, fn({key, value}, state_acc) ->
+        Map.update!(  # if key is not in state, then
+                      # + `claim` is called incorrectly
+                      # + an entity should be in Unique
+          state_acc,
+          key,
+          &MapSet.put(&1, value)) # updating the MapSet belonging to `key`
+      end)
+    {false, new_state}
+  _ ->
+    # get, new_state
+    {{true, reserved_keywords}, state}
+end
+```
 
 
 

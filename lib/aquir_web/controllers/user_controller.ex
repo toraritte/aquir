@@ -6,11 +6,8 @@ defmodule AquirWeb.UserController do
   action_fallback AquirWeb.FallbackController
 
   def index(conn, _params) do
-    render(
-      conn,
-      "index.html",
-      users: Accounts.Read.list_users_with_credentials()
-    )
+    users = Accounts.Read.list_users_with_credentials()
+    render(conn, "index.html", users: users)
   end
 
   def show(conn, %{"username" => username}) do
@@ -22,6 +19,7 @@ defmodule AquirWeb.UserController do
   end
 
   def new(conn, _params) do
+    # require IEx; IEx.pry
     render(conn, "new.html")
   end
 
@@ -36,31 +34,22 @@ defmodule AquirWeb.UserController do
   """
   def create(conn, %{"user" => user}) do
 
-    # OUTPUT
-    # -------
-    #  {:ok, user_with_credentials}
-    #
-    #            taken_error_keywords
-    #  {:errors, [{:(username|email)_already_taken, value}]}
-    #
-    #  { :errors,
-    #    [    {:invalid_changesets, [changeset_1, ..., changeset_N]},
-    #       | {:(username|email)_already_taken, value}
-    #    ]
-    #  }
-
     with(
       {:ok, user_with_credentials} <- Accounts.register_user(user)
     ) do
       username = AquirWeb.UserView.username(user_with_credentials)
 
       conn
-      |> put_flash(:info, "#{username} created!")
-      |> redirect(to: user_path(conn, :show, username))
+      |> put_flash(:info, "User #{username} created!")
+      |> put_status(:created)
+      # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Location
+      |> put_resp_header("location", Routes.user_path(conn, :show, user))
+      |> render("show.html", user: user_with_credentials)
+      # |> redirect(to: Routes.user_path(conn, :show, username))
 
     else
-      {:errors, mixed_or_taken_only_keywords} ->
-        mixed_or_taken_only_keywords
+      {:errors, errors} ->
+        errors
         |> parse_errors()
         |> (&render(conn, "new.html", errors: &1)).()
     end
@@ -72,15 +61,25 @@ defmodule AquirWeb.UserController do
   # 2019-01-24_0810 NOTE (Breaking down `UserController.parse_errors/1`)
   def parse_errors(keywords) do
 
+    # OUTPUT
+    # -------
+    #  {:ok, user_with_credentials}
+    #
+    #  { :errors,
+    #    [ {:invalid_changesets, changeset_list}
+    #    , {:entities_reserved,  reserved_keywords}
+    #    ]
+    #  }
+
     parsed_errors =
       Enum.map(
         keywords,
         fn
-          # 2019-01-23_0603 NOTE (Why only check for email?)
-          ({:email_already_taken, email}) -> email_taken_keyword(email)
-
-          # 2019-01-23_0800 NOTE (Why not `nil`? Or ...)
-          ({:username_already_taken, _})  -> []
+          ({:entities_reserved, keywords}) ->
+            Enum.map(keywords, fn({entity, value}) ->
+              capitalized_entity = atom_to_capitalized_string(entity)
+              {entity, ["#{capitalized_entity} address #{value} already exists."]}
+            end)
 
           # 2019-01-23_0745 NOTE (`traverse_errors/2` example)
           ({:invalid_changesets, changesets}) ->
@@ -93,22 +92,23 @@ defmodule AquirWeb.UserController do
             |> Map.to_list()
         end)
 
-    case List.flatten(parsed_errors) do
-      []    -> nil
-      other -> other
-    end
+    List.flatten(parsed_errors)
+
+    # 2019-01-25_0749 NOTE (Illogical to check for no errors in `parse_errors/1`)
+    # case List.flatten(parsed_errors) do
+    #   []    -> nil
+    #   error_keywords -> error_keywords
+    # end
   end
 
-  defp email_taken_keyword(email) do
-    [email: ["Email address #{email} already exists."]]
-  end
-
-  defp reduce_errors(_changeset, field, {msg, opts}) do
-    field_str =
-      field
+  defp atom_to_capitalized_string(atom) do
+      atom
       |> to_string()
       |> String.capitalize()
+  end
 
+  defp reduce_errors(_changeset, field, {msg, opts}) when is_atom(field) do
+    field_str = atom_to_capitalized_string(field)
     Enum.reduce(opts, "#{field_str} #{msg}", fn({key, value}, acc) ->
       String.replace(acc, "%{#{key}}", to_string(value))
     end)

@@ -21,7 +21,7 @@ defmodule AquirWeb do
     quote do
       use Phoenix.Controller, namespace: AquirWeb
       import Plug.Conn
-      import AquirWeb.Router.Helpers
+      alias AquirWeb.Router.Helpers, as: Routes
       import AquirWeb.Gettext
     end
   end
@@ -37,7 +37,7 @@ defmodule AquirWeb do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import AquirWeb.Router.Helpers
+      alias AquirWeb.Router.Helpers, as: Routes
       import AquirWeb.ErrorHelpers
       import AquirWeb.Gettext
     end

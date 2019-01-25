@@ -71,7 +71,7 @@ defmodule Aquir.Accounts do
 
     r_tuple = {
       %C.RegisterUser{},
-      %{name:  name, email: email}
+      %{name: name, email: email}
     }
     a_tuple = {
       %C.AddUsernamePasswordCredential{},
@@ -83,65 +83,60 @@ defmodule Aquir.Accounts do
       }
     }
 
+    claims = [username: username, email: email]
+
     results = [
       ACS.imbue_commands([r_tuple, a_tuple]),
       # {:ok, [register_user, add_credential]}
       # {:error, [changeset_1, ..., changeset_N]}
-      Unique.taken?(:email, email),
-      Unique.taken?(:username, username),
-      # {:ok, :"#{key}_available", value}
-      # {:error, :"#{key}_already_taken", value}
+
+      # 2019-01-25_1023 NOTE (Why `resereved?/1` needed and not just `claim/1`?)
+      Unique.check(claims)
+      # {:ok,    :entities_free,     keywords}
+      # {:error, :entities_reserved, reserved}
     ]
 
     # require IEx; IEx.pry
-    errors = error_filter(results)
+    filtered_errors = error_filter(results)
 
-    case length(errors) == 0 do
-
-      true ->
-        with(
-          {:ok, :claim_successful, _keywords} <-
-            Unique.claim(username: username, email: email)
-        ) do
-          [{:ok, [register_user, add_credential]} | _] = results
-          ACR.dispatch( register_user,  consistency: :strong)
-          ACR.dispatch( add_credential, consistency: :strong)
-
-          {:ok, Read.get_user_by(user_id: register_user.user_id)}
-
-        else
-          {:errors, taken_errors_keyword} = errors -> errors
-        end
-
-      false ->
-        {:errors,
-          Enum.map(
-            errors,
-            fn
-              ({:error, reason, taken_keyword} when is_atom(reason)) ->
-                {reason, taken_keyword}
-              # 2019-01-23_0617 NOTE (homogeneous lists)
-              ({:error, changesets} when is_list(changesets)) ->
-                {:invalid_changesets, changesets}
-            end)
-        }
+    # switched from `case..do`, will see in a couple months
+    with(
+      true <- length(filtered_errors) == 0,
+      {:ok, :claim_successful, _keywords} <- Unique.claim(claims)
+    ) do
+      [{:ok, [register_user, add_credential]} | _] = results
+      ACR.dispatch( register_user,  consistency: :strong)
+      ACR.dispatch( add_credential, consistency: :strong)
+      {:ok, Read.get_user_by(user_id: register_user.user_id)}
+    else
+      false -> {:errors, transform(filtered_errors)}
+      {:error, :entities_reserved, _} = errors -> {:errors, errors}
     end
 
     # OUTPUT
     # -------
     #  {:ok, user_with_credentials}
     #
-    #            taken_error_keywords
-    #  {:errors, [{:(username|email)_already_taken, value}]}
-    #
     #  { :errors,
-    #    [    {:invalid_changesets, [changeset_1, ..., changeset_N]},
-    #       | {:(username|email)_already_taken, value}
+    #    [ {:invalid_changesets, changeset_list}
+    #    , {:entities_reserved,  reserved_keywords}
     #    ]
     #  }
 
   end
   # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
+
+  defp transform(errors) do
+    Enum.map(
+      errors,
+      fn
+        ({:error, :entities_reserved, reserved}) ->
+          {:entities_reserved, reserved}
+        # 2019-01-23_0617 NOTE (homogeneous lists)
+        ({:error, changesets} when is_list(changesets)) ->
+          {:invalid_changesets, changesets}
+      end)
+  end
 
   # 2019-01-15_1123 NOTE
   @doc """
@@ -163,8 +158,8 @@ defmodule Aquir.Accounts do
 
     credential = Read.get(RS.Credential, :username, username)
 
+    # See 2019-01-21_0827
     maybe_fake_credential_id =
-        # See 2019-01-21_0827
       (credential != nil && credential.credential_id) || Ecto.UUID.generate()
 
     attrs_with_maybe_fake_credential_id =
@@ -181,17 +176,17 @@ defmodule Aquir.Accounts do
     # {:ok, [reset_password]}
     # {:error, [changeset]}
 
-    errors =
+    errors = error_filter(
       [
+        imbue_result,
         case credential do
           nil -> {:error, :user_does_not_exist}
           # needs to be wrapped in tuple because of `error_filter/1`
           # (only errors are needed anyway)
           _ -> {:ok}
         end,
-        imbue_result
       ]
-      |> error_filter()
+    )
 
     case length(errors) == 0 do
       true  ->
@@ -209,5 +204,9 @@ defmodule Aquir.Accounts do
         fn(either_tuple) -> elem(either_tuple, 0) == :error end)
         # `either_tuple` is a tuple of arbitrary size with the
         # first element being either `:ok` or `:error`
+  end
+
+  def delete_user do
+    # TODO remove username and email from Unique as well!
   end
 end

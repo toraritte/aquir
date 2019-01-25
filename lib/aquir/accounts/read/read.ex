@@ -61,19 +61,25 @@ defmodule Aquir.Accounts.Read do
     Repo.all all_users_with_credentials_query()
   end
 
-  def get_user_by(user_id: user_id) do
-    from(
-      [u,c] in all_users_with_credentials_query(),
-      where: u.user_id == ^user_id)
+  def get_user_by([{field, value}]) when is_atom(field) do
+    from( [u,c] in all_users_with_credentials_query(),
+      where: field(u, ^field) == ^value)
     |> Repo.one()
   end
 
-  def get_user_by(username: username) do
-    from(
-      [u,c] in all_users_with_credentials_query(),
-      where: c.username == ^username)
-    |> Repo.one()
-  end
+  # def get_user_by(user_id: user_id) do
+  #   from(
+  #     [u,c] in all_users_with_credentials_query(),
+  #     where: u.user_id == ^user_id)
+  #   |> Repo.one()
+  # end
+
+  # def get_user_by(username: username) do
+  #   from(
+  #     [u,c] in all_users_with_credentials_query(),
+  #     where: c.username == ^username)
+  #   |> Repo.one()
+  # end
 end
 # iex(4)> defmodule A do
 # ...(4)>   defmacro error!(args) do

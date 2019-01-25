@@ -7,7 +7,7 @@
       <td><b><%= username(user) %></b></td>
       <td><%= user.name %></td>
       <td><%= user.email %></td>
-      <td><%= link "View", to: user_path(@conn, :show, username(user)) %></td>
+      <td><%= link "View", to: Routes.user_path(@conn, :show, username(user)) %></td>
     </tr>
   <% end %>
 </table>
