@@ -6,8 +6,13 @@ defmodule AquirWeb.UserController do
   action_fallback AquirWeb.FallbackController
 
   def index(conn, _params) do
-    users = Accounts.Read.list_users_with_credentials()
-    render(conn, "index.html", users: users)
+    case AquirWeb.Auth.authenticate(conn) do
+      %Plug.Conn{halted: true} ->
+        conn
+      conn ->
+        users = Accounts.Read.list_users_with_credentials()
+        render(conn, "index.html", users: users)
+    end
   end
 
   def show(conn, %{"username" => username}) do
