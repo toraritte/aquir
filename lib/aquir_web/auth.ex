@@ -5,7 +5,11 @@ defmodule AquirWeb.Auth do
 
   def init(opts), do: opts
 
-  def call(conn, _opts) do
+  def call(conn, opts) do
+    apply(__MODULE__, opts, [conn])
+  end
+
+  def assign_user_session(conn) do
     user_id = get_session(conn, :user_id)
     user = user_id && Accounts.Read.get_user_by(user_id)
     assign(conn, :current_user, user)
@@ -13,7 +17,6 @@ defmodule AquirWeb.Auth do
 
   def authenticate(conn) do
     case conn.assigns.current_user do
-
       nil ->
         conn
         |> put_flash(:error, "You must be logged in to access that page")

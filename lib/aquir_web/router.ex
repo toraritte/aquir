@@ -7,7 +7,7 @@ defmodule AquirWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug AquirWeb.Auth
+    plug AquirWeb.Auth, :assign_user_session
   end
 
   pipeline :api do
