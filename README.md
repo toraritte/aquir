@@ -1544,6 +1544,32 @@ case length(reserved_keywords) do
 end
 ```
 
+### 2019-01-25_1547 QUESTION (Adding 201 and Location does weird stuff)
+
+Inserting the snippet below to the QUESTION location results in weird stuff. For example:
+
++ adding  all three  lines, the  functionality is  the
+  same  but the  URL will  remain `/users`  instead of
+  `/users/{username}`
+
++ commenting  out `render`  to user  `redirect`, there
+  will be a notice that you are being redirected.
+
+```elixir
+|> put_status(:created)
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Location
+|> put_resp_header("location", Routes.user_path(conn, :show, username))
+|> render("show.html", user: user_with_credentials)
+```
+
+ANSWER:
+https://elixirforum.com/t/you-are-being-redirected-when-redirecting-from-phoenix-controller/16903
+
+To redirect, the status code  has to be 301/302 etc.
+I was trying to be  pedantic with the 201 but that's
+probably more important for an API. (And indeed, the
+above snippet was auto-generated  via mix for a JSON
+API.)
 
 
 

@@ -52,9 +52,18 @@ defmodule Aquir.Accounts.Support.Unique do
     |> MapSet.member?(value)
   end
 
-  defp free?(keywords) do
+  defp free?(state, keywords) do
 
-    reserved = filter_reserved(keywords)
+    reserved =
+      Enum.reduce(
+        keywords,
+        [],
+        fn({key, value} = kv_tuple, acc) ->
+          case value_in_state?(state, key, value) do
+            true  -> [kv_tuple | acc]
+            false -> acc
+          end
+        end)
 
     case length(reserved) do
       0 -> true
@@ -64,7 +73,7 @@ defmodule Aquir.Accounts.Support.Unique do
 
   # just a wrapper around `free?/1`
   def check(keywords) do
-    case free?(keywords) do
+    case free?(get_state(), keywords) do
       true              -> {:ok, :entities_free, keywords}
       {false, reserved} -> entities_reserved_error(reserved)
     end
@@ -80,7 +89,7 @@ defmodule Aquir.Accounts.Support.Unique do
         __MODULE__,
         fn(state) ->
           # has to be checked here to make updates atomic
-          case free?(keywords) do
+          case free?(state, keywords) do
             true ->
               new_state = update_state_mapsets(state, keywords)
               # get, new_state
@@ -99,19 +108,6 @@ defmodule Aquir.Accounts.Support.Unique do
 
   defp entities_reserved_error(keywords) do
     {:error, :entities_reserved, keywords}
-  end
-
-  defp filter_reserved(keywords) do
-
-    Enum.reduce(
-      keywords,
-      [],
-      fn({key, value} = kv_tuple, acc) ->
-        case value_in_state?(get_state(), key, value) do
-          true  -> [kv_tuple | acc]
-          false -> acc
-        end
-      end)
   end
 
   defp update_state_mapsets(state, keywords) do

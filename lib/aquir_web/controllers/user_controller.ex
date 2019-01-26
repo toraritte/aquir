@@ -19,7 +19,6 @@ defmodule AquirWeb.UserController do
   end
 
   def new(conn, _params) do
-    # require IEx; IEx.pry
     render(conn, "new.html")
   end
 
@@ -41,17 +40,14 @@ defmodule AquirWeb.UserController do
 
       conn
       |> put_flash(:info, "User #{username} created!")
-      |> put_status(:created)
-      # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Location
-      |> put_resp_header("location", Routes.user_path(conn, :show, user))
-      |> render("show.html", user: user_with_credentials)
-      # |> redirect(to: Routes.user_path(conn, :show, username))
+      # 2019-01-25_1547 QUESTION (Adding 201 and Location does weird stuff)
+      |> redirect(to: Routes.user_path(conn, :show, username))
 
     else
       {:errors, errors} ->
-        errors
-        |> parse_errors()
-        |> (&render(conn, "new.html", errors: &1)).()
+        conn
+        |> put_status(:bad_request)
+        |> render("new.html", errors: parse_errors(errors))
     end
   end
 
@@ -78,7 +74,7 @@ defmodule AquirWeb.UserController do
           ({:entities_reserved, keywords}) ->
             Enum.map(keywords, fn({entity, value}) ->
               capitalized_entity = atom_to_capitalized_string(entity)
-              {entity, ["#{capitalized_entity} address #{value} already exists."]}
+              {entity, ["#{capitalized_entity} #{value} already exists."]}
             end)
 
           # 2019-01-23_0745 NOTE (`traverse_errors/2` example)
@@ -92,6 +88,7 @@ defmodule AquirWeb.UserController do
             |> Map.to_list()
         end)
 
+    # require IEx; IEx.pry
     List.flatten(parsed_errors)
 
     # 2019-01-25_0749 NOTE (Illogical to check for no errors in `parse_errors/1`)
