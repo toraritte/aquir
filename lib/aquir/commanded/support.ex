@@ -114,7 +114,9 @@ defmodule Aquir.Commanded.Support do
   end
 
   def assign_id(struct, field) do
-    Map.put(struct, field, Ecto.UUID.generate())
+    new_id = Ecto.UUID.generate()
+    Map.put(struct, field, new_id)
+    new_id
   end
 
   @doc """
