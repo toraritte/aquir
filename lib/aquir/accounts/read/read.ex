@@ -53,7 +53,7 @@ defmodule Aquir.Accounts.Read do
   defp all_users_with_credentials_query do
       from u in RS.User,
         join: c in RS.Credential,
-        on: u.user_id == c.for_user_id,
+        on: u.user_id == c.user_id,
         preload: [credentials: c]
   end
 

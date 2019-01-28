@@ -3,18 +3,18 @@ defmodule AquirWeb.UserController do
 
   alias Aquir.Accounts
 
-  plug AquirWeb.Auth, :authenticate when action in [:index, :show, :new]
+  # plug AquirWeb.Auth, :authenticate when action in [:index, :show, :new]
 
   action_fallback AquirWeb.FallbackController
 
   def index(conn, _params) do
-    case AquirWeb.Auth.authenticate(conn) do
-      %Plug.Conn{halted: true} ->
-        conn
-      conn ->
+    # case AquirWeb.Auth.authenticate(conn) do
+    #   %Plug.Conn{halted: true} ->
+    #     conn
+    #   conn ->
         users = Accounts.Read.list_users_with_credentials()
         render(conn, "index.html", users: users)
-    end
+    # end
   end
 
   def show(conn, %{"username" => username}) do

@@ -22,7 +22,7 @@ defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
   @primary_key false
   embedded_schema do
     field :credential_id, :binary_id
-    field :for_user_id,   :binary_id
+    field :user_id,       :binary_id
     field :type,          :string, default: "username_password"
 
     # Even embeds add an `:id` primary key automatically.
@@ -40,13 +40,13 @@ defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
 
     required_fields = [
       :credential_id,
-      :for_user_id,
+      :user_id,
       :payload,
     ]
 
     command
     |> Aquir.Commanded.Support.assign_id(:credential_id)
-    |> cast(params, [:for_user_id])
+    |> cast(params, [:user_id])
     |> cast_embed(:payload, with: &payload_changeset/2)
     |> validate_required(required_fields)
   end

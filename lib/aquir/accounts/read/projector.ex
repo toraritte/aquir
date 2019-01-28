@@ -143,7 +143,7 @@ defmodule Aquir.Accounts.Read.Projector do
         :add_user_credential,
         %RS.Credential{
           credential_id: event.credential_id,
-          for_user_id:   event.for_user_id,
+          user_id:       event.user_id,
           type:          event.type,
           username:      event.payload.username,
           password_hash: event.payload.password_hash,

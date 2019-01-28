@@ -23,7 +23,7 @@ defmodule Aquir.Commanded.Support do
 
     make_add_changeset =
       fn(user_id) ->
-        %C.AddUsernamePasswordCredential{for_user_id: user_id}
+        %C.AddUsernamePasswordCredential{user_id: user_id}
         |> generate_changeset(a_attrs)
       end
 

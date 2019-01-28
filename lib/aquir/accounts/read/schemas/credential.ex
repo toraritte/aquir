@@ -12,7 +12,6 @@ defmodule Aquir.Accounts.Read.Schemas.Credential do
     field :password_hash, :string
 
     belongs_to :user, RS.User,
-      foreign_key: :for_user_id,
       references:  :user_id,
       type:        :binary_id
 

@@ -63,7 +63,6 @@ defmodule Aquir.Accounts do
     %{
       "name"  => name,
       "email" => email,
-      # "for_user_id" => , not needed because it is the user_id
       "username" => username,
       "password" => password,
     } = user
