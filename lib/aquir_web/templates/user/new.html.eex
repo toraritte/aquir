@@ -33,3 +33,5 @@
 
   <%= submit "Create User" %>
 <% end %>
+
+<%= link("Show users", to: Routes.user_path(@conn, :index)) %>
