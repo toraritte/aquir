@@ -1259,7 +1259,7 @@ unts.Commands.AddUsernamePasswordCredential{}, %{payload: %{}})
   data: #Aquir.Accounts.Commands.AddUsernamePasswordCredential<>,
   valid?: false
 >
-iex(45)> Enum.map([a], fn(c) -> Ecto.Changeset.traverse_errors(c, &(&1)) end)
+iex(45)> Enum.map([a], fn(changeset) -> Ecto.Changeset.traverse_errors(changeset, &(&1)) end)
 [
   %{
     for_user_id: [{"can't be blank", [validation: :required]}],

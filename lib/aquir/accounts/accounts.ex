@@ -68,29 +68,37 @@ defmodule Aquir.Accounts do
     } = user
   ) when map_size(user) == 4 do
 
-    r_tuple = {
-      %C.RegisterUser{},
-      %{name: name, email: email}
-    }
-    a_tuple = {
-      %C.AddUsernamePasswordCredential{},
-      %{
-        payload: %{
-          username: username,
-          password: password,
+    [new_credential_id, new_user_id] = generate_uuids(2)
+
+    maybe_register_user =
+      ACS.imbue_command(
+        %C.RegisterUser{},
+        %{user_id: new_user_id, name: name, email: email}
+      )
+
+    maybe_add_credential =
+      ACS.imbue_command(
+        %C.AddUsernamePasswordCredential{},
+        %{
+          credential_id: new_credential_id,
+          user_id: new_user_id,
+          payload: %{
+            username: username,
+            password: password,
+          }
         }
-      }
-    }
+      )
 
     claims = [username: username, email: email]
+    # 2019-01-25_1023 NOTE (Why `check/1` needed and not just `claim/1`?)
+    claim_check = Unique.check(claims)
 
     results = [
-      ACS.imbue_commands([r_tuple, a_tuple]),
-      # {:ok, [register_user, add_credential]}
-      # {:error, [changeset_1, ..., changeset_N]}
-
-      # 2019-01-25_1023 NOTE (Why `resereved?/1` needed and not just `claim/1`?)
-      Unique.check(claims)
+      maybe_register_user,
+      maybe_add_credential,
+      # {:ok,    command_struct}
+      # {:error, changeset}
+      claim_check
       # {:ok,    :entities_free,     keywords}
       # {:error, :entities_reserved, reserved}
     ]
@@ -103,7 +111,7 @@ defmodule Aquir.Accounts do
       true <- length(filtered_errors) == 0,
       {:ok, :claim_successful, _keywords} <- Unique.claim(claims)
     ) do
-      [{:ok, [register_user, add_credential]} | _] = results
+      [{:ok, register_user}, {:ok, add_credential}, {:ok, _, _}] = results
       ACR.dispatch( register_user,  consistency: :strong)
       ACR.dispatch( add_credential, consistency: :strong)
       {:ok, Read.get_user_by(user_id: register_user.user_id)}
@@ -117,8 +125,8 @@ defmodule Aquir.Accounts do
     #  {:ok, user_with_credentials}
     #
     #  { :errors,
-    #    [ {:invalid_changesets, changeset_list}
-    #    , {:entities_reserved,  reserved_keywords}
+    #    [   {:invalid_changeset, changeset}
+    #      | {:entities_reserved, reserved_keywords}
     #    ]
     #  }
 
@@ -126,14 +134,17 @@ defmodule Aquir.Accounts do
   # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
 
   defp transform(errors) do
+
     Enum.map(
       errors,
       fn
         ({:error, :entities_reserved, reserved}) ->
           {:entities_reserved, reserved}
+        ({:error, %Ecto.Changeset{} = cs}) ->
+          {:invalid_changeset, cs}
         # 2019-01-23_0617 NOTE (homogeneous lists)
-        ({:error, changesets} when is_list(changesets)) ->
-          {:invalid_changesets, changesets}
+        # ({:error, changesets} when is_list(changesets)) ->
+        #   {:invalid_changesets, changesets}
       end)
   end
 
@@ -146,56 +157,60 @@ defmodule Aquir.Accounts do
   changeset, but an input error.
   """
 
-  def reset_password(
-    %{
-      "username"     => username,
-      "new_password" => new_password
-    }
-  ) do
+  # !!!
+  # Don't   even   bother    looking   at   this   until
+  # 2019-01-28_0923 TODO is sorted out
+  #
+  # def reset_password(
+  #   %{
+  #     "username"     => username,
+  #     "new_password" => new_password
+  #   }
+  # ) do
 
-    # 2019-01-15_1255 TODO (Why query the DB multiple times?)
+  #   # 2019-01-15_1255 TODO (Why query the DB multiple times?)
 
-    credential = Read.get(RS.Credential, :username, username)
+  #   credential = Read.get(RS.Credential, :username, username)
 
-    # See 2019-01-21_0827
-    maybe_fake_credential_id =
-      (credential != nil && credential.credential_id) || Ecto.UUID.generate()
+  #   # See 2019-01-21_0827
+  #   maybe_fake_credential_id =
+  #     (credential != nil && credential.credential_id) || Ecto.UUID.generate()
 
-    attrs_with_maybe_fake_credential_id =
-      %{
-        credential_id: maybe_fake_credential_id,
-        username: username,
-        new_password: new_password
-       }
+  #   attrs_with_maybe_fake_credential_id =
+  #     %{
+  #       credential_id: maybe_fake_credential_id,
+  #       username: username,
+  #       new_password: new_password
+  #      }
 
-    imbue_result =
-      ACS.imbue_commands([
-        {%C.ResetPassword{}, attrs_with_maybe_fake_credential_id}
-      ])
-    # {:ok, [reset_password]}
-    # {:error, [changeset]}
+  #   imbue_result =
+  #     ACS.imbue_commands([
+  #       {%C.ResetPassword{}, attrs_with_maybe_fake_credential_id}
+  #     ])
+  #   # {:ok, [reset_password]}
+  #   # {:error, [changeset]}
 
-    errors = error_filter(
-      [
-        imbue_result,
-        case credential do
-          nil -> {:error, :user_does_not_exist}
-          # needs to be wrapped in tuple because of `error_filter/1`
-          # (only errors are needed anyway)
-          _ -> {:ok}
-        end,
-      ]
-    )
+  #   errors = error_filter(
+  #     [
+  #       imbue_result,
+  #       case credential do
+  #         nil -> {:error, :user_does_not_exist}
+  #         # needs to be wrapped in tuple because of `error_filter/1`
+  #         # (only errors are needed anyway)
+  #         _ -> {:ok}
+  #       end,
+  #     ]
+  #   )
 
-    case length(errors) == 0 do
-      true  ->
-        {:ok, [reset_password]} = imbue_result
-        ACR.dispatch(reset_password, consistency: :strong)
-        {:ok, :password_changed_succesfully}
-      false ->
-        {:errors, errors}
-    end
-  end
+  #   case length(errors) == 0 do
+  #     true  ->
+  #       {:ok, [reset_password]} = imbue_result
+  #       ACR.dispatch(reset_password, consistency: :strong)
+  #       {:ok, :password_changed_succesfully}
+  #     false ->
+  #       {:errors, errors}
+  #   end
+  # end
 
   defp error_filter(result_list) do
       Enum.filter(
@@ -208,4 +223,6 @@ defmodule Aquir.Accounts do
   def delete_user do
     # TODO remove username and email from Unique as well!
   end
+
+  defp generate_uuids(n), do: for _ <- 1..n, do: Ecto.UUID.generate()
 end

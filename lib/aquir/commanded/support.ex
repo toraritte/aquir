@@ -12,87 +12,101 @@ defmodule Aquir.Commanded.Support do
   end
 
   # See (Evolution of `imbue_command`) NOTEs
-  # [command_struct, attrs_map] ->
-  #     {:ok,    [command]}
-  #   | {:error, [command_changeset]}
-  def imbue_commands(
-    [ {                 %C.RegisterUser{} = r_struct, r_attrs},
-      {%C.AddUsernamePasswordCredential{},            a_attrs},
-    ]
-  ) do
+  def imbue_command(%command{} = command_struct, attrs) do
 
-    make_add_changeset =
-      fn(user_id) ->
-        %C.AddUsernamePasswordCredential{user_id: user_id}
-        |> generate_changeset(a_attrs)
-      end
+    changeset = command.changeset(command_struct, attrs)
 
-    r_changeset = generate_changeset(r_struct, r_attrs)
-
-    case r_changeset.valid? do
-
-      true  ->
-        r_command   = Changeset.apply_changes(r_changeset)
-        a_changeset = make_add_changeset.(r_command.user_id)
-
-        case a_changeset.valid? do
-          true  ->
-            {:ok, [r_command, Changeset.apply_changes(a_changeset)]}
-          false ->
-            {:error, [a_changeset]}
-        end
-
+    case changeset.valid? do
+      true ->
+        # command_with_params = struct(changeset.data, changeset.changes)
+        {:ok, Changeset.apply_changes(changeset)}
       false ->
-        # The uuid  is only a placeholder  to return changeset
-        # validation  errors.  (Remember, returning  :ok  only
-        # when  both commands  succeed,  therefore this  value
-        # will always be discarded; we just need the errors!)
-        a_changeset = make_add_changeset.(Ecto.UUID.generate())
-
-        case a_changeset.valid? do
-          true ->
-            {:error, [r_changeset]}
-          false ->
-            {:error, [r_changeset, a_changeset]}
-        end
+        {:error, changeset}
     end
   end
 
-  # (FP sidenote: this is like an "either", right?
+  # # See (Evolution of `imbue_command`) NOTEs
+  # # [command_struct, attrs_map] ->
+  # #     {:ok,    [command]}
+  # #   | {:error, [command_changeset]}
+  # def imbue_commands(
+  #   [ {                 %C.RegisterUser{} = r_struct, r_attrs},
+  #     {%C.AddUsernamePasswordCredential{},            a_attrs},
+  #   ]
+  # ) do
 
-  # USE CASE: for independent commands
-  # [command_struct, attrs_map] ->
-  #     {:ok,    [command]}
-  #   | {:error, [command_changeset]}
-  def imbue_commands(command_param_tuples) when is_list(command_param_tuples) do
+  #   make_add_changeset =
+  #     fn(user_id) ->
+  #       %C.AddUsernamePasswordCredential{user_id: user_id}
+  #       |> generate_changeset(a_attrs)
+  #     end
 
-    applied_changesets =
-      Enum.map(
-        command_param_tuples,
-        fn({%command{} = command_struct, attrs}) ->
-          changeset = command.changeset(command_struct, attrs)
-          case changeset.valid? do
-            true ->
-              # command_with_params = struct(changeset.data, changeset.changes)
-              Changeset.apply_changes(changeset)
-            false ->
-              changeset
-          end
-        end)
+  #   r_changeset = generate_changeset(r_struct, r_attrs)
 
-    filtered_errors =
-      Enum.filter(
-        applied_changesets,
-        fn
-          (%Changeset{}) -> true
-                     (_) -> false
-        end)
+  #   case r_changeset.valid? do
 
-    case length(filtered_errors) do
-      0 -> {:ok, applied_changesets} # i.e., valid commands at this point
-      _ -> {:error, filtered_errors}
-    end
-  end
+  #     true  ->
+  #       r_command   = Changeset.apply_changes(r_changeset)
+  #       a_changeset = make_add_changeset.(r_command.user_id)
+
+  #       case a_changeset.valid? do
+  #         true  ->
+  #           {:ok, [r_command, Changeset.apply_changes(a_changeset)]}
+  #         false ->
+  #           {:error, [a_changeset]}
+  #       end
+
+  #     false ->
+  #       # The uuid  is only a placeholder  to return changeset
+  #       # validation  errors.  (Remember, returning  :ok  only
+  #       # when  both commands  succeed,  therefore this  value
+  #       # will always be discarded; we just need the errors!)
+  #       a_changeset = make_add_changeset.(Ecto.UUID.generate())
+
+  #       case a_changeset.valid? do
+  #         true ->
+  #           {:error, [r_changeset]}
+  #         false ->
+  #           {:error, [r_changeset, a_changeset]}
+  #       end
+  #   end
+  # end
+
+  # # (FP sidenote: this is like an "either", right?
+
+  # # USE CASE: for independent commands
+  # # [command_struct, attrs_map] ->
+  # #     {:ok,    [command]}
+  # #   | {:error, [command_changeset]}
+  # def imbue_commands(command_param_tuples) when is_list(command_param_tuples) do
+
+  #   applied_changesets =
+  #     Enum.map(
+  #       command_param_tuples,
+  #       fn({%command{} = command_struct, attrs}) ->
+  #         changeset = command.changeset(command_struct, attrs)
+  #         case changeset.valid? do
+  #           true ->
+  #             # command_with_params = struct(changeset.data, changeset.changes)
+  #             Changeset.apply_changes(changeset)
+  #           false ->
+  #             changeset
+  #         end
+  #       end)
+
+  #   filtered_errors =
+  #     Enum.filter(
+  #       applied_changesets,
+  #       fn
+  #         (%Changeset{}) -> true
+  #                    (_) -> false
+  #       end)
+
+  #   case length(filtered_errors) do
+  #     0 -> {:ok, applied_changesets} # i.e., valid commands at this point
+  #     _ -> {:error, filtered_errors}
+  #   end
+  # end
 
   # 2019-01-24_1437 NOTE
 

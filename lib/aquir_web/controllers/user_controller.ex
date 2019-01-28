@@ -69,8 +69,8 @@ defmodule AquirWeb.UserController do
     #  {:ok, user_with_credentials}
     #
     #  { :errors,
-    #    [ {:invalid_changesets, changeset_list}
-    #    , {:entities_reserved,  reserved_keywords}
+    #    [   {:invalid_changeset, changeset}
+    #      | {:entities_reserved, reserved_keywords}
     #    ]
     #  }
 
@@ -79,19 +79,18 @@ defmodule AquirWeb.UserController do
         keywords,
         fn
           ({:entities_reserved, keywords}) ->
-            Enum.map(keywords, fn({entity, value}) ->
+            Enum.map(keywords, fn({entity, value}) when is_atom(entity)->
               capitalized_entity = atom_to_capitalized_string(entity)
               {entity, ["#{capitalized_entity} #{value} already exists."]}
             end)
+          # {:entities_reserved, keywords} ->
+          # [email: "Email ... already exists.", username: "..", ...]
 
-          # 2019-01-23_0745 NOTE (`traverse_errors/2` example)
-          ({:invalid_changesets, changesets}) ->
-            Enum.reduce(changesets, %{}, fn(changeset, acc) ->
-              changeset
-              |> Ecto.Changeset.traverse_errors(&reduce_errors/3)
-              |> unwrap_add_credential_payload()
-              |> Map.merge(acc)
-            end)
+          ({:invalid_changeset, %Ecto.Changeset{} = changeset}) ->
+            changeset
+            # 2019-01-23_0745 NOTE (`traverse_errors/2` example)
+            |> Ecto.Changeset.traverse_errors(&reduce_errors/3)
+            |> unwrap_add_credential_payload()
             |> Map.to_list()
         end)
 
