@@ -19,7 +19,7 @@ defmodule Aquir.Accounts.Aggregates.Credential do
     field :credential_id, :binary_id
     field :user_id,       :binary_id
     field :type,          :string
-    # Why is this not `embeds_many/3`? See NOTE 2019-01-07_1650
+    # 2019-01-07_1650 NOTE (What is payload?)
     field :payload,       :map
   end
 

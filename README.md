@@ -818,11 +818,11 @@ for  command   `AddUsernamePasswordCredential`  this
 data  is  the   username,  password  and  eventually
 the  hashed password.  Adding a  social login  would
 result  in an  embed with  different fields  (though
-`:credential_id`,  `:for_user_id` and  `:type` would
-remain the same).
+`:credential_id`,  `:for_user_id`  and  `:type`  are
+shared among other types).
 
 Even if  the fields would  be the same, it  would be
-`embeds_one/3`  because  is  is a  template  for  an
+`embeds_one/3`  because  it  is a  template  for  an
 aggregate instance  (i.e., it holds the  value for a
 single  credential type  and therefore  has an  ID).
 This fact is reflected in the name of the aggregates
@@ -1631,4 +1631,34 @@ dispatching  commands  and  the  aggregate  module's
 decide what  to do  on certain  preconditions (i.e.,
 aggregate's state).
 
+### 2019-01-28_0847 TODO NOTE (No `user_id` and `type`?)
 
+`ResetPassword`  updates   an  existing  credential,
+therefore  those  values  are already  part  of  the
+aggregate instance and are not necessary.
+
+On the  other hand, more  info is always  welcome so
+these may be added to the metadata in the future.
+
+### 2019-01-28_0923 TODO (Re-think password reset)
+
+When do users usually reset passwords?
+1. forgotten
+2. compromised (or just want to change)
+
+Re-think this  whole command as  it may needs  to be
+split  in  more,  because scenario  1.  means  users
+need  to  be  authenticated by  other  means  (email
+confirmation), and 2. assumes that users are already
+logged in.
+
+### 2019-01-28_0926 TODO (Share Credential changesets)
+
+!!! DO 2019-01-28_0923 FIRST AND RE-EVALUATE THIS !!!
+
+Password   (and    other)   field    validation   is
+the    same     as    for     `ResetPassword`    and
+`AddUsernamePasswordCredential`   so  rounding   out
+`ResetPassword` with payload  would make it possible
+to  create a  "helper" section  in the  `Credential`
+aggregate for creating changesets for both.

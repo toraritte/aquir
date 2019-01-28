@@ -32,7 +32,7 @@ defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
 
     command
     # |> Aquir.Commanded.Support.assign_id(:credential_id)
-    |> cast(params, [:user_id])
+    |> cast(params, [:user_id, :credential_id])
     |> cast_embed(:payload, with: &payload_changeset/2)
     |> validate_required(required_fields)
   end

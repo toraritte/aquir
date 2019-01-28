@@ -1,11 +1,8 @@
 defmodule Aquir.Accounts.Commands.ResetPassword do
   use Ecto.Schema
 
-  # TODO This is probably oversimplified again. It would
-  # be prudent to match the previous password to be more
-  # secure.
+  # 2019-01-28_0923 TODO (Re-think password reset)
 
-  # see 2019-01-09_1200
   @primary_key false
   embedded_schema do
     # Why the `:credential_id`? See 2019-01-15_1223
@@ -13,6 +10,13 @@ defmodule Aquir.Accounts.Commands.ResetPassword do
     field :username,      :string
     field :new_password,  :string, virtual: true
     field :password_hash, :string
+    # 2019-01-28_0847 NOTE TODO (No `user_id` and `type`?)
+
+    # 2019-01-28_0926 TODO (Share Credential changesets)
+    # embeds_one :payload, Payload, primary_key: false do
+    #   field :username,      :string
+    #   field :new_password,  :string, virtual: true
+    #   field :password_hash, :string
   end
 
   import Ecto.Changeset
