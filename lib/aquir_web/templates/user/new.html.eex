@@ -27,6 +27,7 @@
   <div>
 
     <%# 2019-01-18_0503 TODO (multi-round password validation) %>
+    <%# 2019-01-29_1156 TODO (How to do CSRF token in purescript?...) %>
     <%= password_input f, :password, placeholder: "password" %>
     <%= error_tag f, :password %>
   </div>

@@ -5,6 +5,8 @@ defmodule AquirWeb.Auth do
   alias Accounts.Read
   alias Read.Schemas, as: RS
 
+  # 2019-01-29_1157 TODO (Look at  wwwtech.de's remember_me and current_user plug)
+  # 2019-01-29_1200 TODO (How to set cookie max_age and expire properties?)
   def init(opts), do: opts
 
   def call(conn, opts) do

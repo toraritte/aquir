@@ -1318,6 +1318,9 @@ Validate password by having  users enter them again.
 Or  admins, if  this is  not  going to  be a  public
 facing page.
 
+The comparison could easily be made on the front end
+(purescript).
+
 ### 2019-01-24_0810 NOTE (Breaking down `UserController.parse_errors/1`)
 
 ```elixir
@@ -1692,4 +1695,64 @@ username.
 > delete  only  the  user ID  information  by  calling
 > delete_session(conn, :user_id) .
 
+MAYBE? 2019-01-29_1200 (ckruse's `remember_me` plug)
+
+### 2019-01-29_1143 NOTE (Using ckruse's form workaround)
+
+Using   the   `Phoenix.HTML.link/?`  with   `method:
+:delete`  didn't  work,  because javascript  is  not
+initialized on purpose (trying  to use purescript at
+one point).
+
+More details on this [elixirforum post](https://elixirforum.com/t/all-method-delete-links-are-failing/11392/7),
+but the gist is that "_moved the creation of the form to javascript due to [#151](https://github.com/phoenixframework/phoenix_html/issues/151)_" ( [`Phoenix.HTML` issue #192](https://github.com/phoenixframework/phoenix_html/issues/192)).
+
+Used workaround from Christian Kruse (ckruse) in [`Phoenix.HTML` issue #151](https://github.com/phoenixframework/phoenix_html/issues/151#)
+available in his project:
+[ckruse/wwwtech.de - `button.ex`](https://github.com/ckruse/wwwtech.de/blob/0.2.7/lib/wwwtech_web/helpers/button.ex)
+[Usage in layout](https://github.com/ckruse/wwwtech.de/blob/0.2.7/lib/wwwtech_web/templates/layout/app.html.eex)
+
+### 2019-01-29_1157 TODO (Take a look at wwwtech.de's remember_me and current_user plug)
+
+### 2019-01-29_1200 TODO (How to set cookie max_age and expire properties?)
+
+ckruse has done this in his `remember_me` plug.
+
+```elixir
+defmodule WwwtechWeb.Plug.RememberMe do
+  @moduledoc """
+  This plug is plugged in the browser pipeline and implements a „remember me”
+  behaviour:
+
+  - if the user is signed in it does nothing
+  - if the user isn't signed in it checks if there is a `remember_me` cookie
+  - if there is a `remember_me` cookie it loads the user object, signs in the
+    user (sets `user_id` in session) and assigns the current_user
+  """
+
+  def init(opts), do: opts
+
+  def call(conn, _opts) do
+    if conn.assigns[:current_user] do
+      conn
+    else
+      # do we find a cookie
+      token = conn.req_cookies["remember_me"]
+
+      case Phoenix.Token.verify(WwwtechWeb.Endpoint, "user", token, max_age: 2_592_000) do
+        {:ok, uid} ->
+          current_user = Wwwtech.Accounts.get_author!(uid)
+
+          conn
+          |> Plug.Conn.put_session(:current_user, current_user.id)
+          |> Plug.Conn.configure_session(renew: true)
+          |> Plug.Conn.assign(:current_user, current_user)
+
+        {:error, _} ->
+          conn
+      end
+    end
+  end
+end
+```
 
