@@ -22,7 +22,7 @@
 
               <%# 2019-01-29_1143 NOTE (Using ckruse's form workaround) %>
               <%= form_tag(
-                    Routes.session_path(@conn, :delete, "lofa"),
+                    Routes.session_path(@conn, :delete),
                     method: :delete
                   ) do %>
                 <%= Phoenix.HTML.Form.submit("Log out") %>

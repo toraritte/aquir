@@ -42,11 +42,9 @@ defmodule AquirWeb.Router do
     # :singleton - defines  routes for  a  singleton  resource that  is
     #              looked up  by the client without  referencing an ID.
     #              Read below for more information
-    resources(
-      "/sessions",
-      SessionController,
-      only: [:new, :create, :delete]
-    )
+    get "/login", SessionController, :new
+    post "/login", SessionController, :create
+    delete "/logout", SessionController, :delete
   end
 
   # Other scopes may use custom stacks.
