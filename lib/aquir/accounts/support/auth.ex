@@ -2,6 +2,7 @@ defmodule Aquir.Accounts.Support.Auth do
 
   import Ecto.Changeset
   alias Aquir.Accounts.Read
+  alias Read.Schemas, as: RS
 
   defp hash_password(password) do
     Comeonin.Bcrypt.hashpwsalt(password)
@@ -26,7 +27,7 @@ defmodule Aquir.Accounts.Support.Auth do
 
   # 2019-01-29_0603 TODO (Strengthen password checks)
   def authenticate_by_username_and_password(username, given_pass) do
-    Read.get_user_by(username: username)
+    Read.get(RS.Credential, :username, username)
     |> Comeonin.Bcrypt.check_pass(given_pass)
     # {:ok, user}
     # {:error, message}

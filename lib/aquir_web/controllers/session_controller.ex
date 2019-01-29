@@ -13,6 +13,7 @@ defmodule AquirWeb.SessionController do
     login? =
       AquirWeb.Auth.login_by_username_and_password(conn, username, given_pass)
 
+    # require IEx; IEx.pry
     case login? do
       {:error, _reason, conn} ->
         conn
@@ -23,5 +24,11 @@ defmodule AquirWeb.SessionController do
         |> put_flash(:info, "Welcome back!")
         |> redirect(to: Routes.page_path(conn, :index))
     end
+  end
+
+  def delete(conn, _) do
+    conn
+    |> AquirWeb.Auth.logout()
+    |> redirect(to: Routes.page_path(conn, :index))
   end
 end

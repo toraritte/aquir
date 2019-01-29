@@ -3,7 +3,7 @@ defmodule AquirWeb.UserController do
 
   alias Aquir.Accounts
 
-  plug AquirWeb.Auth, :authenticate when action in [:index, :show, :new]
+  plug AquirWeb.Auth, :authenticate when action in [:index, :show]
 
   action_fallback AquirWeb.FallbackController
 

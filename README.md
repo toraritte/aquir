@@ -1683,7 +1683,13 @@ assigned the entire `%Schemas.User{}` instead of the
 username.
 
 
+### 2019-01-29_0816 QUESTION (Use cases to keep the session after a logout?)
 
-
+> This  time  we’re   invoking  configure_session  and
+> setting  :drop  to  true   ,  which  will  drop  the
+> whole  session at  the end  of the  request. If  you
+> want  to keep  the  session around,  you could  also
+> delete  only  the  user ID  information  by  calling
+> delete_session(conn, :user_id) .
 
 

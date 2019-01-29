@@ -19,9 +19,10 @@
             <li>
               <%# 2019-01-29_0804 NOTE ("(ArgumentError) structs expect an :id key..." lofasz) %>
               <p><%= @current_user.name %></p>
-              <%= link "Log out",
-                    to: Routes.session_path(@conn, :delete, hd(@current_user.credentials).username),
-                    method: "delete" %>
+              <%# <%= link "Log out", to: Routes.session_path(@conn, :delete, @current_user.user_id), method: :delete %1> %>
+              <%= form_tag(Routes.session_path(@conn, :delete, "lofa"), method: :delete) do %>
+              <%= Phoenix.HTML.Form.submit("Log out2") %>
+              <% end %>
             </li>
           <% else %>
             <li><%= link "Log in", to: Routes.session_path(@conn, :new) %></li>

@@ -37,6 +37,11 @@ defmodule AquirWeb.Auth do
     |> configure_session(renew: true)
   end
 
+  # 2019-01-29_0816 QUESTION (Use cases to keep the session after a logout?)
+  def logout(conn) do
+    configure_session(conn, drop: true)
+  end
+
   def login_by_username_and_password(conn, username, given_pass) do
     authed? =
       Accounts.Support.Auth.authenticate_by_username_and_password(
