@@ -19,7 +19,7 @@ defmodule AquirWeb.Auth do
     assign(conn, :current_user, user)
   end
 
-  def authenticate(conn) do
+  def authenticate_user(conn) do
     case conn.assigns.current_user do
       nil ->
         conn

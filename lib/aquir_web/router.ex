@@ -10,6 +10,10 @@ defmodule AquirWeb.Router do
     plug AquirWeb.Auth, :assign_user_session
   end
 
+  pipeline :user_auth do
+    plug AquirWeb.Auth, :authenticate_user
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -18,6 +22,15 @@ defmodule AquirWeb.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
+
+    get    "/login",  SessionController, :new
+    post   "/login",  SessionController, :create
+    delete "/logout", SessionController, :delete
+  end
+
+  scope "/admin", AquirWeb do
+    pipe_through [:browser, :user_auth]
+
     resources "/users", UserController, param: "username"
     # GET    /users          => :index
     # GET    /users/new      => :new
@@ -42,9 +55,6 @@ defmodule AquirWeb.Router do
     # :singleton - defines  routes for  a  singleton  resource that  is
     #              looked up  by the client without  referencing an ID.
     #              Read below for more information
-    get "/login", SessionController, :new
-    post "/login", SessionController, :create
-    delete "/logout", SessionController, :delete
   end
 
   # Other scopes may use custom stacks.
