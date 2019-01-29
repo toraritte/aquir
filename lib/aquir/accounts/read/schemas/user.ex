@@ -22,7 +22,10 @@ defmodule Aquir.Accounts.Read.Schemas.User do
     field :name,  :string
     field :email, :string, unique: true
 
-    has_many :credentials, RS.Credential
+    # 2019-01-29_1459 NOTE ("user_user_id" Ecto assoc nerverack)
+    has_many :credentials, RS.Credential,
+      references: :user_id,
+      foreign_key: :user_id
 
     timestamps()
   end

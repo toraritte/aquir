@@ -11,9 +11,11 @@ defmodule Aquir.Accounts.Read.Schemas.Credential do
     field :username,      :string, unique: true
     field :password_hash, :string
 
+    # 2019-01-29_1459 NOTE ("user_user_id" Ecto assoc nerverack)
     belongs_to :user, RS.User,
       references:  :user_id,
-      type:        :binary_id
+      type:        :binary_id,
+      foreign_key: :user_id
 
     timestamps()
   end

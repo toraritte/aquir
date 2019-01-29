@@ -1756,3 +1756,113 @@ defmodule WwwtechWeb.Plug.RememberMe do
 end
 ```
 
+### 2019-01-29_1459 NOTE ("user_user_id" Ecto assoc nerverack)
+
+Specifying every possible  option, because otherwise
+I get this on `Aquir.Repo.preload/2`:
+
+```elixir
+** (Ecto.QueryError) deps/ecto/lib/ecto/association.ex:617: field `user_user_id` in `where
+` does not exist in schema Aquir.Accounts.Read.Schemas.Credential in query:
+
+from c0 in Aquir.Accounts.Read.Schemas.Credential,
+  where: c0.user_user_id == ^"d9b96781-132b-421d-b0dc-2af1bd5757d6",
+  order_by: [asc: c0.user_user_id],
+  select: {c0.user_user_id, c0}
+
+    (elixir) lib/enum.ex:1925: Enum."-reduce/3-lists^foldl/2-0-"/3
+    (elixir) lib/enum.ex:1418: Enum."-map_reduce/3-lists^mapfoldl/2-0-"/3
+    (elixir) lib/enum.ex:1925: Enum."-reduce/3-lists^foldl/2-0-"/3
+    (ecto) lib/ecto/repo/queryable.ex:132: Ecto.Repo.Queryable.execute/4
+    (ecto) lib/ecto/repo/queryable.ex:18: Ecto.Repo.Queryable.all/3
+    (elixir) lib/enum.ex:1314: Enum."-map/2-lists^map/1-0-"/2
+```
+
+Documenting here the migrations and schemas, just in
+case:
+
+```elixir
+defmodule Aquir.Accounts.Read.Schemas.Credential do
+  use Ecto.Schema
+
+  alias Aquir.Accounts.Read.Schemas, as: RS
+
+  @primary_key {:credential_id, :binary_id, autogenerate: false}
+
+  schema "users_credentials" do
+    field :type,          :string
+    field :username,      :string, unique: true
+    field :password_hash, :string
+
+    # 2019-01-29_1459 NOTE ("user_user_id" Ecto assoc nerverack)
+    belongs_to :user, RS.User,
+      references:  :user_id,
+      type:        :binary_id,
+      foreign_key: :user_id
+
+    timestamps()
+  end
+end
+
+defmodule Aquir.Accounts.Read.Schemas.User do
+  use Ecto.Schema
+
+  alias Aquir.Accounts.Read.Schemas, as: RS
+
+  @primary_key {:user_id, :binary_id, autogenerate: false}
+
+  schema "users" do
+    field :name,  :string
+    field :email, :string, unique: true
+
+    # 2019-01-29_1459 NOTE ("user_user_id" Ecto assoc nerverack)
+    has_many :credentials, RS.Credential,
+      references: :user_id,
+      foreign_key: :user_id
+
+    timestamps()
+  end
+end
+
+defmodule Aquir.Repo.Migrations.CreateUsersCredentials do
+  use Ecto.Migration
+
+  def change do
+    # https://hexdocs.pm/ecto/Ecto.Changeset.html#unique_constraint/3-case-sensitivity
+    execute "CREATE EXTENSION IF NOT EXISTS citext"
+
+    create table(:users_credentials, primary_key: false) do
+      add :credential_id, :uuid,   primary_key: true
+      add :type,          :string, null: false
+      add :username,      :string
+      add :password_hash, :string
+      # `:column` option is needed otherwise it won't compile
+      # (because expecting the default `:id` in User)
+      add :user_id, references("users", type: :uuid, column: :user_id)
+
+      timestamps()
+    end
+
+    create unique_index(:users_credentials, [:username])
+  end
+end
+
+defmodule Aquir.Repo.Migrations.CreateUsers do
+  use Ecto.Migration
+
+  def change do
+    # https://hexdocs.pm/ecto/Ecto.Changeset.html#unique_constraint/3-case-sensitivity
+    execute "CREATE EXTENSION IF NOT EXISTS citext"
+
+    create table(:users, primary_key: false) do
+      add :user_id, :uuid, primary_key: true
+      add :name,    :citext, null: false
+      add :email,   :string, null: false
+
+      timestamps()
+    end
+
+    create unique_index(:users, [:email])
+  end
+end
+```
