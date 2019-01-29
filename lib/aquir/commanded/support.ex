@@ -5,7 +5,7 @@ defmodule Aquir.Commanded.Support do
   # validation.
 
   alias Ecto.Changeset
-  alias Aquir.Accounts.Commands, as: C
+  # alias Aquir.Accounts.Commands, as: C
 
   defp generate_changeset(%command{} = command_struct, attrs) do
     command.changeset(command_struct, attrs)

@@ -17,8 +17,37 @@ defmodule AquirWeb.Router do
   scope "/", AquirWeb do
     pipe_through :browser # Use the default browser stack
 
-    resources "/users", UserController, param: "username"
     get "/", PageController, :index
+    resources "/users", UserController, param: "username"
+    # GET    /users          => :index
+    # GET    /users/new      => :new
+    # POST   /users          => :create
+    # GET    /users/:id      => :show
+    # GET    /users/:id/edit => :edit
+    # PATCH  /users/:id      => :update
+    # PUT    /users/:id      => :update
+    # DELETE /users/:id      => :delete
+    #  Options
+
+    # :only   - a list of actions to generate routes for
+    # :except - a list of actions to exclude generated routes from
+    # :param  - the name of the parameter for this resource, defaults
+    #           to "id"
+    # :name   - the  prefix  for this  resource.  This  is used  for
+    #           the  named   helper  and  as  the   prefix  for  the
+    #           parameter in nested resources.  The default value is
+    #           automatically derived from the controller name, i.e.
+    #           UserController will have name "user"
+    # :as     - configures the named helper exclusively
+    # :singleton - defines  routes for  a  singleton  resource that  is
+    #              looked up  by the client without  referencing an ID.
+    #              Read below for more information
+    resources(
+      "/sessions",
+      SessionController,
+      only: [:new, :create, :delete],
+      param: "username"
+    )
   end
 
   # Other scopes may use custom stacks.

@@ -69,6 +69,9 @@ defmodule Aquir.Accounts.Read do
   # end
 
   def get_user_by(user_id: user_id) do
+    # IO.inspect(Process.info(self(), :current_stacktrace))
+    # require IEx; IEx.pry
+
     from(
       [u,c] in all_users_with_credentials_query(),
       where: u.user_id == ^user_id)

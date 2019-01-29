@@ -3,7 +3,7 @@ defmodule AquirWeb.UserController do
 
   alias Aquir.Accounts
 
-  # plug AquirWeb.Auth, :authenticate when action in [:index, :show, :new]
+  plug AquirWeb.Auth, :authenticate when action in [:index, :show, :new]
 
   action_fallback AquirWeb.FallbackController
 
@@ -46,6 +46,7 @@ defmodule AquirWeb.UserController do
       username = AquirWeb.UserView.username(user_with_credentials)
 
       conn
+      |> AquirWeb.Auth.login(user_with_credentials)
       |> put_flash(:info, "User #{username} created!")
       # 2019-01-25_1547 QUESTION (Adding 201 and Location does weird stuff)
       |> redirect(to: Routes.user_path(conn, :show, username))

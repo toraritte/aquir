@@ -14,12 +14,19 @@
   <body>
     <div class="container">
       <header class="header">
-        <nav role="navigation">
-          <ul class="nav nav-pills pull-right">
-            <li><a href="http://www.phoenixframework.org/docs">Get Started</a></li>
-          </ul>
-        </nav>
-        <span class="logo"></span>
+        <ul>
+          <%= if @current_user do %>
+            <li>
+              <%# 2019-01-29_0804 NOTE ("(ArgumentError) structs expect an :id key..." lofasz) %>
+              <p><%= @current_user.name %></p>
+              <%= link "Log out",
+                    to: Routes.session_path(@conn, :delete, hd(@current_user.credentials).username),
+                    method: "delete" %>
+            </li>
+          <% else %>
+            <li><%= link "Log in", to: Routes.session_path(@conn, :new) %></li>
+          <% end %>
+        </ul>
       </header>
 
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>

@@ -1662,3 +1662,28 @@ the    same     as    for     `ResetPassword`    and
 `ResetPassword` with payload  would make it possible
 to  create a  "helper" section  in the  `Credential`
 aggregate for creating changesets for both.
+
+### 2019-01-29_0603 TODO (Strengthen password checks)
+
+https://hexdocs.pm/comeonin/Comeonin.Bcrypt.html#add_hash/2
+> Alternatively,  you could  use a  dedicated password
+> strength checker, such as not_qwerty123.
+>
+> For more information  about password strength rules,
+> see the latest NIST guidelines.
+
+### 2019-01-29_0804 NOTE ("(ArgumentError) structs expect an :id key..." lofasz)
+
+The  `_path/?`   helpers  either  expect   a  struct
+with  an  `:id`  field  (or with  another  field  if
+`Phoenix.Params`   if  derived   for  that   struct)
+or  an  explicit  value.  So  far  I  always  passed
+values  explicitly an  then  following  the book,  I
+assigned the entire `%Schemas.User{}` instead of the
+username.
+
+
+
+
+
+

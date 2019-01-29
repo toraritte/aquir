@@ -15,6 +15,7 @@ defmodule Aquir.Accounts.Read.Schemas.User do
   user  has a  unique  email address  and username  as
   well.
   """
+
   @primary_key {:user_id, :binary_id, autogenerate: false}
 
   schema "users" do
