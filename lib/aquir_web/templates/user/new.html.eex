@@ -1,5 +1,6 @@
 <h1>New User</h1>
 
+<%# 2019-01-29_1235 TODO (Focus first input field on pages with forms) %>
 <%= form_for @conn, Routes.user_path(@conn, :create), [as: :user, errors: @conn.assigns[:errors]], fn f -> %>
 
   <%# <%= require IEx; IEx.pry %1> %>

@@ -45,8 +45,7 @@ defmodule AquirWeb.Router do
     resources(
       "/sessions",
       SessionController,
-      only: [:new, :create, :delete],
-      param: "user_id"
+      only: [:new, :create, :delete]
     )
   end
 
