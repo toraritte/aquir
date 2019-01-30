@@ -52,7 +52,7 @@ defmodule AquirWeb.UserController do
       username = AquirWeb.UserView.username(user_with_username_password_credential)
 
       conn
-      |> AquirWeb.Auth.login(user_with_username_password_credential)
+      # |> AquirWeb.Auth.login(user_with_username_password_credential)
       |> put_flash(:info, "User #{username} created!")
       # 2019-01-25_1547 QUESTION (Adding 201 and Location does weird stuff)
       |> redirect(to: Routes.user_path(conn, :show, username))
