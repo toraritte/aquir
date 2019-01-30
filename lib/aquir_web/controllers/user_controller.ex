@@ -7,6 +7,12 @@ defmodule AquirWeb.UserController do
 
   action_fallback AquirWeb.FallbackController
 
+  # 2019-01-29_0448 NOTE (Controller action definition)
+  # def action(conn, _) do
+  #   args = [conn, conn.params]
+  #   apply(__MODULE__, action_name(conn), args)
+  # end
+
   def index(conn, _params) do
     # case AquirWeb.Auth.authenticate(conn) do
     #   %Plug.Conn{halted: true} ->
