@@ -59,7 +59,7 @@ defmodule Aquir.Accounts.Read.Projector do
       # 2019-01-15_1255 TODO (Why query the DB multiple times?)
       # 2019-01-11_0819 TODO QUESTION (Why not query the aggregate instance process instead?)
 
-      credential = Read.get_one(RS.UsernamePasswordCredential, :username, event.username)
+      credential = Read.get_by(RS.UsernamePasswordCredential, username: event.username)
 
       credential
         |> Ecto.Changeset.change(password_hash: event.password_hash)

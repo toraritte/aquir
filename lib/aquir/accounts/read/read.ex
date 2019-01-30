@@ -31,19 +31,16 @@ defmodule Aquir.Accounts.Read do
 
   # INTERNAL TO ACCOUNTS
   # --------------------
-  def generic_match_query(schema, entity_key, entity) do
-    from(e in schema, where: field(e, ^entity_key) == ^entity)
+  # def generic_match_query(schema, entity_key, entity) do
+  #   from(e in schema, where: field(e, ^entity_key) == ^entity)
+  # end
+
+  def get_by(schema, keywords) do
+    Repo.get_by(schema, keywords)
   end
 
-  def get_one(schema, entity_key, entity) do
-    generic_match_query(schema, entity_key, entity)
-    |> Repo.one()
-  end
-
-  def check_dup(schema, entity_key, entity) do
-    get? = generic_match_query(schema, entity_key, entity) |> Repo.one()
-
-    case get? do
+  def check_dup(schema, [{entity_key, entity}] = keyword) do
+    case get_by(schema, keyword) do
       nil -> :ok
       _   -> {:error, :"#{entity_key}_already_in_database", entity}
     end
