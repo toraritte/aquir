@@ -2314,3 +2314,34 @@ to project them into the right tables, therefore the
 `:type` field is not needed.
 
 The RDBMS tables omit the field on the same basis.
+
+### 2019-01-30_0900 NOTE (seeds)
+
+From the Programming Phoenix book:
+
+```elixir
+# queries/listings/rumbl/lib/rumbl/multimedia.change1.ex
+alias Rumbl.Multimedia.Category
+
+def create_category(name) do
+
+  # Used in the list  comprehension below, filling it up
+  # with  `Category` structs.  First, it  checks whether
+  # the category  is in  the database using  a bang-less
+  # version so that  it returns a false-y  value if not.
+  # Second,  it inserts  it if  none previously  exists,
+  # using  the  bang  version of  insert,  because  this
+  # operation shouldn't fail. If it does, there is a bug
+  # or  some  pre-requisite  is  missing  (database  not
+  # running etc.).
+
+  Repo.get_by(Category, name: name) || Repo.insert!(%Category{name: name})
+end
+
+# queries/listings/rumbl/priv/repo/seeds.change1.exs
+alias Rumbl.Multimedia
+for category <- ~w(Action Drama Romance Comedy Sci-fi) do
+  Multimedia.create_category(category)
+end
+```
+
