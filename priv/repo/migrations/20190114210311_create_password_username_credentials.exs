@@ -34,7 +34,14 @@ defmodule Aquir.Repo.Migrations.CreateUsersCredentials do
       add :credential_id, :uuid,   primary_key: true
       add :username,      :string, null: false
       add :password_hash, :string, null: false
-      add :user_id, references("users", type: :uuid, column: :user_id)
+
+      add(:user_id, 
+        references("users",
+          type: :uuid,
+          column: :user_id,
+          on_delete: :delete_all
+        )
+      )
 
       timestamps()
     end
