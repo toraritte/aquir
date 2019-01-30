@@ -18,7 +18,7 @@ defmodule AquirWeb.UserController do
     #   %Plug.Conn{halted: true} ->
     #     conn
     #   conn ->
-        users = Accounts.Read.list_users_with_credentials()
+        users = Accounts.Read.list_users_with_username_password_credential()
         render(conn, "index.html", users: users)
     # end
   end
@@ -27,7 +27,7 @@ defmodule AquirWeb.UserController do
     render(
       conn,
       "show.html",
-      user: Accounts.Read.get_user_by(username: username)
+      user: Accounts.Read.get_user_with_usrname_password_credential_by(username: username)
     )
   end
 
@@ -47,12 +47,12 @@ defmodule AquirWeb.UserController do
   def create(conn, %{"user" => user}) do
 
     with(
-      {:ok, user_with_credentials} <- Accounts.register_user(user)
+      {:ok, user_with_username_password_credential} <- Accounts.register_user(user)
     ) do
-      username = AquirWeb.UserView.username(user_with_credentials)
+      username = AquirWeb.UserView.username(user_with_username_password_credential)
 
       conn
-      |> AquirWeb.Auth.login(user_with_credentials)
+      |> AquirWeb.Auth.login(user_with_username_password_credential)
       |> put_flash(:info, "User #{username} created!")
       # 2019-01-25_1547 QUESTION (Adding 201 and Location does weird stuff)
       |> redirect(to: Routes.user_path(conn, :show, username))
@@ -73,7 +73,7 @@ defmodule AquirWeb.UserController do
 
     # OUTPUT
     # -------
-    #  {:ok, user_with_credentials}
+    #  {:ok, user_with_username_password_credential}
     #
     #  { :errors,
     #    [   {:invalid_changeset, changeset}

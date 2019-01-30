@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Read.Schemas.Credential do
+defmodule Aquir.Accounts.Read.Schemas.UsernamePasswordCredential do
   use Ecto.Schema
 
   alias Aquir.Accounts.Read.Schemas, as: RS
@@ -6,8 +6,9 @@ defmodule Aquir.Accounts.Read.Schemas.Credential do
   # See 2019-01-14_1317 for schema fields/table columns.
   @primary_key {:credential_id, :binary_id, autogenerate: false}
 
-  schema "users_credentials" do
-    field :type,          :string
+  # 2019-01-30_0627 NOTE (Why the users_credentals -> username_password_credentials migration?)
+  # 2019-01-30_0628 NOTE (Credential :type field flip-flop)
+  schema "username_password_credentials" do
     field :username,      :string, unique: true
     field :password_hash, :string
 

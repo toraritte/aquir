@@ -23,7 +23,8 @@ defmodule Aquir.Accounts.Read.Schemas.User do
     field :email, :string, unique: true
 
     # 2019-01-29_1459 NOTE ("user_user_id" Ecto assoc nerverack)
-    has_many :credentials, RS.Credential,
+    # 2019-01-30_0627 NOTE (Why the users_credentals -> username_password_credentials migration?)
+    has_one :credential, RS.UsernamePasswordCredential,
       references: :user_id,
       foreign_key: :user_id
 

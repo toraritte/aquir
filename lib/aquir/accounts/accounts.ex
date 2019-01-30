@@ -114,7 +114,7 @@ defmodule Aquir.Accounts do
       [{:ok, register_user}, {:ok, add_credential}, {:ok, _, _}] = results
       ACR.dispatch( register_user,  consistency: :strong)
       ACR.dispatch( add_credential, consistency: :strong)
-      {:ok, Read.get_user_by(user_id: register_user.user_id)}
+      {:ok, Read.get_user_with_usrname_password_credential_by(user_id: register_user.user_id)}
     else
       false -> {:errors, transform(filtered_errors)}
       {:error, :entities_reserved, _} = errors -> {:errors, errors}
@@ -122,7 +122,7 @@ defmodule Aquir.Accounts do
 
     # OUTPUT
     # -------
-    #  {:ok, user_with_credentials}
+    #  {:ok, user_with_username_password_credential}
     #
     #  { :errors,
     #    [   {:invalid_changeset, changeset}
@@ -170,7 +170,7 @@ defmodule Aquir.Accounts do
 
   #   # 2019-01-15_1255 TODO (Why query the DB multiple times?)
 
-  #   credential = Read.get(RS.Credential, :username, username)
+  #   credential = Read.get(RS.UsernamePasswordCredential, :username, username)
 
   #   # See 2019-01-21_0827
   #   maybe_fake_credential_id =

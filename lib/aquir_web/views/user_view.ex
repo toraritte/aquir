@@ -13,8 +13,8 @@ defmodule AquirWeb.UserView do
 
   # 2019-01-24_1500 TODO (Make dependent commands execute in a transaction)
   # (Failing to load /users even if nothing has changed)
-  def username(user_with_credentials) do
-    hd(user_with_credentials.credentials).username
+  def username(user_with_username_password_credential) do
+    user_with_username_password_credential.credential.username
   end
 
   # def render("index.json", %{users: users}) do

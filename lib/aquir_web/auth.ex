@@ -15,7 +15,7 @@ defmodule AquirWeb.Auth do
 
   def assign_user_session(conn) do
     user_id = get_session(conn, :user_id)
-    user = user_id && Read.get_user_by(user_id: user_id)
+    user = user_id && Read.get_user_with_usrname_password_credential_by(user_id: user_id)
     assign(conn, :current_user, user)
   end
 

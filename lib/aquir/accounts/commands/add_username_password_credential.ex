@@ -9,6 +9,7 @@ defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
     field :credential_id, :binary_id
     # 2019-01-28 NOTE (Issues on decoupling commands)
     field :user_id,       :binary_id
+    # 2019-01-30_0628 NOTE (Credential :type field flip-flop)
     field :type,          :string, default: "username_password"
 
     # Even embeds add an `:id` primary key automatically.

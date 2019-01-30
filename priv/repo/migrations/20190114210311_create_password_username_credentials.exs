@@ -28,16 +28,17 @@ defmodule Aquir.Repo.Migrations.CreateUsersCredentials do
     # https://hexdocs.pm/ecto/Ecto.Changeset.html#unique_constraint/3-case-sensitivity
     execute "CREATE EXTENSION IF NOT EXISTS citext"
 
-    create table(:users_credentials, primary_key: false) do
+    # 2019-01-30_0627 NOTE (Why the users_credentals -> username_password_credentials migration?)
+    # 2019-01-30_0628 NOTE (Credential :type field flip-flop)
+    create table(:username_password_credentials, primary_key: false) do
       add :credential_id, :uuid,   primary_key: true
-      add :type,          :string, null: false
-      add :username,      :string
-      add :password_hash, :string
+      add :username,      :string, null: false
+      add :password_hash, :string, null: false
       add :user_id, references("users", type: :uuid, column: :user_id)
 
       timestamps()
     end
 
-    create unique_index(:users_credentials, [:username])
+    create unique_index(:username_password_credentials, [:username])
   end
 end

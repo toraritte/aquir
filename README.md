@@ -2032,3 +2032,285 @@ An authorization use case from "Programming Phoenix 1.4":
 > from  any other  video,  Ecto raises  a not  found
 > error. Let’s do the same change to edit and update
 > to ensure that they can only change
+
+### 2019-01-16_0506 TODO QUESTION (Get to the bottom of :consistency settings)
+
+Does  it  make  sense   to  talk  about  consistency
+settings per event?
+
+> https://github.com/commanded/commanded/blob/master/guides/Commands.md#command-dispatch-consistency-guarantee
+
+> Provide  an  explicit  list  of  event  handler  and
+> process manager modules (or their configured names),
+> containing  only   those  handlers  you'd   like  to
+> wait  for. No  other  handlers will  be awaited  on,
+> regardless  of  their   own  configured  consistency
+> setting.
+
+> ```elixir
+> :ok = BankRouter.dispatch(command, consistency: [ExampleHandler, AnotherHandler])
+> :ok = BankRouter.dispatch(command, consistency: ["ExampleHandler", "AnotherHandler"])
+> ```
+> Note you  cannot opt-in to strong  consistency for a
+> handler  that  has  been  configured  as  eventually
+> consistent.
+
+### 2018-10-23_2154 QUESTION (Where is the `:consistency` option defined?)
+
+Where is `:consistency` above defined? Commanded.Projections.Ecto
+has  one file basically (ecto.ex) and it's not in there.
+
+### 2019-01-11_0757 NOTE (Projectors.User -> Accounts.Projector)
+
+PREMISE
+
+Haven't  found  examples for  defining  associations
+among  projections  in  _Building Conduit_,  only  a
+warning  and  an obscure  (at  least  it feels  like
+that  right now) example on page  106:
+
++ the warning:
+
+Projectors work  independently therefore  the tables
+owned by  a projector  shouldn't query the  table of
+another as they  may not be updated  yet, BUT events
+in  a   projector  are  handled  in   order.
+
+Quote: "**individual projectors must be  responsible
+for populating all data they require.**"
+
++ the example:
+
+It  describes   how  to  reference  an   author  for
+a   published   article.   First,   it   takes   the
+`AuthorCreated` event, saves into its "blog_authors"
+table  saving the  `:user_uuid` that  references the
+user in the Accounts context.
+
+That is, the relationship between
+Accounts.(Aggregates.)User and Blog.(Aggregates.)Author
+is either  **one-to-one** or  **one-to-many**. Right
+now I don't  see a way to know it  for sure but this
+fluidity may be an upside
+
+It is hard to see the relationships though and
+
+ISN'T THE WHOLE POINT FOR PROJECTIONS THAT
+        THEY CAN TAKE ANY FORM?
+
+If  one wants  do  design a  specific database  with
+them,  they  should be  able  to.  Or if  one  wants
+a   graphic  database   with  completely   different
+semantics, so be it. Or project selected events into
+a drawing. Whatever.
+
+QUESTIONs raised:
++ 2019-01-11_0819
+
+PROPOSAL
+
+The gist of the PREMISE is that in "Building Conduit"
+
++ couldn't  find  any   associations  or  migrations
+suggesting relationships between tables and
+
++ every projector corresponds  to an aggregate
+(`User` aggregate `User` projector etc.)
+
+What if the projector handles wider range of events,
+for example for an entire context? Or for an entire
+app?
+
+Possible corollary: "fat" projectors
+
+UPDATE: 2019-01-14_1038 (Confused CQRS read model with standard projections)
+
+### 2018-10-19_2344 TODO QUESTION (How to query the stream's state?)
+
+The state of the User  aggregate is fetched from the
+User  projection in  the  database,  but that  state
+should  also be  available  in  the stream  process.
+Aggregate instances (i.e.,  streams) are implemented
+as  GenServers,  therefore,  unless the  system  has
+been restarted/crashed before,  this state should be
+available.
+
+If the Phoenix server  has been restarted or crashed
+before the Commanded.Aggregates.Supervisor will show
+no spawned process.
+
++ How  and  when  will   get  the  stream  processes
+respawned  or on  what  condition  after a  system
+restart?
+
++ Will their events  get re-applyed automatically on
+such  respawn or  do I  need  to bring  back to  a
+consistent state manually re-applying the events?
+
+!!!
+**Look at the aggregate modules `execute/2` and `apply/2`.**
+Both functions receive the aggregate's current state.
+
+### 2019-01-10_0544 QUESTION (Correlation and causation IDs?)
+
++ What are correlation and causation IDs?
++ How idiomatic are they in Commanded?
++ How to use them for this project to make it more reliable?
+
++ Related: How does Commanded utilize event_store?
+
+From https://stackoverflow.com/questions/53740867/correlation-and-causation-id-in-commanded :
+"The  correlation id  is used  to associate  related
+messages (commands  & events). It  will be set  to a
+random UUID  if you don't provide  it during command
+dispatch."
+
+Distill that SO thread.
+
+### 2019-01-10_0604 QUESTION (Event metadata use cases?) (answered)
+
+QUESTION: What is the event metadata field supposed to be used for?
+
+ANSWER:
+https://blog.scooletz.com/2015/08/11/enriching-your-events-with-important-metadata/
+
+> But what information  can be useful to  store in the
+> metadata, which  info is worth to  store despite the
+> fact that it was not captured in the creation of the
+> model?
+
+> ### 1. Audit data
+
+>   + **who?** – simply store the user id of the action invoker
+>   + **when?** – the timestamp of the action and the event(s)
+>   + **why?** – the serialized intent/action of the actor
+
+> ### 2. Event versioning
+
+> The  event sourcing  deals  with the  effect of  the
+> actions. An action executed on a state results in an
+> action  according  to  the  current  implementation.
+> Wait.   The   current   implementation?   Yes,   the
+> implementation of  your aggregate can change  and it
+> will either because of bug fixing or introducing new
+> features. **Wouldn’t it be nice if the version, like
+> a  commit  id  (SHA1  for  gitters)  or  a  semantic
+> version could  be stored  with the event  as well?**
+> Imagine that you published a broken version and your
+> business sold 100 tickets  before fixing a bug. It’d
+> be nice to be able  which events were created on the
+> basis  of  the  broken implementation.  Having  this
+> knowledge  you  can easily  compensate  transactions
+> performed by the broken implementation.
+
+> ### 3. Document implementation details
+
+> It’s  quite  common  to introduce  canary  releases,
+> feature  toggling  and  A/B tests  for  users.  With
+> automated deployment and  small code enhancement all
+> of the mentioned approaches  are feasible to have on
+> a  project board.  If  you consider  the toggles  or
+> different implementation coexisting in the very same
+> moment, storing the version  only may be not enough.
+> How  about adding  information  which features  were
+> applied for the action? Just  create a simple set of
+> features enabled,  or map feature-status and  add it
+> to the event  as well. Having this  and the command,
+> it’s easy to repeat  the process. Additionally, it’s
+> easy to result in your A/B experiments. Just run the
+> scan for events with A enabled and another for the B
+> ones.
+
+> ### 4. Optimized combination of 2. and 3.
+
+> If you think that this  is too much, create a lookup
+> for sets of  versions x features. It’s  not that big
+> and is  repeatable across many users,  hence you can
+> easily optimize  storing the set elsewhere,  under a
+> reference  key.  You  can  serialize  this  map  and
+> calculate SHA1,  put the  values in  a map  (a table
+> will do as well) and  use identifiers to put them in
+> the event.  There’s plenty  of options to  shift the
+> load either to the query (lookups) or to the storage
+> (store everything as named metadata).
+
+> ## Summing up
+
+> If  you   create  an  event   sourced  architecture,
+> consider adding the temporal dimension (version) and
+> a  bit of  configuration to  the metadata.  Once you
+> have  it,  it’s  much  easier to  reason  about  the
+> sources of  your events  and introduce  tooling like
+> compensation. There’s  no such  thing like  too much
+> data, is there?
+
+### 2019-01-10_0633 QUESTION (How to implement event versioning?)
+
+QUESTION: How to implement event versioning in Commanded?
+
+2019-01-10_0604 (event  metadata) is  relevant here,
+but  have to  figure out  the specifics.  See google
+search below as well:
+
+https://www.google.com/search?q=eventstore+event+versioning&oq=eventstore+event+versioning
+
+### 2019-01-30_0627 NOTE (Why the users_credentials -> username_password_credentials migration?)
+
+The notion that a user can have multiple credentials
+is  solid I  think (see  also 2018-10-14_2339),  but
+there  is no  reason  for a  user  to have  multiple
+`username_password` credentials  (hence the `Schema`
+changes from `has_many` to `has_one`).
+
+I  am also  still prone  to confuse  READ and  WRITE
+sides:  the `users_credentals`  table  was about  to
+become very  generic with  maps to hold  the payload
+of  credential  types  (such as  the  CQRS  commands
+do),  but that  is  insane. The  logical thing  with
+relation databases would be to hold a table for each
+credential  type  and  project  events  of  specific
+credential types into  them (see 2019-01-30_0628 for
+more  on this).  If  I  understand correctly,  table
+relationships are implicit  in RDBMS' (`references`)
+compared  to `Ecto.Schemas`  (`has_many`, `has_one`,
+etc.).
+
+```text
+____
+    |
+user|<-- username_password_credentials
+____|<-- facebook_credentials
+```
+
+### 2019-01-30_0628 NOTE (Credential :type field flip-flop)
+
+Entities having a credential `:type` field:
++ `AddUsernamePasswordCredential` command
+  at the moment)
++ `Credential` aggregate
+
+... and that do not:
++ Credential events
++ `Read.Schemas` credentials (`username_password_credentials`
+  at the moment)
+
+#### Why is that?
+
+CQRS commands  update the streams'  (i.e., aggregate
+instance processes)  state and they  are polymorphic
+(it wouldn't be  very good to have  an aggregate for
+each credential type). The `:type` field is probably
+only important  on new credential  creation, because
+even  though  the  commands'  name  is  descriptive,
+the aggregate  template is type-agnostic  (hence the
+payload  field).  Therefore   when  creating  a  new
+aggregate  instance, it  stores the  credential type
+from  the  command,  but   later  commands  will  be
+identified  by ID  and they  probably won't  need to
+expose this information.
+
+Event names are descriptive as well, and can be used
+to project them into the right tables, therefore the
+`:type` field is not needed.
+
+The RDBMS tables omit the field on the same basis.
