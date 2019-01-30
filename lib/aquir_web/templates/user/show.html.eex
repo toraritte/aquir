@@ -1,5 +1,10 @@
 <h1>Showing User</h1>
 <div>
-  <p><%= @user.user_id %>, <%= username(@user) %>, <%= @user.name %>, <%= @user.email %></p>
+  <p>
+    <%= @user.user_id %>,
+    <%= username(@user) %>,
+    <%= @user.name %>,
+    <%= @user.email %>
+  </p>
   <%= link("Show users", to: Routes.user_path(@conn, :index)) %>
 </div>

@@ -181,7 +181,7 @@ defmodule Aquir.Accounts.Read.Projector do
       # (`Accounts.reset_password/1`)
 
       # TODO 2019-01-15_1255 (Why query the DB multiple times?)
-      credential = Read.get(RS.Credential, :username, event.username)
+      credential = Read.get_one(RS.Credential, :username, event.username)
 
       credential
         |> Ecto.Changeset.change(password_hash: event.password_hash)

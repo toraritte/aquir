@@ -34,8 +34,8 @@ defmodule Aquir.Accounts.Support.Unique do
       fn ->
 
         # These result in empty lists if read model is empty.
-        usernames = Read.get_all(RS.Credential, :username)
-        emails    = Read.get_all(RS.User,       :email)
+        usernames = Read.get_all_entity(RS.Credential, :username)
+        emails    = Read.get_all_entity(RS.User,       :email)
 
         %{
           username: MapSet.new(usernames),

@@ -25,15 +25,13 @@ defmodule Aquir.Accounts.Read do
   the event  store should  never be edited.  Hence the
   workaround in the account context (`account.ex`).
   """
+
+  # 2019-01-29_1617 NOTE (`preload` works both ways and works on lists too!)
+
   # INTERNAL TO ACCOUNTS
   # --------------------
-  def generic_get_query(schema, entity_key, entity) do
-
-    query =
-      from(
-        e in schema,
-        where: field(e, ^entity_key) == ^entity
-      )
+  def generic_match_query(schema, entity_key, entity) do
+    from(e in schema, where: field(e, ^entity_key) == ^entity)
   end
 
   # warning: function Aquir.Accounts.Read.get/3 is undefined or private. Did you mean one of:
@@ -45,12 +43,12 @@ defmodule Aquir.Accounts.Read do
   #   lib/aquir/accounts/support/auth.ex:30
 
   def get_one(schema, entity_key, entity) do
-    generic_get_query(schema, entity_key, entity)
+    generic_match_query(schema, entity_key, entity)
     |> Repo.one()
   end
 
   def check_dup(schema, entity_key, entity) do
-    get? = generic_get_query(schema, entity_key, entity) |> Repo.one()
+    get? = generic_match_query(schema, entity_key, entity) |> Repo.one()
 
     case get? do
       nil -> :ok
@@ -58,7 +56,7 @@ defmodule Aquir.Accounts.Read do
     end
   end
 
-  def get_all(schema, field) do
+  def get_all_entity(schema, field) do
     from(e in schema, select: field(e, ^field))
     |> Aquir.Repo.all()
   end
@@ -66,6 +64,9 @@ defmodule Aquir.Accounts.Read do
 
   # EXTERNAL TO ACCOUNTS
   # --------------------
+
+  # 2019-01-29_1648 NOTE (Why not re-write these with `preload/2`?)
+
   defp all_users_with_credentials_query do
       from u in RS.User,
         join: c in RS.Credential,
@@ -85,9 +86,6 @@ defmodule Aquir.Accounts.Read do
   # end
 
   def get_user_by(user_id: user_id) do
-    # IO.inspect(Process.info(self(), :current_stacktrace))
-    # require IEx; IEx.pry
-
     from(
       [u,c] in all_users_with_credentials_query(),
       where: u.user_id == ^user_id)
@@ -101,6 +99,10 @@ defmodule Aquir.Accounts.Read do
     |> Repo.one()
   end
 end
+
+# IO.inspect(Process.info(self(), :current_stacktrace))
+# require IEx; IEx.pry
+
 # iex(4)> defmodule A do
 # ...(4)>   defmacro error!(args) do
 # ...(4)>     quote do

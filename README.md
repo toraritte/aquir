@@ -1867,7 +1867,9 @@ defmodule Aquir.Repo.Migrations.CreateUsers do
 end
 ```
 
-### 2019-01-29_1617 NOTE (`preload` works both ways!)
+### 2019-01-29_1617 NOTE (`preload` works both ways and works on lists too!)
+
+#### Bi-directionality
 
 ```elixir
 # Retrieving credential and preloading the corresponding user
@@ -1940,3 +1942,73 @@ r_id" = $1) ORDER BY u0."user_id" [<<217, 185, 103, 129, 19, 43, 66, 29, 176, 22
   user_id: "d9b96781-132b-421d-b0dc-2af1bd5757d6"
 }
 ```
+
+#### Invoking preload on list of results
+
+```elixir
+iex(21)> Read.generic_get_query(RS.User, :name, "A") |> Aquir.Repo.all() |> Aquir.Repo.preload(:credentials)
+
+[debug] QUERY OK source="users" db=9.0ms
+SELECT u0."user_id", u0."name", u0."email", u0."inserted_at", u0."updated_at" FROM "users"
+ AS u0 WHERE (u0."name" = $1) ["A"]
+[debug] QUERY OK source="users_credentials" db=1.6ms
+SELECT u0."credential_id", u0."type", u0."username", u0."password_hash", u0."user_id", u0.
+"inserted_at", u0."updated_at", u0."user_id" FROM "users_credentials" AS u0 WHERE (u0."use
+r_id" = ANY($1)) ORDER BY u0."user_id" [[<<102, 31, 165, 36, 133, 159, 72, 243, 129, 39, 1
+82, 47, 17, 3, 79, 75>>, <<217, 185, 103, 129, 19, 43, 66, 29, 176, 220, 42, 241, 189, 87,
+ 87, 214>>]]
+
+[
+  %Aquir.Accounts.Read.Schemas.User{
+    __meta__: #Ecto.Schema.Metadata<:loaded, "users">, 
+    credentials: [
+      %Aquir.Accounts.Read.Schemas.Credential{
+        __meta__: #Ecto.Schema.Metadata<:loaded, "users_credentials">,
+        credential_id: "70198b44-649c-4eb6-b444-e3c577c77a3a",
+        inserted_at: ~N[2019-01-29 22:52:48],
+        password_hash: "$2b$12$aUcyGcu90TwbQTCd5.oDj.qILQSfPFDT6uQYxLhAMgsp29rdwiW.u",
+        type: "username_password",
+        updated_at: ~N[2019-01-29 22:52:48],
+        user: #Ecto.Association.NotLoaded<association :user is not loaded>,
+        user_id: "d9b96781-132b-421d-b0dc-2af1bd5757d6",
+        username: "neomad"
+      }
+    ],
+    email: "neomad@t.com",
+    inserted_at: ~N[2019-01-29 22:52:48],
+    name: "A",
+    updated_at: ~N[2019-01-29 22:52:48],
+    user_id: "d9b96781-132b-421d-b0dc-2af1bd5757d6"
+  },
+  %Aquir.Accounts.Read.Schemas.User{
+    __meta__: #Ecto.Schema.Metadata<:loaded, "users">,
+    credentials: [
+      %Aquir.Accounts.Read.Schemas.Credential{
+        __meta__: #Ecto.Schema.Metadata<:loaded, "users_credentials">,
+        credential_id: "cf537fb1-51d9-4379-a8cb-d4ee048a45cd",
+        inserted_at: ~N[2019-01-29 23:06:32],
+        password_hash: "$2b$12$4unuxHnlhWiaAa/XhcKms.FB5XiwCB9DDRqB1GRCHPPTWhAdtUycG",
+        type: "username_password",
+        updated_at: ~N[2019-01-29 23:06:32],
+        user: #Ecto.Association.NotLoaded<association :user is not loaded>,
+        user_id: "661fa524-859f-48f3-8127-b62f11034f4b",
+        username: "aa"
+      }
+    ],
+    email: "aa@a.aaa",
+    inserted_at: ~N[2019-01-29 23:06:32],
+    name: "A",
+    updated_at: ~N[2019-01-29 23:06:32],
+    user_id: "661fa524-859f-48f3-8127-b62f11034f4b"
+  }
+]
+```
+
+### 2019-01-29_1648 NOTE (Why not re-write these with `preload/2`?)
+
+Even though  the preloading issue has  been resolved
+(2019-01-29_1459),  the  current   way  ensures  the
+order  of  keys  in  results.  That  is,  retrieving
+user  by `:username`  or by  `:user_id` will  return
+`RS.User`  structs with  preloaded `RS.Credential`s.
+(Predictability)
