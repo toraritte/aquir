@@ -27,22 +27,38 @@ defmodule Aquir.Accounts.Read do
   """
   # INTERNAL TO ACCOUNTS
   # --------------------
-  def get(schema, entity_key, entity) do
+  def generic_get_query(schema, entity_key, entity) do
 
-    query = from e in schema,
-              where: field(e, ^entity_key) == ^entity
+    query =
+      from(
+        e in schema,
+        where: field(e, ^entity_key) == ^entity
+      )
+  end
 
-    Repo.one(query)
+  # warning: function Aquir.Accounts.Read.get/3 is undefined or private. Did you mean one of:
+
+  #       * get_all/2
+
+  # Found at 2 locations:
+  #   lib/aquir/accounts/read/projector.ex:184
+  #   lib/aquir/accounts/support/auth.ex:30
+
+  def get_one(schema, entity_key, entity) do
+    generic_get_query(schema, entity_key, entity)
+    |> Repo.one()
   end
 
   def check_dup(schema, entity_key, entity) do
-    case    get(schema, entity_key, entity) do
+    get? = generic_get_query(schema, entity_key, entity) |> Repo.one()
+
+    case get? do
       nil -> :ok
       _   -> {:error, :"#{entity_key}_already_in_database", entity}
     end
   end
 
-  def get_all(field, schema) do
+  def get_all(schema, field) do
     from(e in schema, select: field(e, ^field))
     |> Aquir.Repo.all()
   end

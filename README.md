@@ -1866,3 +1866,77 @@ defmodule Aquir.Repo.Migrations.CreateUsers do
   end
 end
 ```
+
+### 2019-01-29_1617 NOTE (`preload` works both ways!)
+
+```elixir
+# Retrieving credential and preloading the corresponding user
+#############################################################
+iex(18)> Read.generic_get_query(RS.Credential, :username, "neomad") |> Aquir.Repo.one() |>
+ Aquir.Repo.preload(:user)
+
+[debug] QUERY OK source="users_credentials" db=1.2ms queue=0.1ms
+SELECT u0."credential_id", u0."type", u0."username", u0."password_hash", u0."user_id", u0.
+"inserted_at", u0."updated_at" FROM "users_credentials" AS u0 WHERE (u0."username" = $1) [
+"neomad"]
+[debug] QUERY OK source="users" db=5.8ms queue=0.1ms
+SELECT u0."user_id", u0."name", u0."email", u0."inserted_at", u0."updated_at", u0."user_id
+" FROM "users" AS u0 WHERE (u0."user_id" = $1) [<<217, 185, 103, 129, 19, 43, 66, 29, 176,
+ 220, 42, 241, 189, 87, 87, 214>>]
+
+%Aquir.Accounts.Read.Schemas.Credential{
+  __meta__: #Ecto.Schema.Metadata<:loaded, "users_credentials">,
+  credential_id: "70198b44-649c-4eb6-b444-e3c577c77a3a",
+  inserted_at: ~N[2019-01-29 22:52:48],
+  password_hash: "$2b$12$aUcyGcu90TwbQTCd5.oDj.qILQSfPFDT6uQYxLhAMgsp29rdwiW.u",
+  type: "username_password",
+  updated_at: ~N[2019-01-29 22:52:48],
+  user: %Aquir.Accounts.Read.Schemas.User{
+    __meta__: #Ecto.Schema.Metadata<:loaded, "users">,
+    credentials: #Ecto.Association.NotLoaded<association :credentials is not loaded>,
+    email: "neomad@t.com",
+    inserted_at: ~N[2019-01-29 22:52:48],
+    name: "A",
+    updated_at: ~N[2019-01-29 22:52:48],
+    user_id: "d9b96781-132b-421d-b0dc-2af1bd5757d6"
+  },
+  user_id: "d9b96781-132b-421d-b0dc-2af1bd5757d6",
+  username: "neomad"
+}
+
+# Retrieving user and preloading the corresponding credential
+#############################################################
+iex(19)> Read.generic_get_query(RS.User, :email, "neomad@t.com") |> Aquir.Repo.one() |> Aq
+uir.Repo.preload(:credentials)
+
+[debug] QUERY OK source="users" db=0.9ms queue=3.2ms
+SELECT u0."user_id", u0."name", u0."email", u0."inserted_at", u0."updated_at" FROM "users"
+ AS u0 WHERE (u0."email" = $1) ["neomad@t.com"]
+[debug] QUERY OK source="users_credentials" db=3.1ms queue=0.1ms
+SELECT u0."credential_id", u0."type", u0."username", u0."password_hash", u0."user_id", u0.
+"inserted_at", u0."updated_at", u0."user_id" FROM "users_credentials" AS u0 WHERE (u0."use
+r_id" = $1) ORDER BY u0."user_id" [<<217, 185, 103, 129, 19, 43, 66, 29, 176, 220, 42, 241
+, 189, 87, 87, 214>>] 
+
+%Aquir.Accounts.Read.Schemas.User{
+  __meta__: #Ecto.Schema.Metadata<:loaded, "users">,
+  credentials: [
+    %Aquir.Accounts.Read.Schemas.Credential{
+      __meta__: #Ecto.Schema.Metadata<:loaded, "users_credentials">,
+      credential_id: "70198b44-649c-4eb6-b444-e3c577c77a3a",
+      inserted_at: ~N[2019-01-29 22:52:48],
+      password_hash: "$2b$12$aUcyGcu90TwbQTCd5.oDj.qILQSfPFDT6uQYxLhAMgsp29rdwiW.u",
+      type: "username_password",
+      updated_at: ~N[2019-01-29 22:52:48],
+      user: #Ecto.Association.NotLoaded<association :user is not loaded>,
+      user_id: "d9b96781-132b-421d-b0dc-2af1bd5757d6",
+      username: "neomad"
+    }
+  ],
+  email: "neomad@t.com",
+  inserted_at: ~N[2019-01-29 22:52:48],
+  name: "A",
+  updated_at: ~N[2019-01-29 22:52:48],
+  user_id: "d9b96781-132b-421d-b0dc-2af1bd5757d6"
+}
+```
