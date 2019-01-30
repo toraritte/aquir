@@ -27,20 +27,13 @@ defmodule Aquir.Accounts.Read do
   """
 
   # 2019-01-29_1617 NOTE (`preload` works both ways and works on lists too!)
+  # 2019-01-30_0516 NOTE (When to use `Repo` bang (!) functions)
 
   # INTERNAL TO ACCOUNTS
   # --------------------
   def generic_match_query(schema, entity_key, entity) do
     from(e in schema, where: field(e, ^entity_key) == ^entity)
   end
-
-  # warning: function Aquir.Accounts.Read.get/3 is undefined or private. Did you mean one of:
-
-  #       * get_all/2
-
-  # Found at 2 locations:
-  #   lib/aquir/accounts/read/projector.ex:184
-  #   lib/aquir/accounts/support/auth.ex:30
 
   def get_one(schema, entity_key, entity) do
     generic_match_query(schema, entity_key, entity)

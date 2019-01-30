@@ -2012,3 +2012,23 @@ order  of  keys  in  results.  That  is,  retrieving
 user  by `:username`  or by  `:user_id` will  return
 `RS.User`  structs with  preloaded `RS.Credential`s.
 (Predictability)
+
+### 2019-01-30_0516 NOTE (When to use `Repo` bang (!) functions)
+
+When  the resource  should  be there.  If, for  some
+reason,  it isn't,  that  is  an application  error.
+Maybe  in  the  persistence layer,  maybe  somewhere
+else, and if the app is designed properly, that data
+should be available at the time of this call.
+
+An authorization use case from "Programming Phoenix 1.4":
+
+> On    lines   2    and   7,    we   grabbed    our
+> current_user   from   the    action   and   called
+> our     new    Multimedia.list_user_videos     and
+> Multimedia.get_user_video! functions  to authorize
+> access. Now, users can only access the information
+> from videos they  own. If the user  provides an id
+> from  any other  video,  Ecto raises  a not  found
+> error. Let’s do the same change to edit and update
+> to ensure that they can only change
