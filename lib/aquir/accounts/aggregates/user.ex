@@ -1,6 +1,8 @@
 defmodule Aquir.Accounts.Aggregates.User do
-  require Logger
   use Ecto.Schema
+
+  alias Aquir.Accounts.{Commands, Events}
+  alias Aquir.Commanded.Support, as: ACS
 
   # 2019_01-16_0804 TODO
   # Think  about  stream  lifespan (Commanded  calls  it
@@ -17,12 +19,6 @@ defmodule Aquir.Accounts.Aggregates.User do
     # See NOTE 2019-01-06_1938 on the missing `embeds_many/3`
   end
 
-  alias Aquir.Accounts.{
-    Commands,
-    Events,
-  }
-  alias Aquir.Commanded
-
   ###########
   # EXECUTE #
   ###########
@@ -35,7 +31,7 @@ defmodule Aquir.Accounts.Aggregates.User do
     # IO.puts("\n\n")
     # IO.inspect(user)
     # IO.puts("\n\n")
-    Commanded.Support.convert_struct(command, Events.UserRegistered)
+    ACS.convert_struct(command, Events.UserRegistered)
   end
 
   #########
@@ -50,6 +46,6 @@ defmodule Aquir.Accounts.Aggregates.User do
     # IO.puts("\n\n")
     # Simply converting the event to %User{} because there
     # is no state before registering.
-    Commanded.Support.convert_struct(event, __MODULE__)
+    ACS.convert_struct(event, __MODULE__)
   end
 end
