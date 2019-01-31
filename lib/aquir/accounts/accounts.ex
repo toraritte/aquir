@@ -19,11 +19,14 @@ defmodule Aquir.Accounts do
   alias Aquir.Commanded.Support, as: ACS
   alias Aquir.Commanded.Router,  as: ACR
 
-  alias __MODULE__.Commands, as: C
-  alias __MODULE__.Support.Unique
-  alias __MODULE__.Read
-  alias __MODULE__.Read.Schemas, as: RS
-  # `alias Read.Schemas, as: RS` would have been enough but being pedantic
+  alias __MODULE__.{
+    Commands,
+    # Events,
+    Unique,
+    Read,
+  }
+
+  # alias Read.Schemas, as: RS
 
   # 2019-01-19_1324 NOTE
   @doc """
@@ -72,13 +75,13 @@ defmodule Aquir.Accounts do
 
     maybe_register_user =
       ACS.imbue_command(
-        %C.RegisterUser{},
+        %Commands.RegisterUser{},
         %{user_id: new_user_id, name: name, email: email}
       )
 
     maybe_add_credential =
       ACS.imbue_command(
-        %C.AddUsernamePasswordCredential{},
+        %Commands.AddUsernamePasswordCredential{},
         %{
           credential_id: new_credential_id,
           user_id: new_user_id,
@@ -185,7 +188,7 @@ defmodule Aquir.Accounts do
 
   #   imbue_result =
   #     ACS.imbue_commands([
-  #       {%C.ResetPassword{}, attrs_with_maybe_fake_credential_id}
+  #       {%Commands.ResetPassword{}, attrs_with_maybe_fake_credential_id}
   #     ])
   #   # {:ok, [reset_password]}
   #   # {:error, [changeset]}

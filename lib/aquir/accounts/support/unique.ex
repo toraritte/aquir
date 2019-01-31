@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Support.Unique do
+defmodule Aquir.Accounts.Unique do
   use Agent
 
   alias Aquir.Accounts.Read

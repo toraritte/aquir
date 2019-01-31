@@ -46,7 +46,7 @@ defmodule AquirWeb.Auth do
 
   def login_by_username_and_password(conn, username, given_pass) do
     authed? =
-      Accounts.Support.Auth.authenticate_by_username_and_password(
+      Accounts.Auth.authenticate_by_username_and_password(
         username,
         given_pass
       )
