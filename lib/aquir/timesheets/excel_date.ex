@@ -25,9 +25,9 @@
       {dateStr, 0} = System.cmd("date", ["+%m/%d/%Y"])
       dateStr
       |> String.split("\n")
-      |> List.first
-      |> mdy_to_map
-      |> map_to_mdy
+      |> List.first #> "01/31/2019"
+      |> mdy_to_map #> %{day: 31, month: 1, year: 2019}
+      |> map_to_mdy #> "1/31/2019"
     end
 
     def mdy_to_map(str) do
