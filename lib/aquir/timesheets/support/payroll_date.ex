@@ -1,7 +1,7 @@
 # TODO: payroll-date struct?
 defmodule PayrollDate do
 
-  @external_resource "./lib/aquir/timesheets/payroll-days"
+  @external_resource "./lib/aquir/timesheets/support/payroll-days"
   # ezt az egesz lofaszt ugy ahogy van atvarialni
   # mert osszevissza van konvertalgatva minden
   # meg talan PayrollDate -> Payroll.Date
@@ -46,7 +46,7 @@ defmodule PayrollDate do
     require Excel.Date
     require Excel.Maker
 
-    p = Parse.parse_payroll_file("./lib/aquir/timesheets/payroll-days")
+    p = Parse.parse_payroll_file("./lib/aquir/timesheets/support/payroll-days")
     [a,_,_|_] = List.first(p)
     [_,_,z|_] = List.last(p)
 
@@ -54,7 +54,7 @@ defmodule PayrollDate do
   end
 
   # 2019-01-30_1630 QUESTION (No `quote` needed in `defmodule` root?)
-  parsed = Parse.parse_payroll_file("./lib/aquir/timesheets/payroll-days")
+  parsed = Parse.parse_payroll_file("./lib/aquir/timesheets/support/payroll-days")
   # require IEx; IEx.pry
 
   for lines <- parsed do
