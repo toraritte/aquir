@@ -75,21 +75,21 @@ defmodule Aquir.Accounts.Read do
     Repo.all all_users_with_username_password_credential_query()
   end
 
-  # def get_user_with_usrname_password_credential_by([{entity, value}]) when is_atom(entity) do
+  # def get_user_with_username_password_credential_by([{entity, value}]) when is_atom(entity) do
 
   #   from( q in all_users_with_username_password_credentials_query(),
   #     where: field(q, ^entity) == ^value)
   #   |> Repo.one()
   # end
 
-  def get_user_with_usrname_password_credential_by(user_id: user_id) do
+  def get_user_with_username_password_credential_by(user_id: user_id) do
     from(
       [u,c] in all_users_with_username_password_credential_query(),
       where: u.user_id == ^user_id)
     |> Repo.one()
   end
 
-  def get_user_with_usrname_password_credential_by(username: username) do
+  def get_user_with_username_password_credential_by(username: username) do
     from(
       [u,c] in all_users_with_username_password_credential_query(),
       where: c.username == ^username)

@@ -117,7 +117,7 @@ defmodule Aquir.Accounts do
       [{:ok, register_user}, {:ok, add_credential}, {:ok, _, _}] = results
       ACR.dispatch( register_user,  consistency: :strong)
       ACR.dispatch( add_credential, consistency: :strong)
-      {:ok, Read.get_user_with_usrname_password_credential_by(user_id: register_user.user_id)}
+      {:ok, Read.get_user_with_username_password_credential_by(user_id: register_user.user_id)}
     else
       false -> {:errors, transform(filtered_errors)}
       {:error, :entities_reserved, _} = errors -> {:errors, errors}

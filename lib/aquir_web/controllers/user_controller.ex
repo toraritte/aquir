@@ -27,7 +27,7 @@ defmodule AquirWeb.UserController do
     render(
       conn,
       "show.html",
-      user: Accounts.Read.get_user_with_usrname_password_credential_by(username: username)
+      user: Accounts.Read.get_user_with_username_password_credential_by(username: username)
     )
   end
 
