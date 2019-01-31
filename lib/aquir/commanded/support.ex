@@ -127,11 +127,11 @@ defmodule Aquir.Commanded.Support do
     # |> (&struct(to, &1)).()
   end
 
-  def assign_id(struct, field) do
-    new_id = Ecto.UUID.generate()
-    Map.put(struct, field, new_id)
-    new_id
-  end
+  # def assign_id(struct, field) do
+  #   new_id = Ecto.UUID.generate()
+  #   Map.put(struct, field, new_id)
+  #   new_id
+  # end
 
   @doc """
   Recursive version of `Map.from_struct/1`
