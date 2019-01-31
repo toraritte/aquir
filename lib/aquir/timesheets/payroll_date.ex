@@ -55,7 +55,7 @@ defmodule PayrollDate do
 
   # 2019-01-30_1630 QUESTION (No `quote` needed in `defmodule` root?)
   parsed = Parse.parse_payroll_file("./lib/aquir/timesheets/payroll-days")
-  require IEx; IEx.pry
+  # require IEx; IEx.pry
 
   for lines <- parsed do
     [a, z, pay_date, due_date|holidays] = lines
