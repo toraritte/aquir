@@ -28,6 +28,7 @@ defmodule Aquir.Accounts.Read do
 
   # 2019-01-29_1617 NOTE (`preload` works both ways and works on lists too!)
   # 2019-01-30_0516 NOTE (When to use `Repo` bang (!) functions)
+  # 2019-01-31_0754 NOTE (Why `Read` is called outside this context?)
 
   # INTERNAL TO ACCOUNTS
   # --------------------

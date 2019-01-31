@@ -2,8 +2,6 @@ defmodule AquirWeb.Auth do
   use AquirWeb, :controller
 
   alias Aquir.Accounts
-  alias Accounts.Read
-  alias Read.Schemas, as: RS
 
   # 2019-01-29_1157 TODO (Look at  wwwtech.de's remember_me and current_user plug)
   # 2019-01-29_1200 TODO (How to set cookie max_age and expire properties?)
@@ -15,7 +13,7 @@ defmodule AquirWeb.Auth do
 
   def assign_user_session(conn) do
     user_id = get_session(conn, :user_id)
-    user = user_id && Read.get_user_with_username_password_credential_by(user_id: user_id)
+    user = user_id && Accounts.get_user_with_username_password_credential_by(user_id: user_id)
     assign(conn, :current_user, user)
   end
 
@@ -27,7 +25,7 @@ defmodule AquirWeb.Auth do
         |> redirect(to: Routes.page_path(conn, :index))
         |> halt()
 
-      %RS.User{} ->
+      _user ->
         conn
     end
   end

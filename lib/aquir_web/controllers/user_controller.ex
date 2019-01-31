@@ -18,7 +18,7 @@ defmodule AquirWeb.UserController do
     #   %Plug.Conn{halted: true} ->
     #     conn
     #   conn ->
-        users = Accounts.Read.list_users_with_username_password_credential()
+        users = Accounts.list_users_with_username_password_credential()
         render(conn, "index.html", users: users)
     # end
   end
@@ -27,7 +27,7 @@ defmodule AquirWeb.UserController do
     render(
       conn,
       "show.html",
-      user: Accounts.Read.get_user_with_username_password_credential_by(username: username)
+      user: Accounts.get_user_with_username_password_credential_by(username: username)
     )
   end
 
