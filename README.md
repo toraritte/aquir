@@ -2358,3 +2358,25 @@ The controllers already check  the keys, but Phoenix
 is just a  wrapper around the contexts.  Would it be
 worth  it to  make  it convert  to  atom keys  every
 single time?
+
+### 2019-02-04_1304 TODO Look up county by address/zip
+
+https://stackoverflow.com/questions/28981130/how-can-i-determine-us-county-by-zip-code
+http://rickluna.com/wp/2012/09/using-the-google-maps-api-to-get-locations-from-zip-codes/
+
+But [beware](https://www.unitedstateszipcodes.org/):
+
+> Places in the US so Remote, They Don't Have a ZIP
+> -------------------------------------------------
+> As you can  see from the map, not  everywhere in the
+> US  is assigned  a ZIP  code. Remote  and especially
+> rural  areas  of  the  country do  not  have  enough
+> deliverable  addresses  to   create  a  mail  route.
+> Without mail delivery,  a ZIP is not  needed. If you
+> are looking  to get  off the  grid, these  areas are
+> some of the most remote places within the country.
+
+The above link is very useful: shows zip boundaries,
+counties  with  zip  codes  within,  etc.  The  site
+can   be  scraped   for  county   info,  see   e.g.,
+https://www.unitedstateszipcodes.org/95811/
