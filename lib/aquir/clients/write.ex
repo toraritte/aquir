@@ -11,9 +11,16 @@ defmodule Aquir.Clients.Write do
 
   # 2019-02-04_1304 TODO Look up county by address/zip
   # 2019-02-04_1305 TODO Validate email address via USPS API
-  def add_address(
+  def add_home_address(
     %{
-
+      "street_address" => street_address,
+      "unit" => unit,
+      "city" => city,
+      "county" => county,
+      "state" => state,
+      "ZIP" => zip,
+      "type" => type, # private or community residential (assisted or independent living, nursing home)
+      "living_arrangements" => 
     }
   ) do
   end
