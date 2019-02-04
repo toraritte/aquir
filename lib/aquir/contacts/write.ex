@@ -27,7 +27,7 @@ defmodule Aquir.Contacts.Write do
       "state" => state,
       "ZIP" => zip,
       "type" => type, # private or community residential (assisted or independent living, nursing home)
-      "living_arrangements" => 
+      # "living_arrangements" => 
     }
   ) do
   end
