@@ -2338,7 +2338,7 @@ def create_category(name) do
   Repo.get_by(Category, name: name) || Repo.insert!(%Category{name: name})
 end
 
-# queries/listings/rumbl/priv/repo/seeds.change1.exs
+  # queries/listings/rumbl/priv/repo/seeds.change1.exs
 alias Rumbl.Multimedia
 for category <- ~w(Action Drama Romance Comedy Sci-fi) do
   Multimedia.create_category(category)
@@ -2351,3 +2351,10 @@ end
 contexts as well.)
 
 Could've made wrapper function around `Read` in `Accounts`, but it is clear that `Accounts` is a CQRS context/service/app, and it has a read model.
+
+### 2019-01-21_0954 TODO (Accept only atom maps, or support both?)
+
+The controllers already check  the keys, but Phoenix
+is just a  wrapper around the contexts.  Would it be
+worth  it to  make  it convert  to  atom keys  every
+single time?
