@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Commands.RegisterUser do
+defmodule Aquir.Users.Commands.RegisterUser do
 
   @moduledoc """
   Defines a command struct very similar to the corresponding `UserRegistered` event (another `struct`):

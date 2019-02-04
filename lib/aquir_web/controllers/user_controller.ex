@@ -1,7 +1,7 @@
 defmodule AquirWeb.UserController do
   use AquirWeb, :controller
 
-  alias Aquir.Accounts
+  alias Aquir.Users
 
   # plug AquirWeb.Auth, :authenticate_user when action in [:index, :show, :new]
 
@@ -18,7 +18,7 @@ defmodule AquirWeb.UserController do
     #   %Plug.Conn{halted: true} ->
     #     conn
     #   conn ->
-        users = Accounts.list_users_with_username_password_credential()
+        users = Users.list_users_with_username_password_credential()
         render(conn, "index.html", users: users)
     # end
   end
@@ -27,7 +27,7 @@ defmodule AquirWeb.UserController do
     render(
       conn,
       "show.html",
-      user: Accounts.get_user_with_username_password_credential_by(username: username)
+      user: Users.get_user_with_username_password_credential_by(username: username)
     )
   end
 
@@ -41,13 +41,13 @@ defmodule AquirWeb.UserController do
   address  and  password,  because at  this  time  the
   username is  extracted from  the email  address (see
   `user_params_with_username`). This  can be  easily modified
-  because  `Accounts.register_user/1`  would accept  a
+  because  `Users.register_user/1`  would accept  a
   username as well.
   """
   def create(conn, %{"user" => user}) do
 
     with(
-      {:ok, user_with_username_password_credential} <- Accounts.register_user(user)
+      {:ok, user_with_username_password_credential} <- Users.register_user(user)
     ) do
       username = AquirWeb.UserView.username(user_with_username_password_credential)
 
@@ -65,8 +65,8 @@ defmodule AquirWeb.UserController do
     end
   end
 
-# {:errors, cs_with_other} = Aquir.Accounts.register_user(%{"name" => "F", "email" => "aa@a.aaa", "password" => "lofa"})
-# {:errors, cs_only} = Aquir.Accounts.register_user(%{"name" => "F", "email" => "@a.a", "password" => "lofa"})
+# {:errors, cs_with_other} = Aquir.Users.register_user(%{"name" => "F", "email" => "aa@a.aaa", "password" => "lofa"})
+# {:errors, cs_only} = Aquir.Users.register_user(%{"name" => "F", "email" => "@a.a", "password" => "lofa"})
 
   # 2019-01-24_0810 NOTE (Breaking down `UserController.parse_errors/1`)
   def parse_errors(keywords) do
@@ -156,7 +156,7 @@ defmodule AquirWeb.UserController do
   end
 
   # def index(conn, _params) do
-  #   users = Accounts.list_users()
+  #   users = Users.list_users()
   #   render(conn, "index.json", users: users)
   # end
 

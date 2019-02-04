@@ -1,7 +1,7 @@
-defmodule Aquir.Accounts.Read.Schemas.UsernamePasswordCredential do
+defmodule Aquir.Users.Read.Schemas.UsernamePasswordCredential do
   use Ecto.Schema
 
-  alias Aquir.Accounts.Read.Schemas, as: RS
+  alias Aquir.Users.Read.Schemas, as: RS
 
   # See 2019-01-14_1317 for schema fields/table columns.
   @primary_key {:credential_id, :binary_id, autogenerate: false}

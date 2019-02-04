@@ -1,7 +1,7 @@
-defmodule Aquir.Accounts.Aggregates.User do
+defmodule Aquir.Users.Aggregates.User do
   use Ecto.Schema
 
-  alias Aquir.Accounts.{Commands, Events}
+  alias Aquir.Users.{Commands, Events}
   alias Aquir.Commanded.Support, as: ACS
 
   # 2019_01-16_0804 TODO
@@ -39,7 +39,7 @@ defmodule Aquir.Accounts.Aggregates.User do
   #########
 
   # `User` aggregate state:
-  # %Aquir.Accounts.Aggregates.User{email: nil, name: nil, user_id: nil}
+  # %Aquir.Users.Aggregates.User{email: nil, name: nil, user_id: nil}
   def apply(%__MODULE__{user_id: nil}, %Events.UserRegistered{} = event) do
     # IO.puts("\n\n")
     # IO.inspect(user)

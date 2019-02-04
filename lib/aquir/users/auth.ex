@@ -1,7 +1,7 @@
-defmodule Aquir.Accounts.Auth do
+defmodule Aquir.Users.Auth do
 
   import Ecto.Changeset
-  alias Aquir.Accounts.Read
+  alias Aquir.Users.Read
   alias Read.Schemas, as: RS
 
   defp hash_password(password) do

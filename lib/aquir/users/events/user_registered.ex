@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Events.UserRegistered do
+defmodule Aquir.Users.Events.UserRegistered do
 
   # From "Building Conduit":  "Commanded uses the poison
   # pure Elixir JSON library  to serialize events in the

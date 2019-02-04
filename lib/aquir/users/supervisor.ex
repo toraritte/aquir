@@ -1,7 +1,7 @@
-defmodule Aquir.Accounts.Supervisor do
+defmodule Aquir.Users.Supervisor do
   use Supervisor
 
-  alias Aquir.Accounts, as: A
+  alias Aquir.Users
 
   def start_link do
     Supervisor.start_link(__MODULE__, [], name: __MODULE__)
@@ -10,8 +10,8 @@ defmodule Aquir.Accounts.Supervisor do
   def init(_arg) do
 
     children = [
-      A.Read.Projector,
-      A.Unique,
+      Users.Read.Projector,
+      Users.Unique,
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

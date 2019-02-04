@@ -1,17 +1,17 @@
-defmodule Aquir.Accounts.Read.Projector do
+defmodule Aquir.Users.Read.Projector do
   use Commanded.Projections.Ecto,
-    name: "Aquir.Accounts",
+    name: "Aquir.Users",
     repo: Aquir.Repo,
     consistency: :strong
 
   # 2019-01-16_0506 TODO QUESTION (Get to the bottom of :consistency settings)
   # 2018-10-23_2154 QUESTION (Where is the `:consistency` option defined?)
-  # 2019-01-11_0757 NOTE (Projectors.User -> Accounts.Projector)
+  # 2019-01-11_0757 NOTE (Projectors.User -> Users.Projector)
 
-  alias Aquir.Accounts.Read
+  alias Aquir.Users.Read
   alias Read.Schemas, as: RS
 
-  alias Aquir.Accounts.Events
+  alias Aquir.Users.Events
   alias Aquir.Commanded.Support, as: ACS
 
   @doc """
@@ -54,7 +54,7 @@ defmodule Aquir.Accounts.Read.Projector do
     fn(multi) ->
       # No need to check whether credential  exists  because
       # it would have already been catched  in  the  context
-      # (`Accounts.reset_password/1`)
+      # (`Users.reset_password/1`)
 
       # 2019-01-15_1255 TODO (Why query the DB multiple times?)
       # 2019-01-11_0819 TODO QUESTION (Why not query the aggregate instance process instead?)
@@ -66,5 +66,5 @@ defmodule Aquir.Accounts.Read.Projector do
         |> (&Ecto.Multi.update(multi, :reset_password, &1)).()
     end
 end
-# Aquir.Accounts.register_user(%{"email" => "alvaro@miez.com",  "new_password" => "balabab"})
-# Aquir.Accounts.reset_password(%{"email" => "alvaro@miez.com", "new_password" => "mas"})
+# Aquir.Users.register_user(%{"email" => "alvaro@miez.com",  "new_password" => "balabab"})
+# Aquir.Users.reset_password(%{"email" => "alvaro@miez.com", "new_password" => "mas"})

@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
+defmodule Aquir.Users.Commands.AddUsernamePasswordCredential do
   use Ecto.Schema
 
   # 2019-01-09_1200 TODO (`build_schema` macro)
@@ -46,6 +46,6 @@ defmodule Aquir.Accounts.Commands.AddUsernamePasswordCredential do
     |> cast(params, required_fields)
     |> validate_required(required_fields)
     |> validate_length(:password, min: 7)
-    |> Aquir.Accounts.Auth.secure_password(:password)
+    |> Aquir.Users.Auth.secure_password(:password)
   end
 end

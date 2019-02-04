@@ -1,7 +1,7 @@
-defmodule Aquir.Accounts.Read.Schemas.User do
+defmodule Aquir.Users.Read.Schemas.User do
   use Ecto.Schema
 
-  alias Aquir.Accounts.Read.Schemas, as: RS
+  alias Aquir.Users.Read.Schemas, as: RS
 
   # 2019-01-15_0918 TODO
   @doc """

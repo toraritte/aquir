@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Commands.ResetPassword do
+defmodule Aquir.Users.Commands.ResetPassword do
   use Ecto.Schema
 
   # 2019-01-28_0923 TODO (Re-think password reset)
@@ -32,6 +32,6 @@ defmodule Aquir.Accounts.Commands.ResetPassword do
     payload
     |> cast(params, required_fields)
     |> validate_required(required_fields)
-    |> Aquir.Accounts.Auth.secure_password(:new_password)
+    |> Aquir.Users.Auth.secure_password(:new_password)
   end
 end

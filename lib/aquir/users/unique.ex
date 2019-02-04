@@ -1,7 +1,7 @@
-defmodule Aquir.Accounts.Unique do
+defmodule Aquir.Users.Unique do
   use Agent
 
-  alias Aquir.Accounts.Read
+  alias Aquir.Users.Read
   alias Read.Schemas, as: RS
 
   @moduledoc """

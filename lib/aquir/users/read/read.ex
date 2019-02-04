@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Read do
+defmodule Aquir.Users.Read do
 
   import Ecto.Query
 
@@ -30,7 +30,7 @@ defmodule Aquir.Accounts.Read do
   # 2019-01-30_0516 NOTE (When to use `Repo` bang (!) functions)
   # 2019-01-31_0754 NOTE (Why `Read` is called outside this context?)
 
-  # INTERNAL TO ACCOUNTS
+  # INTERNAL TO USERS
   # --------------------
   # def generic_match_query(schema, entity_key, entity) do
   #   from(e in schema, where: field(e, ^entity_key) == ^entity)
@@ -52,7 +52,7 @@ defmodule Aquir.Accounts.Read do
     |> Aquir.Repo.all()
   end
 
-  # EXTERNAL TO ACCOUNTS
+  # EXTERNAL TO USERS
   # --------------------
 
   # def get_user_by(username: username) do

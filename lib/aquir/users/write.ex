@@ -1,12 +1,12 @@
-defmodule Aquir.Accounts.Write do
+defmodule Aquir.Users.Write do
 
   @moduledoc """
-  The  Accounts context  that  deals with  information
+  The  Users context  that  deals with  information
   related to users.
 
   Aggregates in this context:
-  + `Aquir.Accounts.Aggregates.User`
-  + `Aquir.Accounts.Aggregates.Credential`
+  + `Aquir.Users.Aggregates.User`
+  + `Aquir.Users.Aggregates.Credential`
 
   Aggregates have their own unique IDs that will be denoted by the `aid` ending. Sometimes that will be used to uniquely identify an entity (e.g., users), but in some cases it only serves to identify the right aggregate instance process to replay the events.
 
@@ -19,7 +19,7 @@ defmodule Aquir.Accounts.Write do
   alias Aquir.Commanded.Support, as: ACS
   alias Aquir.Commanded.Router,  as: ACR
 
-  alias Aquir.Accounts.{
+  alias Aquir.Users.{
     Commands,
     # Events,
     Unique,
@@ -48,7 +48,7 @@ defmodule Aquir.Accounts.Write do
   end
 
   # TODO Clean up. See NOTE 2018-10-23_0914
-  # 2019-01-21_0550 NOTE (`Accounts.register_user/1` refactor)
+  # 2019-01-21_0550 NOTE (`Users.register_user/1` refactor)
   # 2019-01-21_0555 QUESTION (Is this Applicative?)
   # 2019-01-21_0827 TODO (`with/2`-like macro collecting results with deps)
   # 2019-01-21_0954 TODO (Accept only atom maps, or support both?)
@@ -134,7 +134,7 @@ defmodule Aquir.Accounts.Write do
     #  }
 
   end
-  # c = "d"; Aquir.Accounts.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
+  # c = "d"; Aquir.Users.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
 
   defp transform(errors) do
 

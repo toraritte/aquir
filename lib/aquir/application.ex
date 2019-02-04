@@ -15,8 +15,8 @@ defmodule Aquir.Application do
       # Start the endpoint when the application starts
       supervisor(AquirWeb.Endpoint, []),
 
-      # Accounts supervisor
-      supervisor(Aquir.Accounts.Supervisor, []),
+      # Users supervisor
+      supervisor(Aquir.Users.Supervisor, []),
 
       # Start your own worker by calling: Aquir.Worker.start_link(arg1, arg2, arg3)
       # worker(Aquir.Worker, [arg1, arg2, arg3]),

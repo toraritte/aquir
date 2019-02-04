@@ -1,7 +1,7 @@
-defmodule Aquir.Accounts.Aggregates.Credential do
+defmodule Aquir.Users.Aggregates.Credential do
   use Ecto.Schema
 
-  alias Aquir.Accounts.{Commands, Events}
+  alias Aquir.Users.{Commands, Events}
   alias Aquir.Commanded.Support, as: ACS
 
   # 2019-01-30_0628 NOTE (Credential :type field flip-flop)

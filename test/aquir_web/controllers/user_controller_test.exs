@@ -1,15 +1,15 @@
 defmodule AquirWeb.UserControllerTest do
   use AquirWeb.ConnCase
 
-  alias Aquir.Accounts
-  alias Aquir.Accounts.User
+  alias Aquir.Users
+  alias Aquir.Users.User
 
   @create_attrs %{bio: "some bio", email: "some email", hashed_password: "some hashed_password", image: "some image", username: "some username"}
   @update_attrs %{bio: "some updated bio", email: "some updated email", hashed_password: "some updated hashed_password", image: "some updated image", username: "some updated username"}
   @invalid_attrs %{bio: nil, email: nil, hashed_password: nil, image: nil, username: nil}
 
   def fixture(:user) do
-    {:ok, user} = Accounts.create_user(@create_attrs)
+    {:ok, user} = Users.create_user(@create_attrs)
     user
   end
 

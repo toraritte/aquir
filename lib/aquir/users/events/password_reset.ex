@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Events.PasswordReset do
+defmodule Aquir.Users.Events.PasswordReset do
 
   # 2019-01-15_1021 TODO QUESTION
   @doc """

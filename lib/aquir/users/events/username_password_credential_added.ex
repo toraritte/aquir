@@ -1,4 +1,4 @@
-defmodule Aquir.Accounts.Events.UsernamePasswordCredentialAdded do
+defmodule Aquir.Users.Events.UsernamePasswordCredentialAdded do
 
   # 2019-01-30_0628 NOTE (Credential :type field flip-flop)
 
