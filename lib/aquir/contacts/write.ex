@@ -1,10 +1,17 @@
-defmodule Aquir.Clients.Write do
+defmodule Aquir.Contacts.Write do
 
   def register_new_client(
     %{
       "first_name"  => fname,
       "middle_name" => mname,
       "last_name"   => lname,
+    }
+  ) do
+  end
+
+  def add_email(
+    %{
+      "email" => email
     }
   ) do
   end
