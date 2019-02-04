@@ -21,13 +21,27 @@ defmodule Aquir.Contacts.Write do
   def add_home_address(
     %{
       "street_address" => street_address,
-      "unit" => unit,
-      "city" => city,
-      "county" => county,
-      "state" => state,
-      "ZIP" => zip,
-      "type" => type, # private or community residential (assisted or independent living, nursing home)
-      # "living_arrangements" => 
+      "unit"           => unit,
+      "city"           => city,
+      "county"         => county,
+      "state"          => state,
+      "ZIP"            => zip,
+      "category"       => category, # private or community residential, or commercial
+      "type"           => type, # private: rent, own, etc, community: assisted or independent living, nursing home etc.
+    }
+  ) do
+  end
+
+  def add_work_address(
+    %{
+      "street_address"  => street_address,
+      "unit"            => unit,
+      "city"            => city,
+      "county"          => county,
+      "state"           => state,
+      "ZIP"             => zip,
+      "category"        => "commercial",
+      "type"            => "none", # what else?
     }
   ) do
   end
