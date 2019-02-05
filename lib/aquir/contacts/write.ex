@@ -1,6 +1,6 @@
 defmodule Aquir.Contacts.Write do
 
-  def register_new_client(
+  def add_new_contact(
     %{
       "first_name"  => fname,
       "middle_name" => mname,
@@ -44,5 +44,8 @@ defmodule Aquir.Contacts.Write do
       "type"            => "none", # what else?
     }
   ) do
+  end
+
+  def add_phone_number() do
   end
 end
