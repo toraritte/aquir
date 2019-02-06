@@ -8,11 +8,11 @@ defmodule Aquir.Users.Read.Projector do
   # 2018-10-23_2154 QUESTION (Where is the `:consistency` option defined?)
   # 2019-01-11_0757 NOTE (Projectors.User -> Users.Projector)
 
-  alias Aquir.Users.Read
-  alias Read.Schemas, as: RS
-
-  alias Aquir.Users.Events
+  alias Aquir.Commanded.Read, as: ACRead
   alias Aquir.Commanded.Support, as: ACS
+
+  alias Aquir.Users.Read.Schemas, as: RS
+  alias Aquir.Users.Events
 
   @doc """
   The  UserRegistered event  and the  Read.Schemas.User
@@ -59,7 +59,7 @@ defmodule Aquir.Users.Read.Projector do
       # 2019-01-15_1255 TODO (Why query the DB multiple times?)
       # 2019-01-11_0819 TODO QUESTION (Why not query the aggregate instance process instead?)
 
-      credential = Read.get_by(RS.UsernamePasswordCredential, username: event.username)
+      credential = ACRead.get_by(RS.UsernamePasswordCredential, username: event.username)
 
       credential
         |> Ecto.Changeset.change(password_hash: event.password_hash)
