@@ -4,7 +4,6 @@ defmodule Aquir.Users.Events.UserRegistered do
 
   defstruct [
     :user_id,
-    :name,
-    :email,
+    :contact_id,
   ]
 end

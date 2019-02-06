@@ -21,31 +21,10 @@ defmodule Aquir.Users.Write do
 
   alias Aquir.Users.{
     Commands,
-    # Events,
     Unique,
     Read,
   }
-
-  # alias Read.Schemas, as: RS
-
-  # 2019-01-19_1324 NOTE
-  @doc """
-  Moving this here from `UserController.new/2` because
-  it  is a  business domain  decision to  generate the
-  username from the email address.
-
-  Phoenix is  just (albeit huge) wrapper  around these
-  contexts.
-  """
-  def register_user(%{"name" => _, "email" => email, "password" => _} = user)
-    when map_size(user) == 3
-  do
-    email
-    |> String.split("@")
-    |> hd()
-    |> (&Map.put(user, "username", &1)).()
-    |> register_user()
-  end
+  alias Aquir.Contacts
 
   # TODO Clean up. See NOTE 2018-10-23_0914
   # 2019-01-21_0550 NOTE (`Users.register_user/1` refactor)
@@ -63,13 +42,12 @@ defmodule Aquir.Users.Write do
   and return erros
   """
   def register_user(
+    %Aquir.Contacts.Read.Schemas.Contact{} = contact,
     %{
-      "name"  => name,
-      "email" => email,
       "username" => username,
       "password" => password,
     } = user
-  ) when map_size(user) == 4 do
+  ) do
 
     # 2019-02-05_0612 NOTE (Why generate UUIDs in the context and not in commands?)
     [credential_id, user_id] = ACS.generate_uuids(2)

@@ -27,7 +27,7 @@ defmodule Aquir.Users.Read.Projector do
     fn(multi) ->
       Ecto.Multi.insert(
         multi,
-        :add_user,
+        :register_user,
         ACS.convert_struct(event, RS.User)
       )
     end
@@ -38,7 +38,7 @@ defmodule Aquir.Users.Read.Projector do
     fn(multi) ->
       Ecto.Multi.insert(
         multi,
-        :add_user_credential,
+        :add_username_password_credential,
         %RS.UsernamePasswordCredential{
           credential_id: event.credential_id,
           user_id:       event.user_id,

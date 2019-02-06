@@ -32,11 +32,12 @@ defmodule Aquir.Repo.Migrations.CreateUsersCredentials do
     # 2019-01-30_0628 NOTE (Credential :type field flip-flop)
     create table(:username_password_credentials, primary_key: false) do
       add :credential_id, :uuid,   primary_key: true
-      add :username,      :string, null: false
+      add :username,      :citext, null: false
       add :password_hash, :string, null: false
 
-      add(:user_id, 
-        references("users",
+      add(:user_id,
+        references(
+          "users",
           type: :uuid,
           column: :user_id,
           on_delete: :delete_all

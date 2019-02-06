@@ -19,14 +19,17 @@ defmodule Aquir.Users.Read.Schemas.User do
   @primary_key {:user_id, :binary_id, autogenerate: false}
 
   schema "users" do
-    field :name,  :string
-    field :email, :string, unique: true
 
     # 2019-01-29_1459 NOTE ("user_user_id" Ecto assoc nerverack)
     # 2019-01-30_0627 NOTE (Why the users_credentals -> username_password_credentials migration?)
     has_one :credential, RS.UsernamePasswordCredential,
       references: :user_id,
       foreign_key: :user_id
+
+    belongs_to :contact, Aquir.Contacts.Read.Schemas.Contact,
+      references: :contact_id,
+      type: :binary_id,
+      foreign_key: :contact_id
 
     timestamps()
   end
