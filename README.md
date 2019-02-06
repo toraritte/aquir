@@ -2373,3 +2373,137 @@ The above link is very useful: shows zip boundaries,
 counties  with  zip  codes  within,  etc.  The  site
 can   be  scraped   for  county   info,  see   e.g.,
 https://www.unitedstateszipcodes.org/95811/
+
+### 2019-02-05_0612 NOTE (Why generate UUIDs in the context and not in commands?)
+
+There is nothing  wrong with automatically assigning
+IDs  in  commands,  but   if  there  are  dependency
+constraints,  those  will  have  to  be  dealt  with
+somewhere.  The context  would be  the most  obvious
+place  to  do  the dependency  resolution,  and  for
+me,  it  is clearer  seeing  the  ID generation  and
+assignment there.
+
+One  could argue  that  putting  this into  commands
+would keep concerns in their natural place, but that
+is  also  just a  convention.  Again,  for me,  this
+clearer  at  the  moment,  but this  may  change  of
+course:
+
+```elixir
+# users.ex
+
+    [new_credential_id, new_user_id] = generate_uuids(2)
+
+    maybe_register_user =
+      ACS.imbue_command(
+        %Commands.RegisterUser{},
+        %{user_id: new_user_id, name: name, email: email}
+      )
+
+    maybe_add_credential =
+      ACS.imbue_command(
+        %Commands.AddUsernamePasswordCredential{},
+        %{
+          credential_id: new_credential_id,
+          user_id: new_user_id,
+          payload: %{
+            username: username,
+            password: password,
+          }
+        }
+      )
+```
+
+### 2019-01-16_0804 TODO (stream lifespan)
+
+Think  about  stream  lifespan (Commanded  calls  it
+"aggregate  lifespan"  but  it  is  about  aggregate
+instance processes so ...)
+
+https://github.com/commanded/commanded/blob/master/guides/Commands.md#aggregate-lifespan
+
+### 2019-02-05_0803 NOTE (Why keep User aggregate? Why not just convert Credential?)
+
+Because this  is a different  context and we  need a
+root aggregate. If there would only be usernames and
+password, it  would probably be ok,  but there could
+other credentials introduced in the future.
+
+In  that vein,  if Credential  is kept  then it  has
+to  be tied  to  something, which  could be  Contact
+instances, but then it  could just live in Contacts.
+But that is  for a different purpose,  and Users are
+directly  tied  to  the CMS  software  itself,  they
+just  happen to  share the  same dataset.  Also, for
+currently  unknown  reasons,  a contact  could  have
+multiple users. (Testing? Demo? etc.)
+
+### 2019-01-10_0725 NOTE Migration name change TODO
+
+The migration  for the `User` projection  was called
+`:accounts_users` (with a database table of the same
+name),  but (right  now) it  doesn't seem  useful to
+make the  context's name  part of the  table's name.
+The projections can be derived  in any way one wants
+them, that's the whole point of ES, isn't it?
+
+Also,  aggregates have  their own  processes holding
+their  own states  (presumably), and  the [Commanded
+guide "Aggregates"](https://github.com/commanded/commanded/blob/v0.17.2/guides/Aggregates.md#aggregate-state-snapshots)
+seems to  confirm it stating  that a snapshot  is an
+optimization solution  so that not all  events would
+have to be replayed when the server is restarted:
+
+> A snapshot  represents the aggregate state  when all
+> events to that point in time have been replayed. You
+> can  optionally  configure  state  snapshotting  for
+> individual  aggregates  in your  app  configuration.
+> Instead of loading every event for an aggregate when
+> rebuilding  its state,  only  the  snapshot and  any
+> events  appended since  its  creation  are read.  By
+> default snapshotting is disabled for all aggregates.
+
+> As  an example,  assume a  snapshot was  taken after
+> persisting  an event  for the  aggregate at  version
+                vvvvvvvvvvvvvvvvvv
+> 100.  When the  aggregate  process  is restarted  we
+                ^^^^^^^^^^^^^^^^^^
+> load  and  deserialize  the  snapshot  data  as  the
+> aggregate's initial state. Then  we fetch and replay
+> the aggregate's events after version 100.
+
+See QUESTION 2019-01-10_0752 also.
+
+### 2019-02-05_1037 QUESTION (If `:consistency` not specified?)
+
+According to the [`Commanded.Commands.Router` docs](https://hexdocs.pm/commanded/Commanded.Commands.Router.html#module-consistency),
+"_you  cannot opt-in  to  strong  consistency for  a
+handler  that  has  been  configured  as  eventually
+consistent."
+
+But vice  versa works right? (That  is, the handler,
+or this case, the  projector is specified as strong,
+but dispatch the command with eventual consistency.)
+
+### 2019-02-06_0601 NOTE (Why `Unique.check/1` before `claim/1`?)
+
+To return ALL errors, without tying down resources.
+
+For   example,    command   changeset(s)   return(s)
+error(s),  but it  would be  helpful to  see whether
+the  resource  (username,  email address,  etc.)  is
+available at all? `claim/1` will immediately reserve
+on success.
+
+### 2019-02-06_1106 NOTE (Why the `@external_resource`s)
+
+The main  context files  (`users.ex`, `contacts.ex`,
+etc.)  only  pull  in the  context's  `read.ex`  and
+`write.ex`, but  won't get  recompiled automatically
+if any changes happen in those files.
+
+For     example    in     contacts,    I     changed
+`add_new_contact/1`   to  `add_contact/1`,   but  no
+matter how many times I recompiled the code, the old
+name was available.

@@ -1,5 +1,13 @@
 defmodule Aquir.Commanded.ContextWrapper do
 
+  # 2019-02-06_1111 TODO Rework (defdelegate and external_resource)
+  @doc """
+  1. Re-work  the macro  parts based  on the  SO answer
+     below.
+     https://stackoverflow.com/questions/54470436
+
+  2. Add @external_resource lines automatically
+  """
   defmacro __using__(modules) do
 
     # use Wrapper, [B,C]

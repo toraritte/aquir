@@ -1,18 +1,5 @@
 defmodule Aquir.Users.Commands.RegisterUser do
 
-  @moduledoc """
-  Defines a command struct very similar to the corresponding `UserRegistered` event (another `struct`):
-
-  ```elixir
-  defstruct [
-    :user_id,
-    :email,
-    :password,
-    :password_hash
-  ]
-  ```
-  """
-
   use Ecto.Schema
 
   @primary_key false
@@ -26,10 +13,6 @@ defmodule Aquir.Users.Commands.RegisterUser do
 
   def changeset(%__MODULE__{} = command, params) do
 
-    # TODO:
-    # + add tests and email, password constraints
-    #   (these could be in Support)
-    # + separate credentials and user info
     required_fields = [
       :user_id,
       :name,
@@ -37,7 +20,7 @@ defmodule Aquir.Users.Commands.RegisterUser do
     ]
 
     command
-    # |> Aquir.Commanded.Support.assign_id(:user_id)
+    # 2019-02-05_0612 NOTE (Why generate UUIDs in the context and not in commands?)
     |> cast(params, required_fields)
     |> validate_required(required_fields)
     # 2019-01-18_0000 (The reason for such meager validation)

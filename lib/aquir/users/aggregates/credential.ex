@@ -22,6 +22,7 @@ defmodule Aquir.Users.Aggregates.Credential do
   # EXECUTE #
   ###########
 
+  # 2019-01-07_2123 NOTE (Why checking for `user_id: nil`?)
   def execute(
     %__MODULE__{credential_id: nil},
     %Commands.AddUsernamePasswordCredential{} = command

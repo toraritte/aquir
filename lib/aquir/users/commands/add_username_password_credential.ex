@@ -32,7 +32,7 @@ defmodule Aquir.Users.Commands.AddUsernamePasswordCredential do
     ]
 
     command
-    # |> Aquir.Commanded.Support.assign_id(:credential_id)
+    # 2019-02-05_0612 NOTE (Why generate UUIDs in the context and not in commands?)
     |> cast(params, [:user_id, :credential_id])
     |> cast_embed(:payload, with: &payload_changeset/2)
     |> validate_required(required_fields)
