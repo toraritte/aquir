@@ -5,7 +5,80 @@ defmodule Aquir.Commanded.Support do
   # validation.
 
   alias Ecto.Changeset
-  # alias Aquir.Users.Commands, as: C
+
+  alias Aquir.Commanded.Support, as: ACS
+  alias Aquir.Commanded.Router,  as: ACR
+
+  def no_claim_and_dispatch(imbue_tuples, success_callback, opts) do
+    claim_and_dispatch(imbue_tuples, [], success_callback, opts)
+  end
+
+  def claim_and_dispatch(
+    imbue_tuples,
+    claims,
+    success_callback,
+    consistency: consistency
+  )
+    when is_list(imbue_tuples)
+  do
+    maybe_commands =
+      Enum.map(
+        imbue_tuples,
+        fn({command, map}) when is_map(map) ->
+          imbue_command(command, map)
+        end
+      )
+
+    # 2019-02-06_0601 NOTE (Why `Unique.check/1` before `claim/1`?)
+    results = maybe_commands ++ [Aquir.Unique.check(claims)]
+
+    filtered_errors = error_filter(results)
+
+    with(
+      # easier to check for bool than for other than zero in else
+      true <- length(filtered_errors) == 0,
+      {:ok, :claim_successful, _} <- Aquir.Unique.claim(claims)
+    ) do
+      for command <- extract_from(maybe_commands) do
+        ACR.dispatch(command, consistency: consistency)
+      end
+      {:ok, success_callback.()}
+    else
+      false -> {:errors, ACS.transform(filtered_errors)}
+      {:error, :entities_reserved, _} = errors -> {:errors, errors}
+    end
+  end
+
+  def generate_uuids(n) do
+    for _ <- 1..n, do: Ecto.UUID.generate()
+  end
+
+  def error_filter(result_list) do
+    Enum.filter(
+      result_list,
+      fn(either_tuple) -> elem(either_tuple, 0) == :error end)
+      # `either_tuple` is a tuple of arbitrary size with the
+      # first element being either `:ok` or `:error`
+  end
+
+  def extract_from(ok_tuples) do
+    Enum.map(ok_tuples, &elem(&1, 1))
+  end
+
+  def transform(errors) do
+    Enum.map(
+      errors,
+      fn
+        ({:error, :entities_reserved, reserved}) ->
+          {:entities_reserved, reserved}
+        ({:error, %Ecto.Changeset{} = cs}) ->
+          {:invalid_changeset, cs}
+        # 2019-01-23_0617 NOTE (homogeneous lists)
+        # ({:error, changesets} when is_list(changesets)) ->
+        #   {:invalid_changesets, changesets}
+      end)
+  end
+
 
   defp generate_changeset(%command{} = command_struct, attrs) do
     command.changeset(command_struct, attrs)

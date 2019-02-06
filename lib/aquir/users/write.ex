@@ -71,57 +71,37 @@ defmodule Aquir.Users.Write do
     } = user
   ) when map_size(user) == 4 do
 
-    [new_credential_id, new_user_id] = generate_uuids(2)
+    # 2019-02-05_0612 NOTE (Why generate UUIDs in the context and not in commands?)
+    [credential_id, user_id] = ACS.generate_uuids(2)
 
-    maybe_register_user =
-      ACS.imbue_command(
-        %Commands.RegisterUser{},
-        %{user_id: new_user_id, name: name, email: email}
-      )
-
-    maybe_add_credential =
-      ACS.imbue_command(
-        %Commands.AddUsernamePasswordCredential{},
+    imbue_tuples = [
+      { %Commands.RegisterUser{},
         %{
-          credential_id: new_credential_id,
-          user_id: new_user_id,
+          user_id: user_id,
+          contact_id: contact.contact_id,
+        }
+      },
+      { %Commands.AddUsernamePasswordCredential{},
+        %{
+          credential_id: credential_id,
+          user_id: user_id,
           payload: %{
             username: username,
             password: password,
           }
         }
-      )
-
-    claims = [username: username, email: email]
-    # 2019-01-25_1023 NOTE (Why `check/1` needed and not just `claim/1`?)
-    claim_check = Unique.check(claims)
-
-    results = [
-      maybe_register_user,
-      maybe_add_credential,
-      # {:ok,    command_struct}
-      # {:error, changeset}
-      claim_check
-      # {:ok,    :entities_free,     keywords}
-      # {:error, :entities_reserved, reserved}
+      }
     ]
 
-    # require IEx; IEx.pry
-    filtered_errors = error_filter(results)
+    claims = [username: username]
 
-    # switched from `case..do`, will see in a couple months
-    with(
-      true <- length(filtered_errors) == 0,
-      {:ok, :claim_successful, _keywords} <- Unique.claim(claims)
-    ) do
-      [{:ok, register_user}, {:ok, add_credential}, {:ok, _, _}] = results
-      ACR.dispatch( register_user,  consistency: :strong)
-      ACR.dispatch( add_credential, consistency: :strong)
-      {:ok, Read.get_user_with_username_password_credential_by(user_id: register_user.user_id)}
-    else
-      false -> {:errors, transform(filtered_errors)}
-      {:error, :entities_reserved, _} = errors -> {:errors, errors}
-    end
+    ACS.claim_and_dispatch(
+      imbue_tuples,
+      claims,
+      fn() ->
+        Read.get_user_with_username_password_credential_by(user_id: user_id)
+      end,
+      consistency: :strong)
 
     # OUTPUT
     # -------
@@ -135,21 +115,6 @@ defmodule Aquir.Users.Write do
 
   end
   # c = "d"; Aquir.Users.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
-
-  defp transform(errors) do
-
-    Enum.map(
-      errors,
-      fn
-        ({:error, :entities_reserved, reserved}) ->
-          {:entities_reserved, reserved}
-        ({:error, %Ecto.Changeset{} = cs}) ->
-          {:invalid_changeset, cs}
-        # 2019-01-23_0617 NOTE (homogeneous lists)
-        # ({:error, changesets} when is_list(changesets)) ->
-        #   {:invalid_changesets, changesets}
-      end)
-  end
 
   # 2019-01-15_1123 NOTE
   @doc """
@@ -215,17 +180,7 @@ defmodule Aquir.Users.Write do
   #   end
   # end
 
-  defp error_filter(result_list) do
-      Enum.filter(
-        result_list,
-        fn(either_tuple) -> elem(either_tuple, 0) == :error end)
-        # `either_tuple` is a tuple of arbitrary size with the
-        # first element being either `:ok` or `:error`
-  end
-
   def delete_user do
     # TODO remove username and email from Unique as well!
   end
-
-  defp generate_uuids(n), do: for _ <- 1..n, do: Ecto.UUID.generate()
 end
