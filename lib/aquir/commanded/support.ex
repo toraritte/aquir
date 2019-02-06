@@ -187,10 +187,20 @@ defmodule Aquir.Commanded.Support do
   Convert from one type of struct to another.
   """
   def convert_struct(from, to) do
-    # 2019-01-24_1437 NOTE
-    # (Why Jason necessitated `Map.from_struct/1` -> `from/1` switch)
-    struct(to, from(from))
-    # struct(to, Map.from_struct(from))
+    # 2019-01-24_1437 NOTE (Jason needed `Map.from_struct/1` -> `from/1` switch)
+    struct(to, struct_to_map(from))
+
+    # Because I keep forgettting:
+    #
+    # iex(2)> defmodule A do
+    # ...(2)>   defstruct [:a, :b]
+    # ...(2)> end
+    #
+    # iex(3)> struct(A, %{a: 27})
+    # %A{a: 27, b: nil}
+    #
+    # iex(4)> struct(A, %{a: 27, b: 7, c: 9})
+    # %A{a: 27, b: 7}
 
     # Leaving this for posterity that piping is nice
     # but it can be overdone.
@@ -209,7 +219,7 @@ defmodule Aquir.Commanded.Support do
   @doc """
   Recursive version of `Map.from_struct/1`
   """
-  def from(struct) do
+  defp struct_to_map(struct) do
     map = Map.delete(struct, :__struct__)
     map_keys = Map.keys(map)
     Enum.reduce(
@@ -219,7 +229,7 @@ defmodule Aquir.Commanded.Support do
         s = Map.get(map, key)
         value =
           case is_map(s) && Map.has_key?(s, :__struct__) do
-            true  -> from(s)
+            true  -> struct_to_map(s)
             false -> s
           end
         Map.put(acc, key, value)
