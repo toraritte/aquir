@@ -32,6 +32,12 @@ defmodule Aquir.Users.Write do
   # 2019-01-21_0827 TODO (`with/2`-like macro collecting results with deps)
   # 2019-01-21_0954 TODO (Accept only atom maps, or support both?)
 
+  # 2019-02-06_1512 TODO (What if contact persists, but RegisterUser has errors?)
+  @doc """
+  It will fail,  but contact is in  the system. That
+  should be ok, just report what the users error was.
+  """
+
   @doc """
   Phase 1: Check for errors. (Command validation and
            unique claims.)
