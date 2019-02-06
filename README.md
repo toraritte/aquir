@@ -2345,13 +2345,6 @@ for category <- ~w(Action Drama Romance Comedy Sci-fi) do
 end
 ```
 
-### 2019-01-31_0754 NOTE (Why `Read` is called outside this context?)
-
-(This note applies to  other `Read` modules in other
-contexts as well.)
-
-Could've made wrapper function around `Read` in `Accounts`, but it is clear that `Accounts` is a CQRS context/service/app, and it has a read model.
-
 ### 2019-01-21_0954 TODO (Accept only atom maps, or support both?)
 
 The controllers already check  the keys, but Phoenix
