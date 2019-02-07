@@ -11,13 +11,13 @@ defmodule AquirWeb.Auth do
     apply(__MODULE__, opts, [conn])
   end
 
-  def assign_user_session(conn) do
+  def assign_maybe_user_to_conn(conn) do
     user_id = get_session(conn, :user_id)
     user = user_id && Users.get_user_with_username_password_credential_by(user_id: user_id)
     assign(conn, :current_user, user)
   end
 
-  def authenticate_user(conn) do
+  def authorize_user_if_signed_in(conn) do
     case conn.assigns.current_user do
       nil ->
         conn

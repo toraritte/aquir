@@ -7,11 +7,12 @@ defmodule AquirWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug AquirWeb.Auth, :assign_user_session
+    plug AquirWeb.Auth, :assign_maybe_user_to_conn
   end
 
+  # 2019-02-07_0944 NOTE (Why is this not in the `:browser` pipeline?)
   pipeline :user_auth do
-    plug AquirWeb.Auth, :authenticate_user
+    plug AquirWeb.Auth, :authorize_user_if_signed_in
   end
 
   pipeline :api do

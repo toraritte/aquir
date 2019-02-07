@@ -2507,3 +2507,32 @@ For     example    in     contacts,    I     changed
 `add_new_contact/1`   to  `add_contact/1`,   but  no
 matter how many times I recompiled the code, the old
 name was available.
+
+### 2019-02-07_0944 NOTE (Why is this not in the `:browser` pipeline?)
+
+In    `AquirWeb.Auth`,   `assign_maybe_user_to_conn`
+checks the incoming  request if a user  is logged in
+(i.e., is  in the  session, as in  session cookies),
+and puts the user in the `conn` if so.
+
+Plug `authorize_user_if_signed_in` is the gatekeeper
+by  checking the  `conn`  for signed  in users,  and
+allows further processing if so.
+
+**Why is `authorize_user_if_signed_in` not in the `:browser` pipeline?**
+Because public  facing pages  (login, announcements,
+etc.)     wouldn't    need     authorization.    See
+`AquirWeb.Router`.
+
+**Why has `authorize_user_if_signed_in` been moved from the `UsersController`?**
+Because most of the  pages need login authorization,
+and every other controller  would need the same plug
+to  be included.  Moving it  to the  router made  it
+easier to  just include  it into  the pipeline  of a
+specific scope.
+
+### 2019-02-07_1043 TODO (How to to do authorization properly in Phoenix?)
+
+`/admin` scope only refers to  one of the roles that
+can be assumed by users, and it shows up in the URL.
+How to do this properly?
