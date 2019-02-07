@@ -29,6 +29,7 @@ defmodule AquirWeb.Router do
     delete "/logout", SessionController, :delete
   end
 
+  # 2019-02-07_1043 TODO (How to to do authorization properly in Phoenix?)
   scope "/admin", AquirWeb do
     pipe_through [:browser, :user_auth]
 
