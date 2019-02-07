@@ -5,6 +5,7 @@ defmodule AquirWeb.SessionController do
     render(conn, "new.html")
   end
 
+  # 2019-02-07_1055 TODO (Make Users commands to track logins/logouts. Eventual consistency is fine.)
   def create(
     conn,
     %{"session" => %{"username" => username, "password" => given_pass}}
