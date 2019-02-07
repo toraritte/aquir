@@ -18,7 +18,7 @@
           <%= if @current_user do %>
             <li>
               <%# 2019-01-29_0804 NOTE ("(ArgumentError) structs expect an :id key..." lofasz) %>
-              <p><%= @current_user.name %></p>
+              <p><%= @current_user.credential.username %></p>
 
               <%# 2019-01-29_1143 NOTE (Using ckruse's form workaround) %>
               <%= form_tag(

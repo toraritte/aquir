@@ -5,8 +5,8 @@
     <tr>
       <td><%= user.user_id %></td>
       <td><b><%= username(user) %></b></td>
-      <td><%= user.name %></td>
-      <td><%= user.email %></td>
+      <%# <td><%= user.name %1></td> %>
+      <%# <td><%= user.email %1></td> %>
       <td><%= link "View", to: Routes.user_path(@conn, :show, username(user)) %></td>
     </tr>
   <% end %>

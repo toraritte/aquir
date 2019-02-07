@@ -100,6 +100,68 @@ defmodule Aquir.Users.Write do
   end
   # c = "d"; Aquir.Users.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
 
+# {:errors, cs_with_other} = Aquir.Users.register_user(%{"name" => "F", "email" => "aa@a.aaa", "password" => "lofa"})
+# {:errors, cs_only} = Aquir.Users.register_user(%{"name" => "F", "email" => "@a.a", "password" => "lofa"})
+
+  # 2019-01-24_0810 NOTE (Breaking down `UserController.parse_errors/1`)
+  def parse_errors(keywords) do
+
+    parsed_errors =
+      Enum.map(
+        keywords,
+        fn
+          ({:entities_reserved, keywords}) ->
+            Enum.map(keywords, fn({entity, value}) when is_atom(entity)->
+              capitalized_entity = atom_to_capitalized_string(entity)
+              {entity, ["#{capitalized_entity} #{value} already exists."]}
+            end)
+          # {:entities_reserved, keywords} ->
+          # [email: "Email ... already exists.", username: "..", ...]
+
+          ({:invalid_changeset, %Ecto.Changeset{} = changeset}) ->
+            changeset
+            # 2019-01-23_0745 NOTE (`traverse_errors/2` example)
+            |> Ecto.Changeset.traverse_errors(&reduce_errors/3)
+            |> unwrap_add_credential_payload()
+            |> Map.to_list()
+        end)
+
+    # require IEx; IEx.pry
+    List.flatten(parsed_errors)
+
+    # 2019-01-25_0749 NOTE (Illogical to check for no errors in `parse_errors/1`)
+    # case List.flatten(parsed_errors) do
+    #   []    -> nil
+    #   error_keywords -> error_keywords
+    # end
+  end
+
+  defp atom_to_capitalized_string(atom) do
+      atom
+      |> to_string()
+      |> String.capitalize()
+  end
+
+  defp reduce_errors(_changeset, field, {msg, opts}) when is_atom(field) do
+    field_str = atom_to_capitalized_string(field)
+    Enum.reduce(opts, "#{field_str} #{msg}", fn({key, value}, acc) ->
+      String.replace(acc, "%{#{key}}", to_string(value))
+    end)
+  end
+
+  # 2019-01-24_0902 !!!NOTE!!!
+  @doc """
+  If there are keys in  the map other than `:payload`,
+  those will be ignored!
+
+  The     only     content     relevant     in     the
+  `AddUsernamePasswordCredential`   command    is   in
+  the   payload,   everything   else  is   static   or
+  auto-generated.
+  """
+  defp unwrap_add_credential_payload(%{payload: payload}), do: payload
+  defp unwrap_add_credential_payload(map), do: map
+
   # 2019-01-15_1123 NOTE
   @doc """
   Looking  up  the existing  `:credential_id`  because

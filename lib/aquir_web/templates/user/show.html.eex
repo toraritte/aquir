@@ -3,8 +3,8 @@
   <p>
     <%= @user.user_id %>,
     <%= username(@user) %>,
-    <%= @user.name %>,
-    <%= @user.email %>
+    <%# <%= @user.name %1>, %>
+    <%# <%= @user.email %1> %>
   </p>
   <%= link("Show users", to: Routes.user_path(@conn, :index)) %>
 </div>

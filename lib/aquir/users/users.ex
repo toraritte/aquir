@@ -9,4 +9,5 @@ defmodule Aquir.Users do
       Aquir.Users.Write,
       Aquir.Users.Auth,
     ]
+  )
 end
