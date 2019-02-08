@@ -2536,3 +2536,8 @@ specific scope.
 `/admin` scope only refers to  one of the roles that
 can be assumed by users, and it shows up in the URL.
 How to do this properly?
+
+### 2019-02-07-1654 NOTE (contacts/users assoc clean up and contact_contact_id)
+
+https://medium.com/scientific-breakthrough-of-the-afternoon/ecto-schema-has-one-3-and-belongs-to-3-options-foreign-key-and-references-confusion-8e7d116805c7
+

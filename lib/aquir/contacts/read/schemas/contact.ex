@@ -11,6 +11,7 @@ defmodule Aquir.Contacts.Read.Schemas.Contact do
     field :middle_name, :string
     field :last_name,   :string
 
+    # 2019-02-07-1654 NOTE (contacts/users assoc clean up and contact_contact_id)
     has_many :emails, RS.Email,
       foreign_key: :contact_id
 
