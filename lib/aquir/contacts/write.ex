@@ -38,6 +38,13 @@ defmodule Aquir.Contacts.Write do
 
   def add_email(
     %RS.Contact{} = contact,
+    %{"email" => email} = email_map
+  ) when map_size(email_map) == 1 do
+    add_email(contact, %{"email" => email, "type" => ""})
+  end
+
+  def add_email(
+    %RS.Contact{} = contact,
     %{
       "email" => email,
       "type"  => type,
@@ -67,7 +74,7 @@ defmodule Aquir.Contacts.Write do
   end
 
   # 2019-02-04_1304 TODO Look up county by address/zip
-  # 2019-02-04_1305 TODO Validate email address via USPS API
+  # 2019-02-04_1305 TODO Validate address via USPS API
   def add_home_address(
     %{
       "street_address" => street_address,

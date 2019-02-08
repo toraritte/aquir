@@ -6,7 +6,7 @@ defmodule Aquir.Repo.Migrations.CreateContactsEmails do
     create table(:contacts_emails, primary_key: false) do
       add :email_id, :uuid,   primary_key: true
       add :email,    :string, null: false
-      add :type,     :string, null: false
+      add :type,     :string
 
       add(:contact_id,
         references(
