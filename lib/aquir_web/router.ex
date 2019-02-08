@@ -33,6 +33,7 @@ defmodule AquirWeb.Router do
   scope "/admin", AquirWeb do
     pipe_through [:browser, :user_auth]
 
+    get "/users/new-from-existing", UserController, :new_from_existing
     resources "/users", UserController, param: "username"
     # GET    /users          => :index
     # GET    /users/new      => :new

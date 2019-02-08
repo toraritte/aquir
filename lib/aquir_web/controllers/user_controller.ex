@@ -33,8 +33,11 @@ defmodule AquirWeb.UserController do
   end
 
   def new(conn, _params) do
+    render(conn, "new.html")
+  end
+
+  def new_from_existing(conn, _params) do
     render(conn, "new-from-existing.html")
-    # render(conn, "new.html")
   end
 
   def create(conn, %{"user" => user}) do

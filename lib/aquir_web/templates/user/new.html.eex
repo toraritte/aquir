@@ -1,5 +1,7 @@
 <h1>New User</h1>
 
+<%= link("Create new user from existing contact", to: Routes.user_path(@conn, :new_from_existing)) %>
+
 <%# 2019-01-29_1235 TODO (Focus first input field on pages with forms) %>
 <%= form_for @conn, Routes.user_path(@conn, :create), [as: :user, errors: @conn.assigns[:errors]], fn f -> %>
 
@@ -13,11 +15,18 @@
   <%# 2019-01-19_1434 TODO (Make more descriptive foldtexts) %>
 
   <div>
-    <%= text_input f, :name, placeholder: "Full Name" %>
-    <%= error_tag f, :name %>
+    <%= text_input f, :first_name, placeholder: "First name" %>
+    <%= error_tag f, :first_name %>
   </div>
   <div>
-
+    <%= text_input f, :middle_name, placeholder: "Middle name" %>
+    <%= error_tag f, :middle_name %>
+  </div>
+  <div>
+    <%= text_input f, :last_name, placeholder: "Last name" %>
+    <%= error_tag f, :last_name %>
+  </div>
+  <div>
     <%# 2019-01-18_0000 TODO (email validation) %>
     <%# 2019-01-23_1150 TODO (tooltip accessibility) %>
     <%= email_input f, :email,
@@ -26,7 +35,6 @@
     <%= error_tag f, :email %>
   </div>
   <div>
-
     <%# 2019-01-18_0503 TODO (multi-round password validation) %>
     <%# 2019-01-29_1156 TODO (How to do CSRF token in purescript?...) %>
     <%= password_input f, :password, placeholder: "password" %>
