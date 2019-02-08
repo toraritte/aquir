@@ -7,6 +7,7 @@ defmodule Aquir.Contacts.Read.Schemas.Email do
 
   schema "contacts_emails" do
     field :email, :string, unique: true
+    # 2019-02-07_1314 TODO (enumerated postgres types)
     field :type,  :string # work, personal, ?
 
     belongs_to :contact, RS.Contact,

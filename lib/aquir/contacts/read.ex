@@ -13,4 +13,8 @@ defmodule Aquir.Contacts.Read do
   def get_contact_by([contact_id: _] = keyword) do
     ACRead.get_by(RS.Contact, keyword)
   end
+
+  def preload_emails(%RS.Contact{} = contact) do
+    Repo.preload(contact, :email)
+  end
 end
