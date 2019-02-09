@@ -38,70 +38,97 @@ defmodule Aquir.Users.Write do
   should be ok, just report what the users error was.
   """
 
-  @doc """
-  Phase 1: Check for errors. (Command validation and
-           unique claims.)
-  Phase 2: Claim username and email.
-  Phase 3: Dispatch commands and return new user.
-
-  Failure in  any phase will skip  subsequent phases
-  and return erros
-  """
   def register_user(
-    %Aquir.Contacts.Read.Schemas.Contact{} = contact,
     %{
-      "username" => username,
-      "password" => password,
-    } = user
+      # > add_contact
+      first_name:  fname,
+      middle_name: mname,
+      last_name:   lname,
+      # contact_id
+
+      # > add_email
+      email: email,
+      # email_id
+      # contact_id
+
+      # > add_user
+      # user_id
+      # contact_id
+
+      # > add_username_password_credential
+      username: username,
+      password: password,
+      # credential_id
+      # user_id
+    } = params
   ) do
 
     # 2019-02-05_0612 NOTE (Why generate UUIDs in the context and not in commands?)
-    [credential_id, user_id] = ACS.generate_uuids(2)
+    [contact_id, email_id, user_id, credential_id] = ACS.generate_uuids(4)
 
-    imbue_tuples = [
-      { %Commands.RegisterUser{},
+    params_with_ids =
+      Map.merge(
+        params,
         %{
-          user_id: user_id,
-          contact_id: contact.contact_id,
-        }
-      },
-      { %Commands.AddUsernamePasswordCredential{},
-        %{
+          contact_id:    contact_id,
+          email_id:      email_id,
+          user_id:       user_id,
           credential_id: credential_id,
-          user_id: user_id,
-          payload: %{
-            username: username,
-            password: password,
-          }
         }
-      }
+      )
+
+    commands = [
+      {__MODULE__, :add_user},
+      {__MODULE__, :add_username_password_credential},
+      {Aquir.Contacts, :add_contact},
+      {Aquir.Contacts, :add_email},
     ]
 
-    claims = [username: username]
+    commands
+    |> ACS.run_commands(with: params)
+    |> ACS.do_dispatch(on_success: {Aquir.Repo, :get_by, [Read.Schemas.User, user_id: user_id]})
+  end
 
-    ACS.claim_and_dispatch(
-      imbue_tuples,
-      claims,
-      fn() ->
-        Read.get_user_with_username_password_credential_by(user_id: user_id)
-      end,
-      consistency: :strong)
-
-    # OUTPUT
-    # -------
-    #  {:ok, user_with_username_password_credential}
-    #
-    #  { :errors,
-    #    [   {:invalid_changeset, changeset}
-    #      | {:entities_reserved, reserved_keywords}
-    #    ]
-    #  }
-
+  def add_user(
+    %{
+      user_id:    user_id,
+      contact_id: contact_id
+    } = params
+  ) do
+    ACS.claim_and_imbue(
+      Commands.AddUser,
+      params,
+      claims: [],
+      consistency: :strong
+    )
   end
   # c = "d"; Aquir.Users.register_user(%{"name" => "#{c}", "email" => "@#{c}", "username" => "#{c}#{c}", "password" => "#{c}#{c}#{c}"})
 
 # {:errors, cs_with_other} = Aquir.Users.register_user(%{"name" => "F", "email" => "aa@a.aaa", "password" => "lofa"})
 # {:errors, cs_only} = Aquir.Users.register_user(%{"name" => "F", "email" => "@a.a", "password" => "lofa"})
+
+  def add_username_password_credential(
+    %{
+      credential_id: credential_id,
+      user_id:  user_id,
+      username: username,
+      password: password,
+    }
+  ) do
+    ACS.claim_and_imbue(
+      Commands.AddUsernamePasswordCredential,
+      %{
+        credential_id: credential_id,
+        user_id: user_id,
+        payload: %{
+          username: username,
+          password: password,
+        }
+      },
+      claims: [username: username],
+      consistency: :strong
+    )
+  end
 
   # 2019-01-24_0810 NOTE (Breaking down `UserController.parse_errors/1`)
   def parse_errors(keywords) do

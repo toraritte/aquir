@@ -6,7 +6,7 @@ defmodule Aquir.Users.Router do
   alias Aquir.Users.Aggregates, as: A
   alias Aquir.Users.Commands,   as: C
 
-  dispatch [C.RegisterUser],
+  dispatch [C.AddUser],
     to: A.User,
     identity: :user_id
 

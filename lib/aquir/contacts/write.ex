@@ -11,64 +11,38 @@ defmodule Aquir.Contacts.Write do
 
   def add_contact(
     %{
-      "first_name"  => fname,
-      "middle_name" => mname,
-      "last_name"   => lname,
-    }
+      contact_id:  contact_id,
+      first_name:  fname,
+      middle_name: mname,
+      last_name:   lname,
+    } = params
   ) do
+    ACS.claim_and_imbue(
+      Commands.AddContact,
+      params,
+      claims: [],
+      consistency: :strong
+    )
+  end
 
-    [contact_id] = ACS.generate_uuids(1)
-
-    imbue_tuples = [{
-      %Commands.AddContact{},
-      %{
-        contact_id:  contact_id,
-        first_name:  fname,
-        middle_name: mname,
-        last_name:   lname,
-      }
-    }]
-
-    ACS.no_claim_and_dispatch(
-      imbue_tuples,
-      # TODO preload all keys that can be preloaded!
-      fn() -> Read.get_contact_by(contact_id: contact_id) end,
-      consistency: :strong)
+  def add_email(%{ email: email} = params)
+    when map_size(params) == 1
+  do
+    add_email(%{email: email, type: ""})
   end
 
   def add_email(
-    %RS.Contact{} = contact,
-    %{"email" => email} = email_map
-  ) when map_size(email_map) == 1 do
-    add_email(contact, %{"email" => email, "type" => ""})
-  end
-
-  def add_email(
-    %RS.Contact{} = contact,
     %{
-      "email" => email,
-      "type"  => type,
-    }
+      email_id:   email_id,
+      contact_id: contact_id,
+      email: email,
+      type:  type,
+    } = params
   ) do
-
-    [email_id] = ACS.generate_uuids(1)
-
-    imbue_tuples = [{
-      %Commands.AddEmail{},
-      %{
-        email_id:   email_id,
-        contact_id: contact.contact_id,
-        email:      email,
-        type:       type,
-      }
-    }]
-
-    claims = [email: email]
-
-    ACS.claim_and_dispatch(
-      imbue_tuples,
-      claims,
-      fn() -> Read.get_email_by(email_id: email_id) end,
+    ACS.claim_and_imbue(
+      Commands.AddEmail,
+      params,
+      claims: [email: email],
       consistency: :strong
     )
   end

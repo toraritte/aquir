@@ -22,9 +22,9 @@ defmodule Aquir.Users.Aggregates.User do
   # 2019-01-07_2123 NOTE (Why checking for `user_id: nil`?)
   def execute(
     %__MODULE__{user_id: nil},
-    %Commands.RegisterUser{} = command
+    %Commands.AddUser{} = command
   ) do
-    ACS.convert_struct(command, Events.UserRegistered)
+    ACS.convert_struct(command, Events.UserAdded)
   end
 
   #########
@@ -33,7 +33,7 @@ defmodule Aquir.Users.Aggregates.User do
 
   # `User` aggregate state:
   # %Aquir.Users.Aggregates.User{email: nil, name: nil, user_id: nil}
-  def apply(%__MODULE__{user_id: nil}, %Events.UserRegistered{} = event) do
+  def apply(%__MODULE__{user_id: nil}, %Events.UserAdded{} = event) do
     # Simply converting the event to %User{} because there
     # is no state before registering.
     ACS.convert_struct(event, __MODULE__)

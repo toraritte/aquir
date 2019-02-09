@@ -15,14 +15,14 @@ defmodule Aquir.Users.Read.Projector do
   alias Aquir.Users.Events
 
   @doc """
-  The  UserRegistered event  and the  Read.Schemas.User
+  The  UserAdded event  and the  Read.Schemas.User
   struct hold the same keys, hence the conversion, and
   Multi.insert/4  takes  data as  well  in  lieu of  a
   changeset. (Which  is unnecessary because  the event
   is  generated from  the  a command  that is  already
   validated using changesets.)
   """
-  project %Events.UserRegistered{} = event,
+  project %Events.UserAdded{} = event,
     _metadata,
     fn(multi) ->
       Ecto.Multi.insert(

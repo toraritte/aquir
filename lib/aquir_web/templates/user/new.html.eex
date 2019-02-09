@@ -35,6 +35,10 @@
     <%= error_tag f, :email %>
   </div>
   <div>
+    <%= text_input f, :username, placeholder: "Username" %>
+    <%= error_tag f, :username %>
+  </div>
+  <div>
     <%# 2019-01-18_0503 TODO (multi-round password validation) %>
     <%# 2019-01-29_1156 TODO (How to do CSRF token in purescript?...) %>
     <%= password_input f, :password, placeholder: "password" %>

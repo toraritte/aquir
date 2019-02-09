@@ -9,45 +9,67 @@ defmodule Aquir.Commanded.Support do
   alias Aquir.Commanded.Support, as: ACS
   alias Aquir.Commanded.Router,  as: ACR
 
-  def no_claim_and_dispatch(imbue_tuples, success_callback, opts) do
-    claim_and_dispatch(imbue_tuples, [], success_callback, opts)
-  end
-
-  def claim_and_dispatch(
-    imbue_tuples,
-    claims,
-    success_callback,
+  def claim_and_imbue(
+    command, # module name only
+    params,
+    claims: claims, # can be []
     consistency: consistency
-  )
-    when is_list(imbue_tuples)
-  do
-    maybe_commands =
-      Enum.map(
-        imbue_tuples,
-        fn({command, map}) when is_map(map) ->
-          imbue_command(command, map)
-        end
-      )
+  ) do
+    maybe_command =
+      command
+      |> struct()
+      |> imbue_command(params, consistency)
 
     # 2019-02-06_0601 NOTE (Why `Unique.check/1` before `claim/1`?)
-    results = maybe_commands ++ [Aquir.Unique.check(claims)]
+    [
+      maybe_command,
+      Aquir.Unique.check(claims), # {:ok, _} if no claim (i.e., [])
+    ]
+  end
+
+  def run_commands(mod_func_tuples, with: params) do
+    Enum.map(fn({mod, func}) -> apply(mod, func, [params]) end)
+  end
+
+  def do_dispatch(results, on_success: {mod, func, params}) do
 
     filtered_errors = error_filter(results)
 
     with(
       # easier to check for bool than for other than zero in else
       true <- length(filtered_errors) == 0,
+
+      {commands, claims} =
+        Enum.reduce(
+          results,
+          {[],[]},
+          fn
+            ({:ok, :entities_free, keywords}, {cmds, clms}) ->
+              {cmds, clms ++ keywords}
+            (command, {cmds, clms}) ->
+              {[command|cmds], clms}
+          end),
       {:ok, :claim_successful, _} <- Aquir.Unique.claim(claims)
     ) do
-      for command <- extract_from(maybe_commands) do
+
+      for {:ok, command, consistency} <- commands do
         ACR.dispatch(command, consistency: consistency)
       end
-      {:ok, success_callback.()}
+      apply(mod, func, params)
+
     else
-      false -> {:errors, ACS.transform(filtered_errors)}
-      {:error, :entities_reserved, _} = errors -> {:errors, errors}
+      false ->
+        {:errors, ACS.transform(filtered_errors)}
+      {:error, :entities_reserved, _} = errors ->
+        {:errors, errors}
     end
   end
+
+  # def dispatch_commands(command_consistency_tuples) do
+  #   for {command, consistency} <- command_consistency_tuples do
+  #     ACR.dispatch(command, consistency: consistency)
+  #   end
+  # end
 
   def generate_uuids(n) do
     for _ <- 1..n, do: Ecto.UUID.generate()
@@ -61,9 +83,9 @@ defmodule Aquir.Commanded.Support do
       # first element being either `:ok` or `:error`
   end
 
-  def extract_from(ok_tuples) do
-    Enum.map(ok_tuples, &elem(&1, 1))
-  end
+  # def extract_from(ok_tuples) do
+  #   Enum.map(ok_tuples, &elem(&1, 1))
+  # end
 
   def transform(errors) do
     Enum.map(
@@ -85,14 +107,16 @@ defmodule Aquir.Commanded.Support do
   end
 
   # See (Evolution of `imbue_command`) NOTEs
-  def imbue_command(%command{} = command_struct, attrs) do
-
+  def imbue_command(
+    %command{} = command_struct,
+    attrs,
+    consistency
+  ) do
     changeset = command.changeset(command_struct, attrs)
-
     case changeset.valid? do
       true ->
         # command_with_params = struct(changeset.data, changeset.changes)
-        {:ok, Changeset.apply_changes(changeset)}
+        {:ok, Changeset.apply_changes(changeset), consistency}
       false ->
         {:error, changeset}
     end

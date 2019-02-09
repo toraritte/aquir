@@ -1,4 +1,4 @@
-defmodule Aquir.Users.Commands.RegisterUser do
+defmodule Aquir.Users.Commands.AddUser do
 
   use Ecto.Schema
 

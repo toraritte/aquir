@@ -1,4 +1,4 @@
-defmodule Aquir.Users.Events.UserRegistered do
+defmodule Aquir.Users.Events.UserAdded do
 
   @derive Jason.Encoder
 
