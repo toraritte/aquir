@@ -57,9 +57,11 @@ defmodule Aquir.Mixfile do
       # {:commanded, path: "../commanded", override: true},
       {:commanded,
         github:   "toraritte/commanded",
-        branch:   "make-application-more-idiomatic-2",
+        # branch:   "make-application-more-idiomatic-2",
+        ref:      "85e1ad3",
+        override: true,
+        # Overriding commanded in toraritte/commanded_eventstore_adapter
       },
-      {:jason, "~> 1.1"},
 
       # The official lib includes `commanded/eventstore`!
       # {:commanded_eventstore_adapter, "~> 0.3"},
@@ -73,6 +75,9 @@ defmodule Aquir.Mixfile do
         github: "toraritte/commanded-postgres-read-model-projector",
         branch: "master",
       },
+
+      {:jason, "~> 1.1"},
+      {:algae, "~> 1.2"},
     ]
   end
 
