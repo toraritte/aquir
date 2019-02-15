@@ -57,7 +57,8 @@ defmodule Aquir.Mixfile do
       # {:commanded, path: "../commanded", override: true},
       {:commanded,
         github:   "toraritte/commanded",
-        branch:   "make-application-more-idiomatic-2",
+        branch:   "test",
+        override: true,
       },
       {:jason, "~> 1.1"},
 
