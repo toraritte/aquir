@@ -74,6 +74,7 @@ defmodule Aquir.Mixfile do
         github: "toraritte/commanded-postgres-read-model-projector",
         branch: "master",
       },
+      {:algae, "~> 1.2"},
     ]
   end
 
