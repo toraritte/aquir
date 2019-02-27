@@ -24,7 +24,6 @@ defmodule Aquir.Mixfile do
       extra_applications: [
         :logger,
         :runtime_tools,
-        :eventstore,
       ]
     ]
   end
@@ -57,24 +56,24 @@ defmodule Aquir.Mixfile do
       # {:commanded, path: "../commanded", override: true},
       {:commanded,
         github:   "toraritte/commanded",
-        # branch:   "make-application-more-idiomatic-2",
-        ref:      "85e1ad3",
+        branch:   "fork-master",
+        # ref:      "85e1ad3",
         override: true,
         # Overriding commanded in toraritte/commanded_eventstore_adapter
       },
 
       # The official lib includes `commanded/eventstore`!
-      # {:commanded_eventstore_adapter, "~> 0.3"},
-      {:commanded_eventstore_adapter,
-        github: "toraritte/commanded-eventstore-adapter",
-        branch: "remove-child-spec-0",
-      },
+      {:commanded_eventstore_adapter, "~> 0.5"},
+      # {:commanded_eventstore_adapter,
+      #   github: "toraritte/commanded-eventstore-adapter",
+      #   branch: "remove-child-spec-0",
+      # },
 
-      # {:commanded_ecto_projections,   "~> 0.7"},
-      {:commanded_postgres_read_model_projector,
-        github: "toraritte/commanded-postgres-read-model-projector",
-        branch: "master",
-      },
+      {:commanded_ecto_projections, "~> 0.8"},
+      # {:commanded_postgres_read_model_projector,
+      #   github: "toraritte/commanded-postgres-read-model-projector",
+      #   branch: "master",
+      # },
 
       {:jason, "~> 1.1"},
       {:algae, "~> 1.2"},
