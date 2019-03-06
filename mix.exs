@@ -76,7 +76,11 @@ defmodule Aquir.Mixfile do
       # },
 
       {:jason, "~> 1.1"},
-      {:algae, "~> 1.2"},
+      # {:algae, "~> 1.2"},
+      {:algae,
+        github: "toraritte/algae",
+        branch: "experiments",
+      },
     ]
   end
 
